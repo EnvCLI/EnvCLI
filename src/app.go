@@ -41,6 +41,25 @@ func main() {
     },
 		Commands: []*cli.Command{
 			{
+			  Name:    "self-update",
+			  Aliases: []string{},
+			  Usage:   "updates the dev cli utility",
+			  Action:  func(c *cli.Context) error {
+			    // Set loglevel
+			    setLoglevel(c.String("loglevel"))
+
+					// Run Update
+					appUpdater := ApplicationUpdater{AppId: "app_8piLcd8unVA", PublicKey: `-----BEGIN ECDSA PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEinl1s7+5o65K2NkavhUP97ZInqs228+e
+AbS0hVCbHGFpZfjWHH59MCX0ekQnqDpgkJkHGGsT+gPIGGAIzb52K5T8rq2dbrGg
+mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
+-----END ECDSA PUBLIC KEY-----`}
+					appUpdater.update()
+
+			    return nil
+			  },
+			},
+			{
         Name:    "run",
         Aliases: []string{},
         Usage:   "runs 3rd party commands within their respective docker containers",
@@ -121,8 +140,6 @@ func execCommandWithResponse(command string) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
-
 	err := cmd.Run()
   if err != nil {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())

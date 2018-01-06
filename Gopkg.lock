@@ -9,6 +9,19 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/equinox-io/equinox"
+  packages = [
+    ".",
+    "internal/go-update",
+    "internal/go-update/internal/binarydist",
+    "internal/go-update/internal/osext",
+    "internal/osext",
+    "proto"
+  ]
+  revision = "f24972fa72facf59d05c91c848b65eac38815915"
+
+[[projects]]
+  branch = "master"
   name = "github.com/jinzhu/configor"
   packages = ["."]
   revision = "6ecfe629230f24c2e92c7894c6ab21b83b757a39"
@@ -49,6 +62,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f596d9ac54e40ed1a47bc56c9dcb9fd5c50e49ff939b599ef6247957074acbbb"
+  inputs-digest = "0d3a9fc5555206b9ab2ae127757eb5b0c46738eacbc2da5f7bc88a751bc88516"
   solver-name = "gps-cdcl"
   solver-version = 1
