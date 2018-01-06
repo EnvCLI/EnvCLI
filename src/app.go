@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 	"sort"
+	"runtime"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 	"gopkg.in/urfave/cli.v2" // imports as package "cli"
 )
@@ -39,18 +40,6 @@ func main() {
       },
     },
 		Commands: []*cli.Command{
-      {
-        Name:    "self-update",
-        Aliases: []string{},
-        Usage:   "updates the dev cli utility",
-        Action:  func(c *cli.Context) error {
-					// Set loglevel
-					setLoglevel(c.String("loglevel"))
-
-					// Placeholder
-          return nil
-        },
-      },
 			{
         Name:    "run",
         Aliases: []string{},
@@ -69,8 +58,8 @@ func main() {
 					var config ProjectConfigrationFile = configurationLoader.load(configurationLoader.getWorkingDirectory() + "/.envcli.yml")
 
 					// check for command prefix and get the matching configuration entry
-					var dockerImage string
-					var dockerImageTag string
+					var dockerImage string = ""
+					var dockerImageTag string = ""
 					var projectDirectory string
 					for _, element := range config.Commands {
 						if element.Name == commandName {
@@ -81,18 +70,19 @@ func main() {
 							log.Debugf("Image: %s | Tag: %s", dockerImage, dockerImageTag)
 						}
 					}
+					if dockerImage == "" {
+						log.Debugf("No configuration for command [%s] found.", commandName)
+						return nil
+					}
 
 					// detect container service and send command
-					// - docker native
-					log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
-					var command string = fmt.Sprintf("docker run -it --rm --volume \"${PWD}:%s\" -w /project %s:%s %s", projectDirectory, dockerImage, dockerImageTag, commandWithArguments)
-					log.Debugf("RAW Command: %s", command)
-					cmd := exec.Command("apt", "install", "-y", "fail2ban")
-					cmd.Stdout = os.Stdout
-					if err := cmd.Start(); err != nil {
-			        log.Fatal(err)
-			    }
-			    cmd.Wait()
+					// - docker for windows
+					if runtime.GOOS == "windows" {
+						log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
+						var dockerCommand string = fmt.Sprintf("docker run --rm --volume \"%s:%s\" -w /project %s:%s %s", configurationLoader.getWorkingDirectory(), projectDirectory, dockerImage, dockerImageTag, commandWithArguments)
+						log.Debugf("Docker Command: %s", dockerCommand)
+						execCommandWithResponse(dockerCommand)
+					}
 
           return nil
         },
@@ -117,4 +107,20 @@ func setLoglevel(loglevel string) {
 	} else if loglevel == "debug" {
 		log.SetLevel(log.DebugLevel)
 	}
+}
+
+func execCommandWithResponse(command string) {
+	var commandPrefix string
+	if runtime.GOOS == "windows" {
+		commandPrefix = "powershell"
+	} else {
+		commandPrefix = ""
+	}
+
+	cmd := exec.Command(commandPrefix, command)
+	cmd.Stdout = os.Stdout
+	if err := cmd.Start(); err != nil {
+			log.Fatal(err)
+	}
+	cmd.Wait()
 }

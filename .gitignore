@@ -15,3 +15,4 @@
 
 # Dep vendor folder
 vendor/*
+vendor.orig/*

@@ -6,6 +6,8 @@ import (
 	"github.com/jinzhu/configor" // imports as package "configor"
 )
 
+// TODO: Check for configuration in parent directories
+
 /**
  * The Project Configuration and it's properties
  */
