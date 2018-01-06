@@ -23,7 +23,8 @@ type ProjectConfigrationFile struct {
 		Description string
 		Image string
 		Tag string
-		ProjectDirectory string `default:"/project"`
+		Directory string `default:"/project"`
+		PassCommandName bool `default:"true"`
 	}
 }
 

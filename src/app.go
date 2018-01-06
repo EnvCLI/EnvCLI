@@ -66,8 +66,8 @@ func main() {
 							log.Debugf("Found matching entry in configuration for command %s [%s]", commandName, element.Description)
 							dockerImage = element.Image
 							dockerImageTag = element.Tag
-							projectDirectory = element.ProjectDirectory
-							log.Debugf("Image: %s | Tag: %s", dockerImage, dockerImageTag)
+							projectDirectory = element.Directory
+							log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
 						}
 					}
 					if dockerImage == "" {
@@ -78,8 +78,8 @@ func main() {
 					// detect container service and send command
 					// - docker for windows
 					if runtime.GOOS == "windows" {
-						log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
-						var dockerCommand string = fmt.Sprintf("docker run --rm --volume \"%s:%s\" -w /project %s:%s %s", configurationLoader.getWorkingDirectory(), projectDirectory, dockerImage, dockerImageTag, commandWithArguments)
+						log.Infof("Redirecting command to Docker Container [Docker for Windows][%s:%s].", dockerImage, dockerImageTag)
+						var dockerCommand string = fmt.Sprintf("docker run --rm --interactive --tty --workdir %s --volume \"%s:%s\" %s:%s %s", projectDirectory, configurationLoader.getWorkingDirectory(), projectDirectory, dockerImage, dockerImageTag, commandWithArguments)
 						log.Debugf("Docker Command: %s", dockerCommand)
 						execCommandWithResponse(dockerCommand)
 					}
@@ -118,9 +118,14 @@ func execCommandWithResponse(command string) {
 	}
 
 	cmd := exec.Command(commandPrefix, command)
+	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	if err := cmd.Start(); err != nil {
-			log.Fatal(err)
-	}
-	cmd.Wait()
+	cmd.Stderr = os.Stderr
+
+
+	err := cmd.Run()
+  if err != nil {
+			log.Fatalf("Failed to execute command: %s\n", err.Error())
+      os.Exit(1)
+  }
 }

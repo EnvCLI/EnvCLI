@@ -1,14 +1,15 @@
 commands:
-- name: sh
-  description: SH Shell
-  image: alpine
+- name: go
+  description: Go (golang) is a general purpose, higher-level, imperative programming language.
+  image: golang
   tag: latest
+  directory: /go/src/project
 - name: npm
   description: Node.js is a JavaScript-based platform for server-side and networking applications.
   image: node
   tag: 9.3.0-alpine
-- name: go
-  description: Node.js is a JavaScript-based platform for server-side and networking applications.
-  image: golang
+- name: sh
+  description: Minimal linux
+  image: alpine
   tag: latest
-  project_directory: /go/src/project
+  passCommandName: false
