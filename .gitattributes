@@ -1,0 +1,126 @@
+##
+# Handle line endings automatically for files detected as text
+##
+*               text=auto
+
+##
+# The above will handle all files NOT found below
+##
+
+# These files are text and should be normalized (Convert crlf => lf)
+.gitignore      text
+.gitattributes  text
+*.adoc          text
+*.textile       text
+*.mustache      text
+*.csv           text
+*.tab           text
+*.tsv           text
+*.sql           text
+*.md		        text
+*.css           text
+*.df            text
+*.go            text
+*.htm           text
+*.html          text
+*.java          text
+*.js            text
+*.json          text
+*.jsp           text
+*.jspf          text
+*.jspx          text
+*.properties    text
+*.sh            text
+*.tld           text
+*.txt           text
+*.tag           text
+*.tagx          text
+*.xml           text
+*.yml           text
+
+# These files are binary and should be left untouched (binary is a macro for -text -diff)
+*.class         binary
+*.dll           binary
+*.ear           binary
+*.gif           binary
+*.ico           binary
+*.jar           binary
+*.jpg           binary
+*.jpeg          binary
+*.png           binary
+*.so            binary
+*.war           binary
+
+# Documents
+*.doc           diff=astextplain
+*.docx          diff=astextplain
+*.dot           diff=astextplain
+*.pdf           diff=astextplain
+*.rtf           diff=astextplain
+
+# Linux
+*.sh            text eol=lf
+*.bash          text eol=lf
+
+# Visual Studio
+*.sln           text eol=crlf
+*.csproj        text eol=crlf
+*.vbproj        text eol=crlf
+*.vcxproj       text eol=crlf
+*.vcproj        text eol=crlf
+*.dbproj        text eol=crlf
+*.fsproj        text eol=crlf
+*.lsproj        text eol=crlf
+*.wixproj       text eol=crlf
+*.modelproj     text eol=crlf
+*.sqlproj       text eol=crlf
+*.wmaproj       text eol=crlf
+*.xproj         text eol=crlf
+*.props         text eol=crlf
+*.filters       text eol=crlf
+*.vcxitems      text eol=crlf
+
+# Language specific diff implementation # https://github.com/git/git/blob/master/userdiff.c #
+
+# HTML
+*.htm           diff=html
+*.html          diff=html
+
+# Java
+*.htm           diff=java
+
+# Objective-C
+*.c             diff=objc
+
+# Perl
+*.pl            diff=perl
+
+# PHP
+*.php           diff=php
+*.php4          diff=php
+*.php5          diff=php
+*.php7          diff=php
+
+# Python
+*.py            diff=python
+*.py2           diff=python
+*.py3           diff=python
+
+# Ruby
+*.rb            diff=ruby
+
+# Bibtex
+*.bibtex        diff=bibtex
+
+# Tex
+*.tex           diff=tex
+
+# CPP
+*.h             diff=cpp
+*.cpp           diff=cpp
+
+# C-Sharp
+*.cs            diff=csharp
+
+# CSS
+*.css           diff=css
