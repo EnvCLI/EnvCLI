@@ -1,0 +1,14 @@
+commands:
+- name: sh
+  description: SH Shell
+  image: alpine
+  tag: latest
+- name: npm
+  description: Node.js is a JavaScript-based platform for server-side and networking applications.
+  image: node
+  tag: 9.3.0-alpine
+- name: go
+  description: Node.js is a JavaScript-based platform for server-side and networking applications.
+  image: golang
+  tag: latest
+  project_directory: /go/src/project
