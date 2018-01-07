@@ -10,19 +10,26 @@ import (
 	"runtime"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 	"gopkg.in/urfave/cli.v2" // imports as package "cli"
+	"github.com/mattn/go-colorable"
 )
 
 // Init Hook
 func init() {
 	log.SetOutput(os.Stdout)
   log.SetLevel(log.DebugLevel)
+
+	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
+	if runtime.GOOS == "windows" {
+		log.SetFormatter(&log.TextFormatter{ForceColors: true})
+  	log.SetOutput(colorable.NewColorableStdout())
+	}
 }
 
 // CLI Main Entrypoint
 func main() {
 	app := &cli.App{
     Name: "EnvCLI Utility",
-		Version: "v0.1.1",
+		Version: "v0.1.2",
     Compiled: time.Now(),
 		EnableShellCompletion: true,
 		Authors: []*cli.Author{

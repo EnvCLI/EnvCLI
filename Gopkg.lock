@@ -27,6 +27,18 @@
   revision = "6ecfe629230f24c2e92c7894c6ab21b83b757a39"
 
 [[projects]]
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
@@ -62,6 +74,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0d3a9fc5555206b9ab2ae127757eb5b0c46738eacbc2da5f7bc88a751bc88516"
+  inputs-digest = "cf8e053c945f9f26db5bee7cc2df796839869f26e9bf95a9ebedcfce4aa3b075"
   solver-name = "gps-cdcl"
   solver-version = 1
