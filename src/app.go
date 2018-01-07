@@ -2,9 +2,7 @@ package main
 
 import (
 	"os"
-	"os/exec"
 	"time"
-	"fmt"
 	"strings"
 	"sort"
 	"runtime"
@@ -102,14 +100,20 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					}
 
 					// detect container service and send command
-					// - docker for windows
-					if runtime.GOOS == "windows" {
-						log.Infof("Redirecting command to Docker Container [Docker for Windows][%s:%s].", dockerImage, dockerImageTag)
-						var dockerCommand string = fmt.Sprintf("docker run --rm --interactive --tty --workdir %s --volume \"%s:%s\" %s:%s %s", projectDirectory, configurationLoader.getWorkingDirectory(), projectDirectory, dockerImage, dockerImageTag, commandWithArguments)
-						log.Debugf("Docker Command: %s", dockerCommand)
-						execCommandWithResponse(dockerCommand)
+					log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
+					docker := Docker{}
+					// - docker toolbox (docker-machine)
+					if docker.isDockerToolbox() {
+						docker.containerExec(dockerImage, dockerImageTag, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						return nil
+					}
+					// - docker native (docker for windows/mac/linux)
+					if docker.isDockerNative() {
+						docker.containerExec(dockerImage, dockerImageTag, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						return nil
 					}
 
+					log.Fatal("No supported docker installation found.")
           return nil
         },
       },
@@ -133,23 +137,4 @@ func setLoglevel(loglevel string) {
 	} else if loglevel == "debug" {
 		log.SetLevel(log.DebugLevel)
 	}
-}
-
-func execCommandWithResponse(command string) {
-	var commandPrefix string
-	if runtime.GOOS == "windows" {
-		commandPrefix = "powershell"
-	} else {
-		commandPrefix = ""
-	}
-
-	cmd := exec.Command(commandPrefix, command)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-  if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
-      os.Exit(1)
-  }
 }

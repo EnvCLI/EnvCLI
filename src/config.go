@@ -18,9 +18,11 @@ type ConfigurationLoader struct {
  * The Project Configuration
  */
 type ProjectConfigrationFile struct {
+	DockerMachineVM string `default:"envcli"`
 	Commands []struct {
 		Name  string
 		Description string
+		Aliases []string
 		Image string
 		Tag string
 		Directory string `default:"/project"`
