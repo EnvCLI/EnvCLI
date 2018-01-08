@@ -79,7 +79,11 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 
 					// load yml project configuration
 					configurationLoader := ConfigurationLoader{}
-					var config ProjectConfigrationFile = configurationLoader.load(configurationLoader.getWorkingDirectory() + "/.envcli.yml")
+					if configurationLoader.getProjectDirectory() == "" {
+						log.Fatalf("No .envcli.yml configration file found in current or parent directories. Please run envcli within your project.")
+						return nil
+					}
+					var config ProjectConfigrationFile = configurationLoader.load(configurationLoader.getProjectDirectory() + "/.envcli.yml")
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage string = ""
@@ -87,9 +91,11 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					var projectDirectory string
 					var commandShell string = ""
 					for _, element := range config.Commands {
+						log.Debugf("Checking for matching commands in package %s", element.Name)
 						for _, providedCommand := range element.Provides {
+							log.Debugf("Comparing used command [%s] with provided command %s of %s", commandName, providedCommand, element.Name)
 							if providedCommand == commandName {
-								log.Debugf("Found matching entry in configuration for command %s [%s]", commandName, element.Description)
+								log.Debugf("Matched command %s against package [%s]", commandName, element.Name)
 								dockerImage = element.Image
 								dockerImageTag = element.Tag
 								projectDirectory = element.Directory
@@ -102,18 +108,18 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 						log.Debugf("No configuration for command [%s] found.", commandName)
 						return nil
 					}
-
+					
 					// detect container service and send command
 					log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
 					docker := Docker{}
 					// - docker toolbox (docker-machine)
 					if docker.isDockerToolbox() {
-						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory())
 						return nil
 					}
 					// - docker native (docker for windows/mac/linux)
 					if docker.isDockerNative() {
-						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory())
 						return nil
 					}
 
