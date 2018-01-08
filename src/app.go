@@ -8,7 +8,7 @@ import (
 	"runtime"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 	"gopkg.in/urfave/cli.v2" // imports as package "cli"
-	"github.com/mattn/go-colorable"
+	"github.com/mattn/go-colorable" // imports as package "colorable"
 )
 
 // Init Hook
@@ -87,13 +87,15 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					var projectDirectory string
 					var commandShell string = ""
 					for _, element := range config.Commands {
-						if element.Name == commandName {
-							log.Debugf("Found matching entry in configuration for command %s [%s]", commandName, element.Description)
-							dockerImage = element.Image
-							dockerImageTag = element.Tag
-							projectDirectory = element.Directory
-							commandShell = element.Shell
-							log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
+						for _, providedCommand := range element.Provides {
+							if providedCommand == commandName {
+								log.Debugf("Found matching entry in configuration for command %s [%s]", commandName, element.Description)
+								dockerImage = element.Image
+								dockerImageTag = element.Tag
+								projectDirectory = element.Directory
+								commandShell = element.Shell
+								log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
+							}
 						}
 					}
 					if dockerImage == "" {

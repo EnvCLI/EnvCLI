@@ -1,9 +1,9 @@
 package main
 
 import (
-	"os"
+	"github.com/jinzhu/configor"     // imports as package "configor"
 	log "github.com/sirupsen/logrus" // imports as package "log"
-	"github.com/jinzhu/configor" // imports as package "configor"
+	"os"
 )
 
 /**
@@ -17,13 +17,14 @@ type ConfigurationLoader struct {
  */
 type ProjectConfigrationFile struct {
 	DockerMachineVM string `default:"envcli"`
-	Commands []struct {
-		Name  string
+	Commands        []struct {
+		Name        string
 		Description string
-		Image string
-		Tag string
-		Directory string `default:"/project"`
-		Shell string `default:"none"`
+		Provides    []string
+		Image       string
+		Tag         string
+		Directory   string `default:"/project"`
+		Shell       string `default:"none"`
 	}
 }
 
@@ -31,12 +32,12 @@ type ProjectConfigrationFile struct {
  * Load the .devcli.yml Configuration
  */
 func (configurationLoader ConfigurationLoader) load(configFile string) ProjectConfigrationFile {
-	var cfg ProjectConfigrationFile;
+	var cfg ProjectConfigrationFile
 
 	log.Debug("Loading project configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
- 	return cfg
+	return cfg
 }
 
 /**
@@ -45,10 +46,10 @@ func (configurationLoader ConfigurationLoader) load(configFile string) ProjectCo
 func (configurationLoader ConfigurationLoader) getWorkingDirectory() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-			log.WithFields(log.Fields{
-				"error": err,
-			}).Fatal("Couldn't detect working directory!")
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Couldn't detect working directory!")
 	}
 
- 	return workingDir
+	return workingDir
 }
