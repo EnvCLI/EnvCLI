@@ -14,44 +14,44 @@ import (
 // Init Hook
 func init() {
 	log.SetOutput(os.Stdout)
-  log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.DebugLevel)
 
 	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
 	if runtime.GOOS == "windows" {
 		log.SetFormatter(&log.TextFormatter{ForceColors: true})
-  	log.SetOutput(colorable.NewColorableStdout())
+		log.SetOutput(colorable.NewColorableStdout())
 	}
 }
 
 // CLI Main Entrypoint
 func main() {
 	app := &cli.App{
-    Name: "EnvCLI Utility",
-		Version: "v0.1.2",
-    Compiled: time.Now(),
+		Name:                  "EnvCLI Utility",
+		Version:               "v0.1.2",
+		Compiled:              time.Now(),
 		EnableShellCompletion: true,
 		Authors: []*cli.Author{
-      &cli.Author{
-        Name:  "Philipp Heuer",
-        Email: "git@philippheuer.me",
-      },
-    },
-    Usage: "Runs cli commands within docker containers to provide a modern development environment",
+			&cli.Author{
+				Name:  "Philipp Heuer",
+				Email: "git@philippheuer.me",
+			},
+		},
+		Usage: "Runs cli commands within docker containers to provide a modern development environment",
 		Flags: []cli.Flag{
-      &cli.StringFlag{
-        Name:  "loglevel",
-        Value: "info",
-        Usage: "The loglevel used by envcli, use this to troubleshoot issues",
-      },
-    },
+			&cli.StringFlag{
+				Name:  "loglevel",
+				Value: "info",
+				Usage: "The loglevel used by envcli, use this to troubleshoot issues",
+			},
+		},
 		Commands: []*cli.Command{
 			{
-			  Name:    "self-update",
-			  Aliases: []string{},
-			  Usage:   "updates the dev cli utility",
-			  Action:  func(c *cli.Context) error {
-			    // Set loglevel
-			    setLoglevel(c.String("loglevel"))
+				Name:    "self-update",
+				Aliases: []string{},
+				Usage:   "updates the dev cli utility",
+				Action: func(c *cli.Context) error {
+					// Set loglevel
+					setLoglevel(c.String("loglevel"))
 
 					// Run Update
 					appUpdater := ApplicationUpdater{AppId: "app_8piLcd8unVA", PublicKey: `-----BEGIN ECDSA PUBLIC KEY-----
@@ -61,14 +61,14 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 -----END ECDSA PUBLIC KEY-----`}
 					appUpdater.update()
 
-			    return nil
-			  },
+					return nil
+				},
 			},
 			{
-        Name:    "run",
-        Aliases: []string{},
-        Usage:   "runs 3rd party commands within their respective docker containers",
-        Action:  func(c *cli.Context) error {
+				Name:    "run",
+				Aliases: []string{},
+				Usage:   "runs 3rd party commands within their respective docker containers",
+				Action: func(c *cli.Context) error {
 					// Set loglevel
 					setLoglevel(c.String("loglevel"))
 
@@ -85,12 +85,14 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					var dockerImage string = ""
 					var dockerImageTag string = ""
 					var projectDirectory string
+					var commandShell string = ""
 					for _, element := range config.Commands {
 						if element.Name == commandName {
 							log.Debugf("Found matching entry in configuration for command %s [%s]", commandName, element.Description)
 							dockerImage = element.Image
 							dockerImageTag = element.Tag
 							projectDirectory = element.Directory
+							commandShell = element.Shell
 							log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
 						}
 					}
@@ -104,28 +106,28 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					docker := Docker{}
 					// - docker toolbox (docker-machine)
 					if docker.isDockerToolbox() {
-						docker.containerExec(dockerImage, dockerImageTag, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
 						return nil
 					}
 					// - docker native (docker for windows/mac/linux)
 					if docker.isDockerNative() {
-						docker.containerExec(dockerImage, dockerImageTag, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
+						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getWorkingDirectory(), projectDirectory, projectDirectory)
 						return nil
 					}
 
 					log.Fatal("No supported docker installation found.")
-          return nil
-        },
-      },
-    },
-  }
+					return nil
+				},
+			},
+		},
+	}
 
 	// Sort Flags & Commands by Alphabet
 	sort.Sort(cli.FlagsByName(app.Flags))
 	sort.Sort(cli.CommandsByName(app.Commands))
 
 	// Run Application
-  app.Run(os.Args)
+	app.Run(os.Args)
 }
 
 /**

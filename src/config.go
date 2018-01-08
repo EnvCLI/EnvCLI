@@ -6,8 +6,6 @@ import (
 	"github.com/jinzhu/configor" // imports as package "configor"
 )
 
-// TODO: Check for configuration in parent directories
-
 /**
  * The Project Configuration and it's properties
  */
@@ -22,11 +20,10 @@ type ProjectConfigrationFile struct {
 	Commands []struct {
 		Name  string
 		Description string
-		Aliases []string
 		Image string
 		Tag string
 		Directory string `default:"/project"`
-		PassCommandName bool `default:"true"`
+		Shell string `default:"none"`
 	}
 }
 

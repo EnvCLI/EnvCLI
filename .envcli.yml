@@ -4,6 +4,7 @@ commands:
   image: golang
   tag: latest
   directory: /go/src/project
+  shell: sh
 - name: npm
   description: Node.js is a JavaScript-based platform for server-side and networking applications.
   image: node
@@ -12,4 +13,3 @@ commands:
   description: Minimal linux
   image: alpine
   tag: latest
-  passCommandName: false
