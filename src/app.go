@@ -14,7 +14,7 @@ import (
 // Init Hook
 func init() {
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
 	if runtime.GOOS == "windows" {
@@ -25,6 +25,16 @@ func init() {
 
 // CLI Main Entrypoint
 func main() {
+
+	// Global Configuration
+	configurationLoader := ConfigurationLoader{}
+	globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+
+	// Set Proxy Server
+	os.Setenv("HTTP_PROXY", globalConfig.HttpProxy)
+	os.Setenv("HTTPS_PROXY", globalConfig.HttpsProxy)
+
+	// CLI
 	app := &cli.App{
 		Name:                  "EnvCLI Utility",
 		Version:               "v0.1.2",
@@ -83,7 +93,7 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 						log.Fatalf("No .envcli.yml configration file found in current or parent directories. Please run envcli within your project.")
 						return nil
 					}
-					var config ProjectConfigrationFile = configurationLoader.load(configurationLoader.getProjectDirectory() + "/.envcli.yml")
+					var config ProjectConfigrationFile = configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage string = ""
@@ -105,10 +115,10 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 						}
 					}
 					if dockerImage == "" {
-						log.Debugf("No configuration for command [%s] found.", commandName)
+						log.Errorf("No configuration for command [%s] found.", commandName)
 						return nil
 					}
-					
+
 					// detect container service and send command
 					log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
 					docker := Docker{}
@@ -125,6 +135,108 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 
 					log.Fatal("No supported docker installation found.")
 					return nil
+				},
+			},
+			{
+				Name:    "config",
+				Aliases: []string{},
+				Usage:   "updates the dev cli utility",
+				Subcommands: []*cli.Command{
+				  &cli.Command{
+						Name:   "set",
+						Action: func(c *cli.Context) error {
+							// Set loglevel
+							setLoglevel(c.String("loglevel"))
+
+							// Load Config
+							configurationLoader := ConfigurationLoader{}
+							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+
+							// Check Parameters
+							if c.NArg() != 2 {
+					      log.Fatal("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]")
+							}
+							varName := c.Args().Get(0)
+							varValue := c.Args().Get(1)
+
+							// Set Value
+							if varName == "HttpProxy" {
+								globalConfig.HttpProxy = varValue
+								log.Infof("Set value of HttpProxy to [%s]", globalConfig.HttpProxy)
+							} else if varName == "HttpsProxy" {
+								globalConfig.HttpsProxy = varValue
+								log.Infof("Set value of HttpsProxy to [%s]", globalConfig.HttpsProxy)
+							} else {
+								log.Infof("Unknown variable name [%s]", varName)
+							}
+
+							// Save Config
+							configurationLoader.saveGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc", globalConfig)
+
+							return nil
+						},
+				  },
+					&cli.Command{
+						Name:   "get",
+						Action: func(c *cli.Context) error {
+							// Set loglevel
+							setLoglevel(c.String("loglevel"))
+
+							// Load Config
+							configurationLoader := ConfigurationLoader{}
+							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+
+							// Check Parameters
+							if c.NArg() != 1 {
+					      log.Fatal("Please provide the variable name you want to erase. [envcli config unset variable]")
+							}
+							varName := c.Args().Get(0)
+
+							// Get Value
+							if varName == "HttpProxy" {
+								log.Infof("HttpProxy [%s]", globalConfig.HttpProxy)
+							} else if varName == "HttpsProxy" {
+								log.Infof("HttpsProxy [%s]", globalConfig.HttpsProxy)
+							} else {
+								log.Infof("Unknown variable name [%s]", varName)
+							}
+
+							return nil
+						},
+				  },
+					&cli.Command{
+						Name:   "unset",
+						Action: func(c *cli.Context) error {
+							// Set loglevel
+							setLoglevel(c.String("loglevel"))
+
+							// Load Config
+							configurationLoader := ConfigurationLoader{}
+							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+
+							// Check Parameters
+							if c.NArg() != 1 {
+					      log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
+							}
+							varName := c.Args().Get(0)
+
+							// Get Value
+							if varName == "HttpProxy" {
+								globalConfig.HttpProxy = ""
+								log.Info("Unset variable HttpProxy.")
+							} else if varName == "HttpsProxy" {
+								globalConfig.HttpsProxy = ""
+								log.Info("Unset variable HttpsProxy.")
+							} else {
+								log.Infof("Unknown variable name [%s]", varName)
+							}
+
+							// Save Config
+							configurationLoader.saveGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc", globalConfig)
+
+							return nil
+						},
+				  },
 				},
 			},
 		},

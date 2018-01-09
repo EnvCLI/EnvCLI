@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/jinzhu/configor"     // imports as package "configor"
 	log "github.com/sirupsen/logrus" // imports as package "log"
+	yaml "gopkg.in/yaml.v2"          // imports as package "yaml"
 	"os"
 	"strings"
 	"path/filepath"
+	"io/ioutil"
 )
 
 /**
@@ -31,15 +33,64 @@ type ProjectConfigrationFile struct {
 }
 
 /**
- * Load the .devcli.yml Configuration
+ * The EnvCLI Configuration
  */
-func (configurationLoader ConfigurationLoader) load(configFile string) ProjectConfigrationFile {
+type CLIConfigrationFile struct {
+	HttpProxy string `default:""`
+	HttpsProxy string `default:""`
+}
+
+/**
+ * Load the project config
+ */
+func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile string) ProjectConfigrationFile {
 	var cfg ProjectConfigrationFile
 
 	log.Debug("Loading project configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg
+}
+
+/**
+ * Load the global config
+ */
+func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) CLIConfigrationFile {
+	var cfg CLIConfigrationFile
+
+	log.Debug("Loading global configuration file " + configFile)
+	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
+
+	return cfg
+}
+
+/**
+ * Save the global config
+ */
+func (configurationLoader ConfigurationLoader) saveGlobalConfig(configFile string, cfg CLIConfigrationFile) error {
+	log.Debug("Saving global configuration file " + configFile)
+
+	fileContent, err := yaml.Marshal(&cfg)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(configFile, fileContent, 0600)
+}
+
+/**
+ * Get the execution directory
+ */
+func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
+ 	ex, err := os.Executable()
+ 	if err != nil {
+ 		log.WithFields(log.Fields{
+ 			"error": err,
+ 		}).Fatal("Couldn't detect execution directory!")
+		return ""
+ 	}
+
+ 	return filepath.Dir(ex)
 }
 
 /**
