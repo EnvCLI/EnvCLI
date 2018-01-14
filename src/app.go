@@ -11,6 +11,9 @@ import (
 	"github.com/mattn/go-colorable" // imports as package "colorable"
 )
 
+var appName string = "EnvCLI Utility"
+var appVersion string = "v0.1.0"
+
 // Init Hook
 func init() {
 	log.SetOutput(os.Stdout)
@@ -36,8 +39,8 @@ func main() {
 
 	// CLI
 	app := &cli.App{
-		Name:                  "EnvCLI Utility",
-		Version:               "v0.1.2",
+		Name:                  appName,
+		Version:               appVersion,
 		Compiled:              time.Now(),
 		EnableShellCompletion: true,
 		Authors: []*cli.Author{
@@ -52,6 +55,11 @@ func main() {
 				Name:  "loglevel",
 				Value: "info",
 				Usage: "The loglevel used by envcli, use this to troubleshoot issues",
+			},
+			&cli.StringSliceFlag{
+				Name: "env",
+				Aliases: []string{"e"},
+				Usage: "Sets environment variables within the containers",
 			},
 		},
 		Commands: []*cli.Command{
@@ -85,7 +93,7 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					// parse command
 					commandName := c.Args().First()
 					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
-					log.Debugf("Command run in Remote: %s | %s", commandName, commandWithArguments)
+					log.Debugf("Recieved request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
 					// load yml project configuration
 					configurationLoader := ConfigurationLoader{}
@@ -120,20 +128,10 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 					}
 
 					// detect container service and send command
-					log.Infof("Redirecting command to Docker Container [%s:%s].", dockerImage, dockerImageTag)
+					log.Infof("Executing specified command in Docker Container [%s:%s].", dockerImage, dockerImageTag)
 					docker := Docker{}
-					// - docker toolbox (docker-machine)
-					if docker.isDockerToolbox() {
-						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory())
-						return nil
-					}
-					// - docker native (docker for windows/mac/linux)
-					if docker.isDockerNative() {
-						docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory())
-						return nil
-					}
+					docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), c.StringSlice("env"))
 
-					log.Fatal("No supported docker installation found.")
 					return nil
 				},
 			},
@@ -160,10 +158,10 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 							varValue := c.Args().Get(1)
 
 							// Set Value
-							if varName == "HttpProxy" {
+							if varName == "http-proxy" {
 								globalConfig.HttpProxy = varValue
 								log.Infof("Set value of HttpProxy to [%s]", globalConfig.HttpProxy)
-							} else if varName == "HttpsProxy" {
+							} else if varName == "https-proxy" {
 								globalConfig.HttpsProxy = varValue
 								log.Infof("Set value of HttpsProxy to [%s]", globalConfig.HttpsProxy)
 							} else {
@@ -193,9 +191,9 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 							varName := c.Args().Get(0)
 
 							// Get Value
-							if varName == "HttpProxy" {
+							if varName == "http-proxy" {
 								log.Infof("HttpProxy [%s]", globalConfig.HttpProxy)
-							} else if varName == "HttpsProxy" {
+							} else if varName == "https-proxy" {
 								log.Infof("HttpsProxy [%s]", globalConfig.HttpsProxy)
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
@@ -221,10 +219,10 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 							varName := c.Args().Get(0)
 
 							// Get Value
-							if varName == "HttpProxy" {
+							if varName == "http-proxy" {
 								globalConfig.HttpProxy = ""
 								log.Info("Unset variable HttpProxy.")
-							} else if varName == "HttpsProxy" {
+							} else if varName == "https-proxy" {
 								globalConfig.HttpsProxy = ""
 								log.Info("Unset variable HttpsProxy.")
 							} else {
@@ -248,15 +246,4 @@ mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
 
 	// Run Application
 	app.Run(os.Args)
-}
-
-/**
- * Sets the loglevel according to the flag on each command run
- */
-func setLoglevel(loglevel string) {
-	if loglevel == "info" {
-		log.SetLevel(log.InfoLevel)
-	} else if loglevel == "debug" {
-		log.SetLevel(log.DebugLevel)
-	}
 }

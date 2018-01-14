@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"bytes"
 	"os/exec"
 	"strings"
 	"runtime"
@@ -44,16 +44,17 @@ func (docker Docker) isDockerToolbox() bool {
 /**
  * Run a Command in Docker
  */
-func (docker Docker) containerExec(image string, tag string, commandShell string, command string, mountSource string, mountTarget string, workingdir string) {
+func (docker Docker) containerExec(image string, tag string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string) {
+	var shellCommand bytes.Buffer
+
 	// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
 	if docker.isDockerToolbox() && runtime.GOOS == "windows" {
-		log.Debugf("Replacement for [%s].", mountSource)
 		driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 		for _, element := range driveLetters {
 			mountSource = strings.Replace(mountSource, element+":\\", "/"+element+"_DRIVE/", 1)
 		}
 
-		// replace windows path seperator with linux path seperator
+		// replace windows path separator with linux path separator
 		mountSource = strings.Replace(mountSource, "\\", "/", -1)
 	}
 
@@ -68,36 +69,26 @@ func (docker Docker) containerExec(image string, tag string, commandShell string
 		command = fmt.Sprintf("/usr/bin/env bash -c \"%s\" -l", command)
 	}
 
-	var dockerCommand string = fmt.Sprintf("docker run --rm --interactive --tty --workdir %s --volume \"%s:%s\" %s:%s %s", workingdir, mountSource, mountTarget, image, tag, command)
+	// build docker command
+	// - docker machine prefix
 	if docker.isDockerToolbox() {
-		execCommandWithResponse(fmt.Sprintf("docker-machine ssh envcli %s", dockerCommand))
-	} else {
-		execCommandWithResponse(dockerCommand)
+		shellCommand.WriteString("docker-machine ssh envcli ")
 	}
-}
-
-/**
- * CLI Command Passthru with input/output
- */
-func execCommandWithResponse(command string) {
-	// Use Powershell on Windows
-	if runtime.GOOS == "windows" {
-		command = fmt.Sprintf("powershell %s", command)
+	// - docker
+	shellCommand.WriteString("docker run --rm --interactive --tty ")
+	// - environment variables
+	for _, envVariable := range environment {
+		shellCommand.WriteString(fmt.Sprintf("--env %s ", envVariable))
 	}
+	// - set working directory
+	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
+	// - volume mounts
+	shellCommand.WriteString(fmt.Sprintf("--volume \"%s:%s\" ", mountSource, mountTarget))
+	// - image
+	shellCommand.WriteString(fmt.Sprintf("%s:%s ", image, tag))
+	// - command to run inside of the container
+	shellCommand.WriteString(fmt.Sprintf("%s", command))
 
-	log.Debugf("Running Command: %s", command)
-
-	// Arguments
-	args := strings.Fields(command)
-
-	// Run Command
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		log.Fatalf("Failed to execute command: %s\n", err.Error())
-		os.Exit(1)
-	}
+	// execute command
+  systemExec(shellCommand.String())
 }

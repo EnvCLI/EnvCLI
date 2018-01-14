@@ -7,6 +7,14 @@ commands:
   tag: latest
   directory: /go/src/project
   shell: sh
+- name: godep
+  description: dep is a prototype dependency management tool for Go. It requires Go 1.8 or newer to compile.
+  provides:
+  - dep
+  image: philippheuer/docker-go-dep
+  tag: latest
+  directory: /go/src/project
+  shell: sh
 - name: npm
   description: Node.js is a JavaScript-based platform for server-side and networking applications.
   provides:
