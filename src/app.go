@@ -18,7 +18,7 @@ var appVersion string = "v0.1.0"
 func init() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
-
+	
 	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
 	if runtime.GOOS == "windows" {
 		log.SetFormatter(&log.TextFormatter{ForceColors: true})
@@ -72,12 +72,8 @@ func main() {
 					setLoglevel(c.String("loglevel"))
 
 					// Run Update
-					appUpdater := ApplicationUpdater{AppId: "app_8piLcd8unVA", PublicKey: `-----BEGIN ECDSA PUBLIC KEY-----
-MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEinl1s7+5o65K2NkavhUP97ZInqs228+e
-AbS0hVCbHGFpZfjWHH59MCX0ekQnqDpgkJkHGGsT+gPIGGAIzb52K5T8rq2dbrGg
-mmYdo1ZNtsh4rk9sJbQb2IkjSm+n+Xwr
------END ECDSA PUBLIC KEY-----`}
-					appUpdater.update()
+					appUpdater := ApplicationUpdater{BintrayOrg: "philippheuer", BintrayRepository: "golang", BintrayPackage: "EnvCLI"}
+					appUpdater.update("latest")
 
 					return nil
 				},

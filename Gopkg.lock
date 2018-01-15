@@ -8,17 +8,32 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   branch = "master"
-  name = "github.com/equinox-io/equinox"
+  name = "github.com/enr/go-bintray"
+  packages = ["bintray"]
+  revision = "a188470ed9faf4831e85bc333e06f029d40e4acb"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/enr/go-commons"
+  packages = ["lang"]
+  revision = "bcd3f40eeea857496af2cf1bea949ab00e925b12"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/inconshreveable/go-update"
   packages = [
     ".",
-    "internal/go-update",
-    "internal/go-update/internal/binarydist",
-    "internal/go-update/internal/osext",
-    "internal/osext",
-    "proto"
+    "internal/binarydist",
+    "internal/osext"
   ]
-  revision = "f24972fa72facf59d05c91c848b65eac38815915"
+  revision = "8152e7eb6ccf8679a64582a66b78519688d156ad"
 
 [[projects]]
   branch = "master"
@@ -74,6 +89,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c89da00b02556090aa1dad95696158509bea495080fdb04b66d3818f6c3d6b30"
+  inputs-digest = "ea9435c3d17c72f89646ce7edde86e2cdc55325367a5c769af84512bf0c153da"
   solver-name = "gps-cdcl"
   solver-version = 1

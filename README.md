@@ -9,8 +9,7 @@ Since all commands run in *ethereal docker containers* you will never have to in
 
 ---
 
-. **[Overview](#overview)** . **[Merits](#merits)** . **[Example](#example)** . **[Installation](#installation)** .
-. **[Contributing](#contributing)** . **[Changelog](#changelog)** . **[Credits](#credits)** .
+. **[Overview](#overview)** . **[Merits](#merits)** . **[Example](#example)** . **[Installation](#installation)** . **[Contributing](#contributing)** . **[Changelog](#changelog)** . **[Credits](#credits)** .
 
 ---
 
@@ -32,7 +31,7 @@ commands:
   tag: 9.3.0-alpine
 ```
 
-When you run `envcli run npm init` *EnvCLI* will detect the above entry based on the provided commands and match it against the [Docker](https://www.docker.com/) Image `node:9.3.0-alpine`.
+When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:9.3.0-alpine` based on the provided commands.
 
 #### What does the EnvCLI do?
 
@@ -134,11 +133,11 @@ After that you have to share the drive containing your projects with virtualbox 
 
 ## Roadmap
 
-*Feel free to respond in the issue of the feature if you want to work on any point*
+*Feel free to respond in the respective issue if you want to work on a feature*
 
-- Aliases for Windows/Linux to omit the "envcli run" prefix and use `npm`, `go`, ... directly. #1
-- Caching of directories on the host. #2
-- Configuration of proxy server for the containers. #3
+- Aliases for Windows/Linux to omit the "envcli run" prefix and use `npm`, `go`, ... directly.
+- Caching of directories on the host.
+- Configuration of proxy server for the containers.
 
 ## Contributing
 
@@ -148,6 +147,7 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 #### Unreleased (14-01-2018)
 
+* implemented bintray updater to ship new binaries. [Philipp Heuer]
 * add the ability to pass environment variables into the containers. [Philipp Heuer]
 * add global configuration for the proxy server. [Philipp Heuer]
 * support to run commands within subdirectories of the project. [Philipp Heuer]
@@ -160,7 +160,9 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 ## Credits
 
-- YML Configuration File [github.com/jinzhu/configor]
-- Logging [github.com/sirupsen/logrus]
-- CLI [github.com/urfave/cli]
-- Support of colors in Windows CLI [github.com/mattn/go-colorable]
+- YML Configuration File [https://github.com/jinzhu/configor]
+- Logging [https://github.com/sirupsen/logrus]
+- CLI [https://github.com/urfave/cli]
+- Support of colors in Windows CLI [https://github.com/mattn/go-colorable]
+- Inconshreveable / Go Update [https://github.com/inconshreveable/go-update]
+- Blang / Semver [https://github.com/blang/semver]
