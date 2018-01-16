@@ -19,3 +19,4 @@ vendor.orig/*
 
 # Build
 build/*
+EnvCLI-cache/*

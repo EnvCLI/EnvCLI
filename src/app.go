@@ -18,7 +18,7 @@ var appVersion string = "v0.1.0"
 func init() {
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
-	
+
 	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
 	if runtime.GOOS == "windows" {
 		log.SetFormatter(&log.TextFormatter{ForceColors: true})
