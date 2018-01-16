@@ -83,7 +83,7 @@ func (docker Docker) containerExec(image string, tag string, commandShell string
 	// - set working directory
 	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
 	// - volume mounts
-	shellCommand.WriteString(fmt.Sprintf("--volume \"%s:%s\" ", mountSource, mountTarget))
+	shellCommand.WriteString(fmt.Sprintf("--volume %s:%s ", mountSource, mountTarget))
 	// - image
 	shellCommand.WriteString(fmt.Sprintf("%s:%s ", image, tag))
 	// - command to run inside of the container

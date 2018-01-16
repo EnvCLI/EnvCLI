@@ -112,16 +112,30 @@ Is this ok? (yes) yes
 #### **Docker for Windows**
 
 1. Install Docker for Windows from https://docs.docker.com/docker-for-windows/install/
-2. Install [EnvCLI](https://bin.equinox.io/c/ezRXCVys3aV/envcli-stable-windows-amd64.msi)
+2. Install [EnvCLI](https://bintray.com/philippheuer/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
 
 #### **Docker for Linux**
 
 1. Install the default Docker version from your favorite package manager.
-2. Install [EnvCLI](https://dl.equinox.io/philippheuer/envcli/stable)
+2. Install [EnvCLI]
+
+*32bit*
+```
+$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/philippheuer/golang/envcli/v0.1.0/envcli_linux_386
+$ chmod +x /usr/local/bin/envcli
+```
+
+*64bit*
+```
+$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/philippheuer/golang/envcli/v0.1.0/envcli_linux_amd64
+$ chmod +x /usr/local/bin/envcli
+```
 
 #### **Docker Toolbox (Legacy)**
 
-The first step is to create a new docker-machine which will be used by envcli: `docker-machine create envcli`
+Install [EnvCLI](https://bintray.com/philippheuer/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
+
+Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
 
 After that you have to share the drive containing your projects with virtualbox and docker:
  1. Stop the envcli machine `docker-machine stop envcli`
@@ -133,8 +147,6 @@ After that you have to share the drive containing your projects with virtualbox 
 
 ## Roadmap
 
-*Feel free to respond in the respective issue if you want to work on a feature*
-
 - Aliases for Windows/Linux to omit the "envcli run" prefix and use `npm`, `go`, ... directly.
 - Caching of directories on the host.
 - Configuration of proxy server for the containers.
@@ -145,7 +157,7 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 ## Changelog
 
-#### Unreleased (14-01-2018)
+#### v0.1.0 (16-01-2018)
 
 * implemented bintray updater to ship new binaries. [Philipp Heuer]
 * add the ability to pass environment variables into the containers. [Philipp Heuer]
@@ -160,9 +172,11 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 ## Credits
 
-- YML Configuration File [https://github.com/jinzhu/configor]
-- Logging [https://github.com/sirupsen/logrus]
-- CLI [https://github.com/urfave/cli]
-- Support of colors in Windows CLI [https://github.com/mattn/go-colorable]
-- Inconshreveable / Go Update [https://github.com/inconshreveable/go-update]
-- Blang / Semver [https://github.com/blang/semver]
+- [Bintray - Software Distribution](https://bintray.com)
+- [Advanced Installer](https://www.advancedinstaller.com/) - Free License to build the Setup
+- [Jinzhu / YML Configuration File](https://github.com/jinzhu/configor)
+- [Sirupsen / Logging](https://github.com/sirupsen/logrus)
+- [Urfave / CLI](https://github.com/urfave/cli)
+- [Mattn / Support of colors in Windows CLI](https://github.com/mattn/go-colorable)
+- [Inconshreveable / Go Update](https://github.com/inconshreveable/go-update)
+- [Blang / Semver](https://github.com/blang/semver)
