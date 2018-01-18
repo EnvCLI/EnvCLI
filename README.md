@@ -1,10 +1,13 @@
 [![Build Status](https://travis-ci.org/PhilippHeuer/EnvCLI.svg?branch=master)](https://travis-ci.org/PhilippHeuer/EnvCLI)
 [![Go Report Card](https://goreportcard.com/badge/philippheuer/envcli)](http://goreportcard.com/report/philippheuer/envcli)
+[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg)]()
+[![GitHub contributors](https://img.shields.io/github/contributors/PhilippHeuer/envcli.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/master/LICENSE.md)
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
+
 *EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can match commands to specific containers within a configuration file.
-It currently supports several docker backends [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
+It currently supports the following container providers [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
 Since all commands run in *ethereal docker containers* you will never have to install dependencies (Ruby, ...) or other cli tools ever again.
 
 ---
@@ -112,7 +115,7 @@ Is this ok? (yes) yes
 #### **Docker for Windows**
 
 1. Install Docker for Windows from https://docs.docker.com/docker-for-windows/install/
-2. Install [EnvCLI](https://bintray.com/philippheuer/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
+2. Install [EnvCLI](https://bintray.com/envcli/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
 
 #### **Docker for Linux**
 
@@ -121,19 +124,19 @@ Is this ok? (yes) yes
 
 *32bit*
 ```
-$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/philippheuer/golang/envcli/v0.1.0/envcli_linux_386
+$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.1.0/envcli_linux_386
 $ chmod +x /usr/local/bin/envcli
 ```
 
 *64bit*
 ```
-$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/philippheuer/golang/envcli/v0.1.0/envcli_linux_amd64
+$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.1.0/envcli_linux_amd64
 $ chmod +x /usr/local/bin/envcli
 ```
 
 #### **Docker Toolbox (Legacy)**
 
-Install [EnvCLI](https://bintray.com/philippheuer/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
+Install [EnvCLI](https://bintray.com/envcli/golang/download_file?file_path=envcli%2Fv0.1.0%2FEnvCLI_Setup.exe)
 
 Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
 
