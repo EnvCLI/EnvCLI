@@ -8,6 +8,7 @@ import (
 	"strings"
 	"path/filepath"
 	"io/ioutil"
+	"errors"
 )
 
 /**
@@ -43,25 +44,33 @@ type CLIConfigrationFile struct {
 /**
  * Load the project config
  */
-func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile string) ProjectConfigrationFile {
+func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 	var cfg ProjectConfigrationFile
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return cfg, errors.New("Project configuration file not found.")
+	}
 
 	log.Debug("Loading project configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
-	return cfg
+	return cfg, nil
 }
 
 /**
  * Load the global config
  */
-func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) CLIConfigrationFile {
+func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) (CLIConfigrationFile, error) {
 	var cfg CLIConfigrationFile
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return cfg, errors.New("Global configuration file not found.")
+	}
 
 	log.Debug("Loading global configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
-	return cfg
+	return cfg, nil
 }
 
 /**

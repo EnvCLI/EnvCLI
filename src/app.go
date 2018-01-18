@@ -31,11 +31,14 @@ func main() {
 
 	// Global Configuration
 	configurationLoader := ConfigurationLoader{}
-	globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+	globalConfig, err := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
 
-	// Set Proxy Server
-	os.Setenv("HTTP_PROXY", globalConfig.HttpProxy)
-	os.Setenv("HTTPS_PROXY", globalConfig.HttpsProxy)
+	// Configure Proxy Server
+	if(err == nil) {
+		// Set Proxy Server
+		os.Setenv("HTTP_PROXY", globalConfig.HttpProxy)
+		os.Setenv("HTTPS_PROXY", globalConfig.HttpsProxy)
+	}
 
 	// CLI
 	app := &cli.App{
@@ -67,13 +70,21 @@ func main() {
 				Name:    "self-update",
 				Aliases: []string{},
 				Usage:   "updates the dev cli utility",
+				Flags: []cli.Flag {
+		      &cli.BoolFlag{
+		        Name: "force",
+						Aliases: []string{"f"},
+		        Value: false,
+		        Usage: "A forced update would also redownload the current version",
+		      },
+		    },
 				Action: func(c *cli.Context) error {
 					// Set loglevel
 					setLoglevel(c.String("loglevel"))
 
 					// Run Update
-					appUpdater := ApplicationUpdater{BintrayOrg: "philippheuer", BintrayRepository: "golang", BintrayPackage: "EnvCLI"}
-					appUpdater.update("latest")
+					appUpdater := ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "PhilippHeuer", GitHubRepository: "EnvCLI"}
+					appUpdater.update("latest", c.Bool("force"))
 
 					return nil
 				},
@@ -97,7 +108,7 @@ func main() {
 						log.Fatalf("No .envcli.yml configration file found in current or parent directories. Please run envcli within your project.")
 						return nil
 					}
-					var config ProjectConfigrationFile = configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
+					config, _ := configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage string = ""
@@ -144,7 +155,7 @@ func main() {
 
 							// Load Config
 							configurationLoader := ConfigurationLoader{}
-							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
 
 							// Check Parameters
 							if c.NArg() != 2 {
@@ -178,7 +189,7 @@ func main() {
 
 							// Load Config
 							configurationLoader := ConfigurationLoader{}
-							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
 
 							// Check Parameters
 							if c.NArg() != 1 {
@@ -206,7 +217,7 @@ func main() {
 
 							// Load Config
 							configurationLoader := ConfigurationLoader{}
-							globalConfig := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
 
 							// Check Parameters
 							if c.NArg() != 1 {

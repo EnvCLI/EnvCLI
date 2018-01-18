@@ -15,15 +15,15 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/enr/go-bintray"
-  packages = ["bintray"]
-  revision = "a188470ed9faf4831e85bc333e06f029d40e4acb"
+  name = "github.com/google/go-github"
+  packages = ["github"]
+  revision = "922ceac0585d40f97d283d921f872fc50480e06e"
 
 [[projects]]
   branch = "master"
-  name = "github.com/enr/go-commons"
-  packages = ["lang"]
-  revision = "bcd3f40eeea857496af2cf1bea949ab00e925b12"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
   branch = "master"
@@ -89,6 +89,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea9435c3d17c72f89646ce7edde86e2cdc55325367a5c769af84512bf0c153da"
+  inputs-digest = "457421805dc2e5f807c293841044ede894687a29fb6933c472d1d3e28bfd7c7c"
   solver-name = "gps-cdcl"
   solver-version = 1

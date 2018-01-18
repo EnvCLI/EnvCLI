@@ -10,7 +10,7 @@ import (
 /**
  * CLI Command Passthru with input/output
  */
-func systemExec(command string) {
+func systemExec(command string) error {
 	log.Debugf("Running Command: %s", command)
 
 	// Run Command
@@ -22,7 +22,7 @@ func systemExec(command string) {
   	err := cmd.Run()
   	if err != nil {
   		log.Fatalf("Failed to execute command: %s\n", err.Error())
-  		os.Exit(1)
+			return err
   	}
   } else if runtime.GOOS == "windows" {
     cmd := exec.Command("powershell", command)
@@ -32,9 +32,11 @@ func systemExec(command string) {
   	err := cmd.Run()
   	if err != nil {
   		log.Fatalf("Failed to execute command: %s\n", err.Error())
-  		os.Exit(1)
+			return err
   	}
 	}
+
+	return nil
 }
 
 /**
