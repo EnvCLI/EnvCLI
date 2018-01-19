@@ -121,8 +121,10 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 
 	// Log Result
 	if applicationVersion.GT(updateTargetVersion) {
-		log.Infof("Downgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
+		log.Infof("Successfully downgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
 	} else if applicationVersion.LT(updateTargetVersion) {
-		log.Infof("Upgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
+		log.Infof("Successfully upgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
+	} else {
+		log.Infof("Successfully downloaded [%s]!", applicationVersion.String())
 	}
 }
