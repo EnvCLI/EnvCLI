@@ -6,13 +6,22 @@
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
 
-*EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can match commands to specific containers within a configuration file.
-It currently supports the following container providers [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
-Since all commands run in *ethereal docker containers* you will never have to install dependencies (Ruby, ...) or other cli tools ever again.
+*EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the configuration file.
+It currently supports the following providers: [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
+
+This project aims at dockerizing your development environment, which is the missing counterpart of dockerizing your application.
+
+**What merits does this have?**
+
+- Reproducible builds (always use the specified version of Node, Go, ...)
+- Quick on-boarding (just install Docker and EnvCLI and you can start coding without setting up any other dependencies or spending time on configurations)
+- Enforce identical development environments (every developer has the same version of every depenency)
+- Never install dependencies manually or deal with leftovers of old versions (containers are ethereal)
+- Tools (ex. Ruby -> Changelog generator) can be defined in the `.envcli.yml` without installing Ruby or a specific version which might break other tools
 
 ---
 
-. **[Overview](#overview)** . **[Merits](#merits)** . **[Example](#example)** . **[Installation](#installation)** . **[Contributing](#contributing)** . **[Changelog](#changelog)** . **[Credits](#credits)** .
+. **[Overview](#overview)** . **[Example](#example)** . **[Installation](#installation)** . **[Contributing](#contributing)** . **[Changelog](#changelog)** . **[Credits](#credits)** .
 
 ---
 
@@ -20,9 +29,9 @@ Since all commands run in *ethereal docker containers* you will never have to in
 
 To use *EnvCLI* you have to install docker and envcli. (See **[Installation](#installation)**)
 
-Now you can create your `.envcli.yml` configuration file for your project.
+After that you can create the `.envcli.yml` configuration file for your project.
 
-Example:
+Example (A single image can provide multiple commands):
 ```
 commands:
 - name: npm
@@ -50,13 +59,6 @@ go/src/project" golang:latest /usr/bin/env sh -c "go build -o envcli src/*"
 ```
 envcli run go build -o envcli src/*
 ```
-
-## Merits
-
- - Use project-specific versions of your dependencies (go, node, ...) to build or run your project
- - Enforce identical development environments for all developers
- - Never install dependencies manually or deal with leftovers (containers are ethereal)
- - Package tools (ex. Ruby -> Changelog generator) can be defined in the `.envcli.yml` without installing Ruby or a specific version which might break other tools
 
 ## Example
 
