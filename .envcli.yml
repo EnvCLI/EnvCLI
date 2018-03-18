@@ -15,10 +15,3 @@ commands:
   tag: latest
   directory: /go/src/project
   shell: sh
-- name: npm
-  description: Node.js is a JavaScript-based platform for server-side and networking applications.
-  provides:
-  - npm
-  - yarn
-  image: node
-  tag: 9.3.0-alpine
