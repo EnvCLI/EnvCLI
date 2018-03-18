@@ -153,8 +153,8 @@ func main() {
 								if element.BeforeScript != nil {
 									commandWithBeforeScript = strings.Join(element.BeforeScript[:], ";") + " && " + commandWithArguments
 
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", propConfig.HTTPProxy)
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", propConfig.HTTPSProxy)
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", propConfig.HTTPProxy, -1)
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", propConfig.HTTPSProxy, -1)
 								}
 
 								log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
