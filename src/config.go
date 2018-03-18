@@ -53,7 +53,7 @@ type ProjectConfigrationFile struct {
  * The EnvCLI Configuration
  */
 type PropertyConfigurationFile struct {
-	GlobalCommandFile string `default:""`
+	ConfigurationPath string `default:""`
 	HTTPProxy         string `default:""`
 	HTTPSProxy        string `default:""`
 }

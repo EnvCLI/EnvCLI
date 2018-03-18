@@ -116,8 +116,8 @@ func main() {
 
 					// load global configuration
 					var globalConfigPath = defaultConfigurationDirectory
-					if propConfigErr == nil && propConfig.GlobalCommandFile != "" {
-						globalConfigPath = propConfig.GlobalCommandFile
+					if propConfigErr == nil && propConfig.ConfigurationPath != "" {
+						globalConfigPath = propConfig.ConfigurationPath
 					}
 					log.Warnf("[%s].", globalConfigPath)
 					globalConfig, _ := configurationLoader.loadProjectConfig(globalConfigPath + "/.envcli.yml")
@@ -187,10 +187,13 @@ func main() {
 							// Set Value
 							if varName == "http-proxy" {
 								propConfig.HTTPProxy = varValue
-								log.Infof("Set value of HttpProxy to [%s]", propConfig.HTTPProxy)
+								log.Infof("Set value of %s to [%s]", varName, propConfig.HTTPProxy)
 							} else if varName == "https-proxy" {
 								propConfig.HTTPSProxy = varValue
-								log.Infof("Set value of HttpsProxy to [%s]", propConfig.HTTPSProxy)
+								log.Infof("Set value of %s to [%s]", varName, propConfig.HTTPSProxy)
+							} else if varName == "configuration-path" {
+								propConfig.ConfigurationPath = varValue
+								log.Infof("Set value of %s to [%s]", varName, propConfig.ConfigurationPath)
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
 							}
@@ -212,9 +215,11 @@ func main() {
 
 							// Get Value
 							if varName == "http-proxy" {
-								log.Infof("HttpProxy [%s]", propConfig.HTTPProxy)
+								log.Infof("%s [%s]", varName, propConfig.HTTPProxy)
 							} else if varName == "https-proxy" {
-								log.Infof("HttpsProxy [%s]", propConfig.HTTPSProxy)
+								log.Infof("%s [%s]", varName, propConfig.HTTPSProxy)
+							} else if varName == "configuration-path" {
+								log.Infof("%s [%s]", varName, propConfig.ConfigurationPath)
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
 							}
@@ -234,13 +239,16 @@ func main() {
 							// Get Value
 							if varName == "http-proxy" {
 								propConfig.HTTPProxy = ""
-								log.Info("Unset variable HttpProxy.")
 							} else if varName == "https-proxy" {
 								propConfig.HTTPSProxy = ""
-								log.Info("Unset variable HttpsProxy.")
+							} else if varName == "configuration-path" {
+								propConfig.ConfigurationPath = ""
 							} else {
-								log.Infof("Unknown variable name [%s]", varName)
+								log.Fatalf("Unknown variable name [%s]", varName)
+								return nil
 							}
+
+							log.Infof("Unset variable %s.", varName)
 
 							// Save Config
 							configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
