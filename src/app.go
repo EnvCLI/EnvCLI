@@ -65,6 +65,12 @@ func main() {
 				Usage: "The loglevel used by envcli, use this to troubleshoot issues",
 			},
 		},
+		Before: func(c *cli.Context) error {
+			// Set loglevel
+			setLoglevel(c.String("loglevel"))
+
+			return nil
+		},
 		Commands: []*cli.Command{
 			{
 				Name:    "self-update",
@@ -79,9 +85,6 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					// Set loglevel
-					setLoglevel(c.String("loglevel"))
-
 					// Run Update
 					appUpdater := ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "PhilippHeuer", GitHubRepository: "EnvCLI"}
 					appUpdater.update("latest", c.Bool("force"))
@@ -106,9 +109,6 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					// Set loglevel
-					setLoglevel(c.String("loglevel"))
-
 					// parse command
 					commandName := c.Args().First()
 					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
@@ -173,9 +173,6 @@ func main() {
 					&cli.Command{
 						Name: "set",
 						Action: func(c *cli.Context) error {
-							// Set loglevel
-							setLoglevel(c.String("loglevel"))
-
 							// Load Config
 							configurationLoader := ConfigurationLoader{}
 							propConfig, _ := configurationLoader.loadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
@@ -207,9 +204,6 @@ func main() {
 					&cli.Command{
 						Name: "get",
 						Action: func(c *cli.Context) error {
-							// Set loglevel
-							setLoglevel(c.String("loglevel"))
-
 							// Check Parameters
 							if c.NArg() != 1 {
 								log.Fatal("Please provide the variable name you want to erase. [envcli config unset variable]")
@@ -231,9 +225,6 @@ func main() {
 					&cli.Command{
 						Name: "unset",
 						Action: func(c *cli.Context) error {
-							// Set loglevel
-							setLoglevel(c.String("loglevel"))
-
 							// Check Parameters
 							if c.NArg() != 1 {
 								log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
