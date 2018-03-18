@@ -12,8 +12,13 @@ import (
 	cli "gopkg.in/urfave/cli.v2"
 )
 
+// App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.1.1"
+var appVersion = "v0.1.0"
+
+// Configuration
+var configurationLoader = ConfigurationLoader{}
+var defaultConfigurationDirectory = configurationLoader.getExecutionDirectory()
 
 // Init Hook
 func init() {
@@ -31,14 +36,13 @@ func init() {
 func main() {
 
 	// Global Configuration
-	configurationLoader := ConfigurationLoader{}
-	globalConfig, err := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+	propConfig, propConfigErr := configurationLoader.loadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
 	// Configure Proxy Server
-	if err == nil {
+	if propConfigErr == nil {
 		// Set Proxy Server
-		os.Setenv("HTTP_PROXY", globalConfig.HTTPProxy)
-		os.Setenv("HTTPS_PROXY", globalConfig.HTTPSProxy)
+		os.Setenv("HTTP_PROXY", propConfig.HTTPProxy)
+		os.Setenv("HTTPS_PROXY", propConfig.HTTPSProxy)
 	}
 
 	// CLI
@@ -110,21 +114,32 @@ func main() {
 					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
-					// load yml project configuration
+					// load global configuration
+					var globalConfigPath = defaultConfigurationDirectory
+					if propConfigErr == nil && propConfig.GlobalCommandFile != "" {
+						globalConfigPath = propConfig.GlobalCommandFile
+					}
+					log.Warnf("[%s].", globalConfigPath)
+					globalConfig, _ := configurationLoader.loadProjectConfig(globalConfigPath + "/.envcli.yml")
+
+					// load project configuration
 					configurationLoader := ConfigurationLoader{}
 					if configurationLoader.getProjectDirectory() == "" {
-						log.Fatalf("No .envcli.yml configration file found in current or parent directories. Please run envcli within your project.")
+						log.Warnf("No project configuration found in current or parent directories. Only the globally defined commands are available.")
 						return nil
 					}
-					config, _ := configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
+					projectConfig, _ := configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
+
+					// merge project and global configuration
+					var finalConfiguration = configurationLoader.mergeConfigurations(projectConfig, globalConfig)
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage = ""
 					var dockerImageTag = ""
 					var projectDirectory = ""
 					var commandShell = ""
-					for _, element := range config.Commands {
-						log.Debugf("Checking for matching commands in package %s", element.Name)
+					for _, element := range finalConfiguration.Commands {
+						log.Debugf("Checking for matching commands in package %s [Scope: %s]", element.Name, element.Scope)
 						for _, providedCommand := range element.Provides {
 							log.Debugf("Comparing used command [%s] with provided command %s of %s", commandName, providedCommand, element.Name)
 							if providedCommand == commandName {
@@ -143,7 +158,7 @@ func main() {
 					}
 
 					// detect container service and send command
-					log.Infof("Executing specified command in Docker Container [%s:%s].", dockerImage, dockerImageTag)
+					log.Infof("Executing command in container [%s:%s].", dockerImage, dockerImageTag)
 					docker := Docker{}
 					docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), c.StringSlice("env"), c.StringSlice("port"))
 
@@ -163,7 +178,7 @@ func main() {
 
 							// Load Config
 							configurationLoader := ConfigurationLoader{}
-							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
+							propConfig, _ := configurationLoader.loadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
 							// Check Parameters
 							if c.NArg() != 2 {
@@ -174,17 +189,17 @@ func main() {
 
 							// Set Value
 							if varName == "http-proxy" {
-								globalConfig.HTTPProxy = varValue
-								log.Infof("Set value of HttpProxy to [%s]", globalConfig.HTTPProxy)
+								propConfig.HTTPProxy = varValue
+								log.Infof("Set value of HttpProxy to [%s]", propConfig.HTTPProxy)
 							} else if varName == "https-proxy" {
-								globalConfig.HTTPSProxy = varValue
-								log.Infof("Set value of HttpsProxy to [%s]", globalConfig.HTTPSProxy)
+								propConfig.HTTPSProxy = varValue
+								log.Infof("Set value of HttpsProxy to [%s]", propConfig.HTTPSProxy)
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
 							}
 
 							// Save Config
-							configurationLoader.saveGlobalConfig(configurationLoader.getExecutionDirectory()+"/.envclirc", globalConfig)
+							configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 
 							return nil
 						},
@@ -195,10 +210,6 @@ func main() {
 							// Set loglevel
 							setLoglevel(c.String("loglevel"))
 
-							// Load Config
-							configurationLoader := ConfigurationLoader{}
-							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
-
 							// Check Parameters
 							if c.NArg() != 1 {
 								log.Fatal("Please provide the variable name you want to erase. [envcli config unset variable]")
@@ -207,9 +218,9 @@ func main() {
 
 							// Get Value
 							if varName == "http-proxy" {
-								log.Infof("HttpProxy [%s]", globalConfig.HTTPProxy)
+								log.Infof("HttpProxy [%s]", propConfig.HTTPProxy)
 							} else if varName == "https-proxy" {
-								log.Infof("HttpsProxy [%s]", globalConfig.HTTPSProxy)
+								log.Infof("HttpsProxy [%s]", propConfig.HTTPSProxy)
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
 							}
@@ -223,10 +234,6 @@ func main() {
 							// Set loglevel
 							setLoglevel(c.String("loglevel"))
 
-							// Load Config
-							configurationLoader := ConfigurationLoader{}
-							globalConfig, _ := configurationLoader.loadGlobalConfig(configurationLoader.getExecutionDirectory() + "/.envclirc")
-
 							// Check Parameters
 							if c.NArg() != 1 {
 								log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
@@ -235,17 +242,17 @@ func main() {
 
 							// Get Value
 							if varName == "http-proxy" {
-								globalConfig.HTTPProxy = ""
+								propConfig.HTTPProxy = ""
 								log.Info("Unset variable HttpProxy.")
 							} else if varName == "https-proxy" {
-								globalConfig.HTTPSProxy = ""
+								propConfig.HTTPSProxy = ""
 								log.Info("Unset variable HttpsProxy.")
 							} else {
 								log.Infof("Unknown variable name [%s]", varName)
 							}
 
 							// Save Config
-							configurationLoader.saveGlobalConfig(configurationLoader.getExecutionDirectory()+"/.envclirc", globalConfig)
+							configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 
 							return nil
 						},

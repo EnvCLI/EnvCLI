@@ -22,15 +22,30 @@ type ConfigurationLoader struct {
  * The Project Configuration
  */
 type ProjectConfigrationFile struct {
-	DockerMachineVM string `default:"envcli"`
-	Commands        []struct {
-		Name        string
+	Commands []struct {
+		// name of the container
+		Name string
+
+		// description for the  container
 		Description string
-		Provides    []string
-		Image       string
-		Tag         string
-		Directory   string `default:"/project"`
-		Shell       string `default:"none"`
+
+		// the commands provided by the image
+		Provides []string
+
+		// docker image
+		Image string
+
+		// docker image tag
+		Tag string
+
+		// target directory to mount your project inside of the container
+		Directory string `default:"/project"`
+
+		// wrap the executed command inside of the container into a shell (ex. if you use globs)
+		Shell string `default:"none"`
+
+		// the command scope (internal use only) - global or project
+		Scope string
 	}
 }
 
@@ -38,8 +53,9 @@ type ProjectConfigrationFile struct {
  * The EnvCLI Configuration
  */
 type PropertyConfigurationFile struct {
-	HTTPProxy  string `default:""`
-	HTTPSProxy string `default:""`
+	GlobalCommandFile string `default:""`
+	HTTPProxy         string `default:""`
+	HTTPSProxy        string `default:""`
 }
 
 /**
@@ -59,16 +75,16 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 }
 
 /**
- * Load the global config
+ * Load the property config
  */
-func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) (PropertyConfigurationFile, error) {
+func (configurationLoader ConfigurationLoader) loadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
 	var cfg PropertyConfigurationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return cfg, errors.New("global configuration file not found")
+		return cfg, errors.New("global property file not found")
 	}
 
-	log.Debug("Loading global configuration file " + configFile)
+	log.Debug("Loading property configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg, nil
@@ -77,8 +93,8 @@ func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile strin
 /**
  * Save the global config
  */
-func (configurationLoader ConfigurationLoader) saveGlobalConfig(configFile string, cfg PropertyConfigurationFile) error {
-	log.Debug("Saving global configuration file " + configFile)
+func (configurationLoader ConfigurationLoader) savePropertyConfig(configFile string, cfg PropertyConfigurationFile) error {
+	log.Debug("Saving property configuration file " + configFile)
 
 	fileContent, err := yaml.Marshal(&cfg)
 	if err != nil {
@@ -129,13 +145,13 @@ func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
 	for projectDirectory == "" {
 		if _, err := os.Stat(filepath.Join(currentDirectory, "/.envcli.yml")); err == nil {
 			return currentDirectory
-		} else {
-			if directoryParts[0]+"\\" == currentDirectory {
-				return ""
-			}
-
-			currentDirectory = filepath.Dir(currentDirectory)
 		}
+
+		if directoryParts[0]+"\\" == currentDirectory {
+			return ""
+		}
+
+		currentDirectory = filepath.Dir(currentDirectory)
 	}
 
 	return ""
@@ -153,4 +169,23 @@ func (configurationLoader ConfigurationLoader) getRelativePathToWorkingDirectory
 	relativePath = strings.Trim(relativePath, "/")
 
 	return relativePath
+}
+
+/**
+ * Merge two configurations and keep the origin in the Scope
+ * TODO: Handle conflicts with a warning / by order project definition have precedence right now
+ */
+func (configurationLoader ConfigurationLoader) mergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
+	var cfg = ProjectConfigrationFile{}
+
+	for _, command := range configProject.Commands {
+		command.Scope = "Project"
+		cfg.Commands = append(cfg.Commands, command)
+	}
+	for _, command := range configGlobal.Commands {
+		command.Scope = "Global"
+		cfg.Commands = append(cfg.Commands, command)
+	}
+
+	return cfg
 }
