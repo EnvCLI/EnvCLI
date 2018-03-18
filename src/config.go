@@ -44,6 +44,9 @@ type ProjectConfigrationFile struct {
 		// wrap the executed command inside of the container into a shell (ex. if you use globs)
 		Shell string `default:"none"`
 
+		// commands that should run in the container before the actual command is executed
+		BeforeScript []string `yaml:"before_script"`
+
 		// the command scope (internal use only) - global or project
 		Scope string
 	}

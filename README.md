@@ -159,6 +159,11 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 ## Changelog
 
+#### v0.2.0 (Unreleased)
+
+* system scoped alias configuration / merging with the project configuration #4. [Philipp Heuer]
+* pass proxy server configuration into the container #3. [Philipp Heuer]
+
 #### v0.1.0 (16-01-2018)
 
 * implemented bintray updater to ship new binaries. [Philipp Heuer]

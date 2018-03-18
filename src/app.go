@@ -138,16 +138,25 @@ func main() {
 					var dockerImageTag = ""
 					var projectDirectory = ""
 					var commandShell = ""
+					var commandWithBeforeScript = ""
 					for _, element := range finalConfiguration.Commands {
 						log.Debugf("Checking for matching commands in package %s [Scope: %s]", element.Name, element.Scope)
 						for _, providedCommand := range element.Provides {
-							log.Debugf("Comparing used command [%s] with provided command %s of %s", commandName, providedCommand, element.Name)
 							if providedCommand == commandName {
-								log.Debugf("Matched command %s against package [%s]", commandName, element.Name)
+								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
 								dockerImage = element.Image
 								dockerImageTag = element.Tag
 								projectDirectory = element.Directory
 								commandShell = element.Shell
+
+								commandWithBeforeScript = commandWithArguments
+								if element.BeforeScript != nil {
+									commandWithBeforeScript = strings.Join(element.BeforeScript[:], ";") + " && " + commandWithArguments
+
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", propConfig.HTTPProxy)
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", propConfig.HTTPSProxy)
+								}
+
 								log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
 							}
 						}
@@ -157,10 +166,23 @@ func main() {
 						return nil
 					}
 
+					// environment variables
+					var environmentVariables []string = c.StringSlice("env")
+
+					// - proxy environment
+					if propConfigErr == nil {
+						if propConfig.HTTPProxy != "" {
+							environmentVariables = append(environmentVariables, "http_proxy="+propConfig.HTTPProxy)
+						}
+						if propConfig.HTTPSProxy != "" {
+							environmentVariables = append(environmentVariables, "https_proxy="+propConfig.HTTPSProxy)
+						}
+					}
+
 					// detect container service and send command
 					log.Infof("Executing command in container [%s:%s].", dockerImage, dockerImageTag)
 					docker := Docker{}
-					docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithArguments, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), c.StringSlice("env"), c.StringSlice("port"))
+					docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithBeforeScript, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},
