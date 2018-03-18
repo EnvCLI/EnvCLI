@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"bytes"
-	"os/exec"
-	"strings"
-	"runtime"
+	"fmt"
 	log "github.com/sirupsen/logrus" // imports as package "log"
+	"os/exec"
+	"runtime"
+	"strings"
 )
 
 /**
@@ -22,10 +22,10 @@ func (docker Docker) isDockerNative() bool {
 	path, err := exec.LookPath("docker")
 	if err != nil {
 		return false
-	} else {
-		log.Debugf("Found Docker native at [%s].", path)
-		return true
 	}
+
+	log.Debugf("Found Docker native at [%s].", path)
+	return true
 }
 
 /**
@@ -35,16 +35,16 @@ func (docker Docker) isDockerToolbox() bool {
 	path, err := exec.LookPath("docker-machine")
 	if err != nil || strings.Contains(path, "Docker Toolbox") == false {
 		return false
-	} else {
-		log.Debugf("Found Docker Toolbox at [%s].", path)
-		return true
 	}
+
+	log.Debugf("Found Docker Toolbox at [%s].", path)
+	return true
 }
 
 /**
  * Run a Command in Docker
  */
-func (docker Docker) containerExec(image string, tag string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string) {
+func (docker Docker) containerExec(image string, tag string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
 	// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
@@ -80,6 +80,10 @@ func (docker Docker) containerExec(image string, tag string, commandShell string
 	for _, envVariable := range environment {
 		shellCommand.WriteString(fmt.Sprintf("--env %s ", envVariable))
 	}
+	// - publish ports
+	for _, publishVariable := range publish {
+		shellCommand.WriteString(fmt.Sprintf("--publish %s ", publishVariable))
+	}
 	// - set working directory
 	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
 	// - volume mounts
@@ -90,5 +94,5 @@ func (docker Docker) containerExec(image string, tag string, commandShell string
 	shellCommand.WriteString(fmt.Sprintf("%s", command))
 
 	// execute command
-  systemExec(shellCommand.String())
+	systemExec(shellCommand.String())
 }

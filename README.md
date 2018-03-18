@@ -5,7 +5,6 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/master/LICENSE.md)
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
-
 *EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the configuration file.
 It currently supports the following providers: [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
 
@@ -152,9 +151,7 @@ After that you have to share the drive containing your projects with virtualbox 
 
 ## Roadmap
 
-- Aliases for Windows/Linux to omit the "envcli run" prefix and use `npm`, `go`, ... directly.
-- Caching of directories on the host.
-- Configuration of proxy server for the containers.
+- [Features](https://github.com/PhilippHeuer/EnvCLI/labels/feature)
 
 ## Contributing
 

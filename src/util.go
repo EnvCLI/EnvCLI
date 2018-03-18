@@ -1,10 +1,10 @@
 package main
 
 import (
+	log "github.com/sirupsen/logrus" // imports as package "log"
 	"os"
 	"os/exec"
 	"runtime"
-	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
 /**
@@ -14,26 +14,26 @@ func systemExec(command string) error {
 	log.Debugf("Running Command: %s", command)
 
 	// Run Command
-  if runtime.GOOS == "linux" {
-    cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
-    cmd.Stdin = os.Stdin
-  	cmd.Stdout = os.Stdout
-  	cmd.Stderr = os.Stderr
-  	err := cmd.Run()
-  	if err != nil {
-  		log.Fatalf("Failed to execute command: %s\n", err.Error())
+	if runtime.GOOS == "linux" {
+		cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			log.Fatalf("Failed to execute command: %s\n", err.Error())
 			return err
-  	}
-  } else if runtime.GOOS == "windows" {
-    cmd := exec.Command("powershell", command)
-    cmd.Stdin = os.Stdin
-  	cmd.Stdout = os.Stdout
-  	cmd.Stderr = os.Stderr
-  	err := cmd.Run()
-  	if err != nil {
-  		log.Fatalf("Failed to execute command: %s\n", err.Error())
+		}
+	} else if runtime.GOOS == "windows" {
+		cmd := exec.Command("powershell", command)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		if err != nil {
+			log.Fatalf("Failed to execute command: %s\n", err.Error())
 			return err
-  	}
+		}
 	}
 
 	return nil

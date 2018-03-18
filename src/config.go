@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/jinzhu/configor"     // imports as package "configor"
-	log "github.com/sirupsen/logrus" // imports as package "log"
-	yaml "gopkg.in/yaml.v2"          // imports as package "yaml"
-	"os"
-	"strings"
-	"path/filepath"
-	"io/ioutil"
 	"errors"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/jinzhu/configor"
+	log "github.com/sirupsen/logrus"
+	yaml "gopkg.in/yaml.v2"
 )
 
 /**
- * The Project Configuration and it's properties
+ * ConfigurationLoader contains all methods to load/save configuration files
  */
 type ConfigurationLoader struct {
 }
@@ -36,9 +37,9 @@ type ProjectConfigrationFile struct {
 /**
  * The EnvCLI Configuration
  */
-type CLIConfigrationFile struct {
-	HttpProxy string `default:""`
-	HttpsProxy string `default:""`
+type PropertyConfigurationFile struct {
+	HTTPProxy  string `default:""`
+	HTTPSProxy string `default:""`
 }
 
 /**
@@ -48,7 +49,7 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 	var cfg ProjectConfigrationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return cfg, errors.New("Project configuration file not found.")
+		return cfg, errors.New("project configuration file not found")
 	}
 
 	log.Debug("Loading project configuration file " + configFile)
@@ -60,11 +61,11 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 /**
  * Load the global config
  */
-func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) (CLIConfigrationFile, error) {
-	var cfg CLIConfigrationFile
+func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile string) (PropertyConfigurationFile, error) {
+	var cfg PropertyConfigurationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return cfg, errors.New("Global configuration file not found.")
+		return cfg, errors.New("global configuration file not found")
 	}
 
 	log.Debug("Loading global configuration file " + configFile)
@@ -76,7 +77,7 @@ func (configurationLoader ConfigurationLoader) loadGlobalConfig(configFile strin
 /**
  * Save the global config
  */
-func (configurationLoader ConfigurationLoader) saveGlobalConfig(configFile string, cfg CLIConfigrationFile) error {
+func (configurationLoader ConfigurationLoader) saveGlobalConfig(configFile string, cfg PropertyConfigurationFile) error {
 	log.Debug("Saving global configuration file " + configFile)
 
 	fileContent, err := yaml.Marshal(&cfg)
@@ -91,15 +92,15 @@ func (configurationLoader ConfigurationLoader) saveGlobalConfig(configFile strin
  * Get the execution directory
  */
 func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
- 	ex, err := os.Executable()
- 	if err != nil {
- 		log.WithFields(log.Fields{
- 			"error": err,
- 		}).Fatal("Couldn't detect execution directory!")
+	ex, err := os.Executable()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Couldn't detect execution directory!")
 		return ""
- 	}
+	}
 
- 	return filepath.Dir(ex)
+	return filepath.Dir(ex)
 }
 
 /**
@@ -121,7 +122,7 @@ func (configurationLoader ConfigurationLoader) getWorkingDirectory() string {
  */
 func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
 	currentDirectory := configurationLoader.getWorkingDirectory()
-	var projectDirectory string = ""
+	var projectDirectory = ""
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
 

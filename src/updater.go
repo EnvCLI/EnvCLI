@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"runtime"
 	"strings"
-	"context"
-	log "github.com/sirupsen/logrus"    // imports as package "log"
-	"net/http"
-  "github.com/inconshreveable/go-update"
+
 	"github.com/blang/semver"
 	"github.com/google/go-github/github"
+	update "github.com/inconshreveable/go-update"
+	log "github.com/sirupsen/logrus"
 )
 
 /**
@@ -17,11 +18,11 @@ import (
  * Using equinox.io
  */
 type ApplicationUpdater struct {
-	BintrayOrg  string
+	BintrayOrg        string
 	BintrayRepository string
-	BintrayPackage string
-	GitHubOrg string
-	GitHubRepository string
+	BintrayPackage    string
+	GitHubOrg         string
+	GitHubRepository  string
 }
 
 /**
@@ -31,19 +32,19 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 	// current application version
 	applicationVersion, err := semver.Make(strings.TrimLeft(appVersion, "v"))
 	if err != nil {
-		 log.Errorf("Unexpected Error: %s", err)
-		 return
+		log.Errorf("Unexpected Error: %s", err)
+		return
 	}
 
 	// Get Latest Version from Link
-	if(version == "latest") {
+	if version == "latest" {
 		ctx := context.Background()
 		client := github.NewClient(nil)
 		opt := &github.ListOptions{Page: 0, PerPage: 500}
 		tags, _, err := client.Repositories.ListTags(ctx, appUpdater.GitHubOrg, appUpdater.GitHubRepository, opt)
 		if err != nil {
-			 log.Errorf("Unexpected GitHub Error: %s", err)
-			 return
+			log.Errorf("Unexpected GitHub Error: %s", err)
+			return
 		}
 
 		// Find newest tag
@@ -53,8 +54,8 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 
 			tagVersion, err := semver.Make(strings.TrimLeft(*tag.Name, "v"))
 			if err != nil {
-				 log.Debugf("Unexpected error parsing the github tag: %s", err)
-				 continue
+				log.Debugf("Unexpected error parsing the github tag: %s", err)
+				continue
 			}
 
 			if tagVersion.GTE(applicationVersion) && tagVersion.GTE(currentVersion) {
@@ -74,11 +75,11 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 	// update target version
 	updateTargetVersion, err := semver.Make(strings.TrimLeft(version, "v"))
 	if err != nil {
-		 log.Errorf("Unexpected Error: %s", err)
-		 return
+		log.Errorf("Unexpected Error: %s", err)
+		return
 	}
 
-	if(applicationVersion.Compare(updateTargetVersion) == 0 && force == false) {
+	if applicationVersion.Compare(updateTargetVersion) == 0 && force == false {
 		log.Info("No update available, already at the latest version!")
 		return
 	}
@@ -92,24 +93,24 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 
 	// download new version
 	resp, err := http.Get(downloadUrl)
-  if err != nil {
+	if err != nil {
 		log.Errorf("Unexpected Error: %s", err)
 		return
-  }
+	}
 	if resp.StatusCode != 200 {
 		log.Error("Update not found on remote server ... aborting.")
 		return
 	}
 
-  defer resp.Body.Close()
+	defer resp.Body.Close()
 	opts := update.Options{}
 	err = opts.CheckPermissions()
 	if err != nil {
 		log.Errorf("Missing permissions, update can't be executed: %s", err)
 		return
 	}
-  err = update.Apply(resp.Body, opts)
-  if err != nil {
+	err = update.Apply(resp.Body, opts)
+	if err != nil {
 		if rerr := update.RollbackError(err); rerr != nil {
 			log.Errorf("Broken update, failed to rollback. Please reinstall the application. [%s]", err)
 		} else {
@@ -117,7 +118,7 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 		}
 
 		return
-  }
+	}
 
 	// Log Result
 	if applicationVersion.GT(updateTargetVersion) {
