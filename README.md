@@ -14,9 +14,10 @@ This project aims at dockerizing your development environment, which is the miss
 
 - Reproducible builds (always use the specified version of Node, Go, ...)
 - Quick on-boarding (just install Docker and EnvCLI and you can start coding without setting up any other dependencies or spending time on configurations)
-- Enforce identical development environments (every developer has the same version of every depenency)
+- Enforce identical development environments (every developer has the same version of the compilers/gradle/...)
 - Never install dependencies manually or deal with leftovers of old versions (containers are ethereal)
 - Tools (ex. Ruby -> Changelog generator) can be defined in the `.envcli.yml` without installing Ruby or a specific version which might break other tools
+- Need to use the coreos config transpiler one time to create a config to boot CoreOS? Just use the system-scoped configuration and use `ct` anywhere without installing anything or modifiding your path variables.
 
 ---
 
