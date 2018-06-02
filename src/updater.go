@@ -88,11 +88,11 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 		log.Debugf("Initiating forced update to version: %s", updateTargetVersion.String())
 	}
 
-	var downloadUrl string = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/envcli_%s_%s", appUpdater.BintrayOrg, appUpdater.BintrayRepository, appUpdater.BintrayPackage, version, runtime.GOOS, runtime.GOARCH)
-	log.Debugf("Starting download from remote: %v", downloadUrl)
+	var downloadURL = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/envcli_%s_%s", appUpdater.BintrayOrg, appUpdater.BintrayRepository, appUpdater.BintrayPackage, version, runtime.GOOS, runtime.GOARCH)
+	log.Debugf("Starting download from remote: %v", downloadURL)
 
 	// download new version
-	resp, err := http.Get(downloadUrl)
+	resp, err := http.Get(downloadURL)
 	if err != nil {
 		log.Errorf("Unexpected Error: %s", err)
 		return

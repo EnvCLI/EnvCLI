@@ -45,7 +45,7 @@ commands:
 
 When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:9.3.0-alpine` based on the provided commands.
 
-#### What does the EnvCLI do?
+#### What does EnvCLI do?
 
 This project only provides the configuration file and the easy *envcli* commmand, therefore making it easier to use [Docker](https://www.docker.com/) when development your project. You can do the same without *EnvCLI*.
 
@@ -143,6 +143,7 @@ Install [EnvCLI](https://bintray.com/envcli/golang/download_file?file_path=envcl
 Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
 
 After that you have to share the drive containing your projects with virtualbox and docker:
+
  1. Stop the envcli machine `docker-machine stop envcli`
  2. Open VirtualBox
  3. Rightclick -> Settings on the envcli virtual Machine
@@ -162,21 +163,21 @@ Feel free to put up a pull request to fix a bug or maybe add a feature.
 
 #### v0.2.0 (Unreleased)
 
-* system scoped alias configuration / merging with the project configuration #4. [Philipp Heuer]
-* pass proxy server configuration into the container #3. [Philipp Heuer]
+- system scoped alias configuration / merging with the project configuration #4. [Philipp Heuer]
+- pass proxy server configuration into the container #3. [Philipp Heuer]
 
 #### v0.1.0 (16-01-2018)
 
-* implemented bintray updater to ship new binaries. [Philipp Heuer]
-* add the ability to pass environment variables into the containers. [Philipp Heuer]
-* add global configuration for the proxy server. [Philipp Heuer]
-* support to run commands within subdirectories of the project. [Philipp Heuer]
-* add the ability for a single image to provide multiple commands. [Philipp Heuer]
-* option to wrap container commands in a shell. [Philipp Heuer]
-* support for docker toolbox. [Philipp Heuer]
-* using go-colorable to support colored output on windows. [Philipp Heuer]
-* self-update command to provide updates. [Philipp Heuer]
-* support for command errors and inputs. [Philipp Heuer]
+- implemented bintray updater to ship new binaries. [Philipp Heuer]
+- add the ability to pass environment variables into the containers. [Philipp Heuer]
+- add global configuration for the proxy server. [Philipp Heuer]
+- support to run commands within subdirectories of the project. [Philipp Heuer]
+- add the ability for a single image to provide multiple commands. [Philipp Heuer]
+- option to wrap container commands in a shell. [Philipp Heuer]
+- support for docker toolbox. [Philipp Heuer]
+- using go-colorable to support colored output on windows. [Philipp Heuer]
+- self-update command to provide updates. [Philipp Heuer]
+- support for command errors and inputs. [Philipp Heuer]
 
 ## Credits
 

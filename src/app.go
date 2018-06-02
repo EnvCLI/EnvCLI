@@ -14,7 +14,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.1.0"
+var appVersion = "v0.2.0"
 
 // Configuration
 var configurationLoader = ConfigurationLoader{}
