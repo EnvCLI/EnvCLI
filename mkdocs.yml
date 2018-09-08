@@ -1,0 +1,12 @@
+site_name: EnvCLI
+repo_url: https://github.com/philippheuer/envcli
+theme: readthedocs
+docs_dir: docs
+pages:
+- Overview: 'index.md'
+- For Contributors:
+    - 'Overview & Collobaration': 'contributors/overview.md'
+- Changelog & Migration:
+    - 'Overview & Collobaration': 'changelog/overview.md'
+    - '0.1.0': 'changelog/0-1-0.md'
+    - '0.2.0': 'changelog/0-2-0.md'

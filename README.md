@@ -151,33 +151,17 @@ After that you have to share the drive containing your projects with virtualbox 
  5. Share the drive which contains your projects (In this example C -> Folder_Path: `C:\`, Folder_Name: `C_DRIVE`) and select the options `Auto-mount` and `Permanent`
  6. Start the envcli machine `docker-machine start envcli`
 
+## Documentation
+
+[Documentation](https://envcli.readthedocs.io/en/latest/)
+
 ## Roadmap
 
 - [Features](https://github.com/PhilippHeuer/EnvCLI/labels/feature)
 
-## Contributing
-
-Feel free to put up a pull request to fix a bug or maybe add a feature.
-
 ## Changelog
 
-#### v0.2.0 (Unreleased)
-
-- system scoped alias configuration / merging with the project configuration #4. [Philipp Heuer]
-- pass proxy server configuration into the container #3. [Philipp Heuer]
-
-#### v0.1.0 (16-01-2018)
-
-- implemented bintray updater to ship new binaries. [Philipp Heuer]
-- add the ability to pass environment variables into the containers. [Philipp Heuer]
-- add global configuration for the proxy server. [Philipp Heuer]
-- support to run commands within subdirectories of the project. [Philipp Heuer]
-- add the ability for a single image to provide multiple commands. [Philipp Heuer]
-- option to wrap container commands in a shell. [Philipp Heuer]
-- support for docker toolbox. [Philipp Heuer]
-- using go-colorable to support colored output on windows. [Philipp Heuer]
-- self-update command to provide updates. [Philipp Heuer]
-- support for command errors and inputs. [Philipp Heuer]
+[Changelog](https://envcli.readthedocs.io/en/latest/changelog/overview/)
 
 ## Credits
 
