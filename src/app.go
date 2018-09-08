@@ -72,6 +72,9 @@ func main() {
 			return nil
 		},
 		Commands: []*cli.Command{
+			/**
+			 * Command: self-update
+			 */
 			{
 				Name:    "self-update",
 				Aliases: []string{},
@@ -86,12 +89,15 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater := ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "PhilippHeuer", GitHubRepository: "EnvCLI"}
+					appUpdater := ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 					appUpdater.update("latest", c.Bool("force"))
 
 					return nil
 				},
 			},
+			/**
+			 * Command: run
+			 */
 			{
 				Name:    "run",
 				Aliases: []string{},
@@ -187,6 +193,9 @@ func main() {
 					return nil
 				},
 			},
+			/**
+			 * Command: config
+			 */
 			{
 				Name:    "config",
 				Aliases: []string{},
@@ -206,7 +215,6 @@ func main() {
 							varName := c.Args().Get(0)
 							varValue := c.Args().Get(1)
 
-							// Set Value
 							if varName == "http-proxy" {
 								propConfig.HTTPProxy = varValue
 								log.Infof("Set value of %s to [%s]", varName, propConfig.HTTPProxy)

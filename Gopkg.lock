@@ -14,10 +14,10 @@
   version = "v3.5.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "922ceac0585d40f97d283d921f872fc50480e06e"
+  revision = "08dbadce1a0514f79ea9a9aa91b2f12ba656d5a7"
+  version = "v18.0.0"
 
 [[projects]]
   branch = "master"
@@ -39,7 +39,7 @@
   branch = "master"
   name = "github.com/jinzhu/configor"
   packages = ["."]
-  revision = "6ecfe629230f24c2e92c7894c6ab21b83b757a39"
+  revision = "4edaf76fe18865e36de734d887f4c01bd05707af"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -50,20 +50,20 @@
 [[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
-  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
-  version = "v0.0.3"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
@@ -72,19 +72,19 @@
     "unix",
     "windows"
   ]
-  revision = "b9cf5f96b68d9eaa53d5db5fef235718767f416a"
+  revision = "917fdcba135dcbaccd57425db91723541b4427c8"
 
 [[projects]]
   branch = "v2"
   name = "gopkg.in/urfave/cli.v2"
   packages = ["."]
-  revision = "b2bf3c5abeb90da407891aecd1df2c5a1f6170c1"
+  revision = "d3ae77c26ac8db90639677e4831a728d33c36111"
 
 [[projects]]
-  branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"

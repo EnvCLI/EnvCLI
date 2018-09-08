@@ -65,7 +65,7 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 		}
 
 		if version == "latest" {
-			log.Errorf("Couldn't determinate the latest version.")
+			log.Errorf("You already have the latest version [%s].", applicationVersion)
 			return
 		} else {
 			log.Debugf("Latest version is [%s].", version)
