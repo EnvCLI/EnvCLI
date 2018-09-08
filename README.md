@@ -17,7 +17,7 @@ This project aims at dockerizing your development environment, which is the miss
 - Enforce identical development environments (every developer has the same version of the compilers/gradle/...)
 - Never install dependencies manually or deal with leftovers of old versions (containers are ethereal)
 - Tools (ex. Ruby -> Changelog generator) can be defined in the `.envcli.yml` without installing Ruby or a specific version which might break other tools
-- Need to use the coreos config transpiler one time to create a config to boot CoreOS? Just use the system-scoped configuration and use `ct` anywhere without installing anything or modifiding your path variables.
+- Need to use the coreos config transpiler to create a config to boot CoreOS? Just use the system-scoped configuration and use `ct` in any directory without installing anything or modifiding your path variables.
 
 ---
 

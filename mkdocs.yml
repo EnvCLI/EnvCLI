@@ -6,6 +6,7 @@ pages:
 - Overview: 'index.md'
 - For Contributors:
     - 'Overview & Collobaration': 'contributors/overview.md'
+    - 'Build & Test EnvCLI': 'contributors/build-test.md'
 - Changelog & Migration:
     - 'Overview & Collobaration': 'changelog/overview.md'
     - '0.1.0': 'changelog/0-1-0.md'
