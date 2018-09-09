@@ -20,6 +20,9 @@ var appVersion = "v0.2.0"
 var configurationLoader = ConfigurationLoader{}
 var defaultConfigurationDirectory = configurationLoader.getExecutionDirectory()
 
+// Constants
+var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path"}
+
 // Init Hook
 func init() {
 	log.SetOutput(os.Stdout)
@@ -41,8 +44,8 @@ func main() {
 	// Configure Proxy Server
 	if propConfigErr == nil {
 		// Set Proxy Server
-		os.Setenv("HTTP_PROXY", propConfig.HTTPProxy)
-		os.Setenv("HTTPS_PROXY", propConfig.HTTPSProxy)
+		os.Setenv("HTTP_PROXY", getOrDefault(propConfig.Properties, "http-proxy", ""))
+		os.Setenv("HTTPS_PROXY", getOrDefault(propConfig.Properties, "https-proxy", ""))
 	}
 
 	// CLI
@@ -120,12 +123,9 @@ func main() {
 					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
-					// load global configuration
-					var globalConfigPath = defaultConfigurationDirectory
-					if propConfigErr == nil && propConfig.ConfigurationPath != "" {
-						globalConfigPath = propConfig.ConfigurationPath
-					}
-					log.Warnf("[%s].", globalConfigPath)
+					// load global (user-scope) configuration
+					var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+					log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
 					globalConfig, _ := configurationLoader.loadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 					// load project configuration
@@ -141,7 +141,6 @@ func main() {
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage = ""
-					var dockerImageTag = ""
 					var projectDirectory = ""
 					var commandShell = ""
 					var commandWithBeforeScript = ""
@@ -151,7 +150,6 @@ func main() {
 							if providedCommand == commandName {
 								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
 								dockerImage = element.Image
-								dockerImageTag = element.Tag
 								projectDirectory = element.Directory
 								commandShell = element.Shell
 
@@ -159,11 +157,11 @@ func main() {
 								if element.BeforeScript != nil {
 									commandWithBeforeScript = strings.Join(element.BeforeScript[:], ";") + " && " + commandWithArguments
 
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", propConfig.HTTPProxy, -1)
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", propConfig.HTTPSProxy, -1)
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", getOrDefault(propConfig.Properties, "http-proxy", ""), -1)
+									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", getOrDefault(propConfig.Properties, "https-proxy", ""), -1)
 								}
 
-								log.Debugf("Image: %s | Tag: %s | ImageDirectory: %s", dockerImage, dockerImageTag, projectDirectory)
+								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, projectDirectory)
 							}
 						}
 					}
@@ -177,18 +175,21 @@ func main() {
 
 					// - proxy environment
 					if propConfigErr == nil {
-						if propConfig.HTTPProxy != "" {
-							environmentVariables = append(environmentVariables, "http_proxy="+propConfig.HTTPProxy)
+						httpProxy := getOrDefault(propConfig.Properties, "http-proxy", "")
+						if httpProxy != "" {
+							environmentVariables = append(environmentVariables, "http_proxy="+httpProxy)
 						}
-						if propConfig.HTTPSProxy != "" {
-							environmentVariables = append(environmentVariables, "https_proxy="+propConfig.HTTPSProxy)
+
+						httpsProxy := getOrDefault(propConfig.Properties, "https-proxy", "")
+						if httpsProxy != "" {
+							environmentVariables = append(environmentVariables, "https_proxy="+httpsProxy)
 						}
 					}
 
 					// detect container service and send command
-					log.Infof("Executing command in container [%s:%s].", dockerImage, dockerImageTag)
+					log.Infof("Executing command in container [%s].", dockerImage)
 					docker := Docker{}
-					docker.containerExec(dockerImage, dockerImageTag, commandShell, commandWithBeforeScript, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
+					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},
@@ -215,21 +216,17 @@ func main() {
 							varName := c.Args().Get(0)
 							varValue := c.Args().Get(1)
 
-							if varName == "http-proxy" {
-								propConfig.HTTPProxy = varValue
-								log.Infof("Set value of %s to [%s]", varName, propConfig.HTTPProxy)
-							} else if varName == "https-proxy" {
-								propConfig.HTTPSProxy = varValue
-								log.Infof("Set value of %s to [%s]", varName, propConfig.HTTPSProxy)
-							} else if varName == "configuration-path" {
-								propConfig.ConfigurationPath = varValue
-								log.Infof("Set value of %s to [%s]", varName, propConfig.ConfigurationPath)
-							} else {
-								log.Infof("Unknown variable name [%s]", varName)
-							}
+							// Set value
+							isValidValue, _ := inArray(varName, validConfigurationOptions)
+							if isValidValue {
+								propConfig.Properties[varName] = varValue
+								log.Infof("Set value of %s to [%s]", varName, varValue)
 
-							// Save Config
-							configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
+								// Save Config
+								configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
+							} else {
+								log.Warnf("Unknown variable [%s]", varName)
+							}
 
 							return nil
 						},
@@ -239,19 +236,27 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								log.Fatal("Please provide the variable name you want to erase. [envcli config unset variable]")
+								log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
 							}
 							varName := c.Args().Get(0)
 
 							// Get Value
-							if varName == "http-proxy" {
-								log.Infof("%s [%s]", varName, propConfig.HTTPProxy)
-							} else if varName == "https-proxy" {
-								log.Infof("%s [%s]", varName, propConfig.HTTPSProxy)
-							} else if varName == "configuration-path" {
-								log.Infof("%s [%s]", varName, propConfig.ConfigurationPath)
+							isValidValue, _ := inArray(varName, validConfigurationOptions)
+							if isValidValue {
+								log.Infof("%s [%s]", propConfig.Properties[varName])
 							} else {
-								log.Infof("Unknown variable name [%s]", varName)
+								log.Warnf("Unknown variable [%s]", varName)
+							}
+
+							return nil
+						},
+					},
+					&cli.Command{
+						Name: "get-all",
+						Action: func(c *cli.Context) error {
+							// Print all values
+							for key, value := range propConfig.Properties {
+								log.Infof("%s [%s]", key, value)
 							}
 
 							return nil
@@ -262,26 +267,21 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
+								log.Fatal("Please provide the variable name you want to unset. [envcli config unset variable]")
 							}
 							varName := c.Args().Get(0)
 
-							// Get Value
-							if varName == "http-proxy" {
-								propConfig.HTTPProxy = ""
-							} else if varName == "https-proxy" {
-								propConfig.HTTPSProxy = ""
-							} else if varName == "configuration-path" {
-								propConfig.ConfigurationPath = ""
+							// Unset Value
+							isValidValue, _ := inArray(varName, validConfigurationOptions)
+							if isValidValue {
+								propConfig.Properties[varName] = ""
+								log.Infof("Value of variable %s set to [].", varName)
+
+								// Save Config
+								configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 							} else {
-								log.Fatalf("Unknown variable name [%s]", varName)
-								return nil
+								log.Warnf("Unknown variable [%s]", varName)
 							}
-
-							log.Infof("Unset variable %s.", varName)
-
-							// Save Config
-							configurationLoader.savePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 
 							return nil
 						},

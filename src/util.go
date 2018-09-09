@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus" // imports as package "log"
 	"os"
 	"os/exec"
+	"reflect"
 	"runtime"
 )
 
@@ -48,4 +49,40 @@ func setLoglevel(loglevel string) {
 	} else if loglevel == "debug" {
 		log.SetLevel(log.DebugLevel)
 	}
+}
+
+/**
+ * Checks if a object is part of a array
+ */
+func inArray(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+
+	return
+}
+
+/**
+ * Gets the value or the specified default value if not found or empty
+ */
+func getOrDefault(entity map[string]string, key string, defaultValue string) (val string) {
+	value, found := entity[key]
+
+	if found {
+		return value
+	}
+
+	return defaultValue
 }

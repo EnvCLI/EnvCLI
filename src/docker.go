@@ -44,7 +44,7 @@ func (docker Docker) isDockerToolbox() bool {
 /**
  * Run a Command in Docker
  */
-func (docker Docker) containerExec(image string, tag string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string, publish []string) {
+func (docker Docker) containerExec(image string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
 	// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
@@ -89,7 +89,7 @@ func (docker Docker) containerExec(image string, tag string, commandShell string
 	// - volume mounts
 	shellCommand.WriteString(fmt.Sprintf("--volume \"%s:%s\" ", mountSource, mountTarget))
 	// - image
-	shellCommand.WriteString(fmt.Sprintf("%s:%s ", image, tag))
+	shellCommand.WriteString(fmt.Sprintf("%s ", image))
 	// - command to run inside of the container
 	shellCommand.WriteString(fmt.Sprintf("%s", command))
 

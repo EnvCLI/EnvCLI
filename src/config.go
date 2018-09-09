@@ -32,11 +32,8 @@ type ProjectConfigrationFile struct {
 		// the commands provided by the image
 		Provides []string
 
-		// docker image
+		// container image
 		Image string
-
-		// docker image tag
-		Tag string
 
 		// target directory to mount your project inside of the container
 		Directory string `default:"/project"`
@@ -56,9 +53,7 @@ type ProjectConfigrationFile struct {
  * The EnvCLI Configuration
  */
 type PropertyConfigurationFile struct {
-	ConfigurationPath string `default:""`
-	HTTPProxy         string `default:""`
-	HTTPSProxy        string `default:""`
+	Properties map[string]string
 }
 
 /**
@@ -71,7 +66,7 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 		return cfg, errors.New("project configuration file not found")
 	}
 
-	log.Debug("Loading project configuration file " + configFile)
+	log.Debugf("Loading project configuration file %s", configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg, nil
@@ -82,6 +77,7 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
  */
 func (configurationLoader ConfigurationLoader) loadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
 	var cfg PropertyConfigurationFile
+	cfg.Properties = make(map[string]string)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return cfg, errors.New("global property file not found")
