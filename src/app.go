@@ -144,8 +144,10 @@ func main() {
 					var projectDirectory = ""
 					var commandShell = ""
 					var commandWithBeforeScript = ""
-					for _, element := range finalConfiguration.Commands {
-						log.Debugf("Checking for matching commands in package %s [Scope: %s]", element.Name, element.Scope)
+					var containerMounts []ContainerMount
+
+					for _, element := range finalConfiguration.Images {
+						log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
 						for _, providedCommand := range element.Provides {
 							if providedCommand == commandName {
 								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
@@ -159,6 +161,16 @@ func main() {
 
 									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", getOrDefault(propConfig.Properties, "http-proxy", ""), -1)
 									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", getOrDefault(propConfig.Properties, "https-proxy", ""), -1)
+								}
+
+								// project mount
+								containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: configurationLoader.getProjectDirectory(), target: projectDirectory})
+
+								// caching mounts
+								for _, cachingEntry := range element.Caching {
+									var cacheFolder = getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
+									createDirectory(cacheFolder)
+									containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, target: cachingEntry.ContainerDirectory})
 								}
 
 								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, projectDirectory)
@@ -189,7 +201,7 @@ func main() {
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", dockerImage)
 					docker := Docker{}
-					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, configurationLoader.getProjectDirectory(), projectDirectory, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
+					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},

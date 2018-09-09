@@ -4,6 +4,13 @@ theme: readthedocs
 docs_dir: docs
 pages:
 - Overview: 'index.md'
+- Usage Examples:
+    - 'Golang': 'examples/golang.md'
+    - 'Node': 'examples/node.md'
+- Configuration:
+    - 'EnvCLI.yml Specification': 'config/envcli-yml-specification.md'
+    - 'Project Config': 'config/project-config.md'
+    - 'Global Config': 'config/global-config.md'
 - For Contributors:
     - 'Overview & Collobaration': 'contributors/overview.md'
     - 'Build & Test EnvCLI': 'contributors/build-test.md'

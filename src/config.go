@@ -22,7 +22,7 @@ type ConfigurationLoader struct {
  * The Project Configuration
  */
 type ProjectConfigrationFile struct {
-	Commands []struct {
+	Images []struct {
 		// name of the container
 		Name string
 
@@ -44,9 +44,25 @@ type ProjectConfigrationFile struct {
 		// commands that should run in the container before the actual command is executed
 		BeforeScript []string `yaml:"before_script"`
 
+		// Caching of container-directories
+		Caching []CachingEntry `yaml:"cache"`
+
 		// the command scope (internal use only) - global or project
 		Scope string
 	}
+}
+
+type CachingEntry struct {
+
+	/**
+	 * Name of the caching entry
+	 */
+	Name string `yaml:"name",default:""`
+
+	/**
+	 * Directory inside of the container that should be mounted on the host within the cache directory
+	 */
+	ContainerDirectory string `yaml:"directory",default:""`
 }
 
 /**
@@ -177,13 +193,13 @@ func (configurationLoader ConfigurationLoader) getRelativePathToWorkingDirectory
 func (configurationLoader ConfigurationLoader) mergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
 	var cfg = ProjectConfigrationFile{}
 
-	for _, command := range configProject.Commands {
-		command.Scope = "Project"
-		cfg.Commands = append(cfg.Commands, command)
+	for _, image := range configProject.Images {
+		image.Scope = "Project"
+		cfg.Images = append(cfg.Images, image)
 	}
-	for _, command := range configGlobal.Commands {
-		command.Scope = "Global"
-		cfg.Commands = append(cfg.Commands, command)
+	for _, image := range configGlobal.Images {
+		image.Scope = "Global"
+		cfg.Images = append(cfg.Images, image)
 	}
 
 	return cfg

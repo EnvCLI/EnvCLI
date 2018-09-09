@@ -21,7 +21,7 @@ This project aims at dockerizing your development environment, which is the miss
 
 ---
 
-. **[Overview](#overview)** . **[Example](#example)** . **[Installation](#installation)** . **[Contributing](#contributing)** . **[Changelog](#changelog)** . **[Credits](#credits)** .
+. **[Overview](#overview)** . **[Installation](#installation)** . **[Documentation](#documentation)** . **[Credits](#credits)** .
 
 ---
 
@@ -39,11 +39,11 @@ commands:
   provides:
   - npm
   - yarn
-  image: node
-  tag: 9.3.0-alpine
+  image: docker.io/node:10-alpine
+  tag:
 ```
 
-When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:9.3.0-alpine` based on the provided commands.
+When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:10-alpine` based on the provided commands.
 
 #### What does EnvCLI do?
 
@@ -58,58 +58,6 @@ go/src/project" golang:latest /usr/bin/env sh -c "go build -o envcli src/*"
 **With EnvCLI**:
 ```
 envcli run go build -o envcli src/*
-```
-
-## Example
-
-#### Example: Build a Go-Project (Windows by overwriting GOOS and GOARCH)
-```
-$ cd /myproject
-$ envcli --env GOOS=windows --env GOARCH=amd64 run go build -o cli.exe src/*
-INFO[0000] Executing specified command in Docker Container [golang:latest].
-```
-
-Please take note that your project directory can be anywhere on your computer, because your project will be mounted into the `go path` within the container by default.
-
-#### Example: Node - Init
-
-```
-$ envcli run npm init
-INFO[0000] Executing specified command in Docker Container [node:9.3.0-alpine].
-This utility will walk you through creating a package.json file.
-It only covers the most common items, and tries to guess sensible defaults.
-
-See `npm help json` for definitive documentation on these fields
-and exactly what they do.
-
-Use `npm install <pkg>` afterwards to install a package and
-save it as a dependency in the package.json file.
-
-Press ^C at any time to quit.
-package name: (project) myproject
-version: (1.0.0) 0.1.0
-description: Example
-entry point: (index.js)
-test command:
-git repository:
-keywords:
-author:
-license: (ISC)
-About to write to /project/package.json:
-
-{
-  "name": "myproject",
-  "version": "0.1.0",
-  "description": "Example",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC"
-}
-
-Is this ok? (yes) yes
 ```
 
 ## Installation
@@ -151,17 +99,15 @@ After that you have to share the drive containing your projects with virtualbox 
  5. Share the drive which contains your projects (In this example C -> Folder_Path: `C:\`, Folder_Name: `C_DRIVE`) and select the options `Auto-mount` and `Permanent`
  6. Start the envcli machine `docker-machine start envcli`
 
-## Documentation
-
-[Documentation](https://envcli.readthedocs.io/en/latest/)
-
 ## Roadmap
 
 - [Features](https://github.com/PhilippHeuer/EnvCLI/labels/feature)
 
-## Changelog
+## Documentation
 
-[Changelog](https://envcli.readthedocs.io/en/latest/changelog/overview/)
+- [Documentation](https://envcli.readthedocs.io/en/latest/)
+- [Examples](https://envcli.readthedocs.io/en/latest/examples/)
+- [Changelog](https://envcli.readthedocs.io/en/latest/changelog/overview/)
 
 ## Credits
 

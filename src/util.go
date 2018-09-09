@@ -52,6 +52,13 @@ func setLoglevel(loglevel string) {
 }
 
 /**
+ * Create folders if they don't exist
+ */
+func createDirectory(dir string) {
+	os.MkdirAll(dir, os.ModePerm)
+}
+
+/**
  * Checks if a object is part of a array
  */
 func inArray(val interface{}, array interface{}) (exists bool, index int) {

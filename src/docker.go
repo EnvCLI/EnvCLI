@@ -15,6 +15,24 @@ import (
 type Docker struct {
 }
 
+type ContainerMount struct {
+
+	/**
+	 * Mount Type
+	 */
+	mountType string
+
+	/**
+	 * Source Directory (Host) / Source Volume
+	 */
+	source string
+
+	/**
+	 * Target Directory (Container)
+	 */
+	target string
+}
+
 /**
  * Detect Docker native
  */
@@ -44,19 +62,8 @@ func (docker Docker) isDockerToolbox() bool {
 /**
  * Run a Command in Docker
  */
-func (docker Docker) containerExec(image string, commandShell string, command string, mountSource string, mountTarget string, workingdir string, environment []string, publish []string) {
+func (docker Docker) containerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
-
-	// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
-	if docker.isDockerToolbox() && runtime.GOOS == "windows" {
-		driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
-		for _, element := range driveLetters {
-			mountSource = strings.Replace(mountSource, element+":\\", "/"+element+"_DRIVE/", 1)
-		}
-
-		// replace windows path separator with linux path separator
-		mountSource = strings.Replace(mountSource, "\\", "/", -1)
-	}
 
 	// Shell (wrap the command within the container into a shell)
 	if commandShell == "powershell" {
@@ -87,7 +94,25 @@ func (docker Docker) containerExec(image string, commandShell string, command st
 	// - set working directory
 	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
 	// - volume mounts
-	shellCommand.WriteString(fmt.Sprintf("--volume \"%s:%s\" ", mountSource, mountTarget))
+	for _, containerMount := range mounts {
+		if containerMount.mountType == "directory" {
+			var mountSource string = containerMount.source
+			var mountTarget string = containerMount.target
+			// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
+			if docker.isDockerToolbox() && runtime.GOOS == "windows" {
+				driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+				for _, element := range driveLetters {
+					mountSource = strings.Replace(mountSource, element+":\\", "/"+element+"_DRIVE/", 1)
+				}
+
+				// replace windows path separator with linux path separator
+				mountSource = strings.Replace(mountSource, "\\", "/", -1)
+			}
+
+			shellCommand.WriteString(fmt.Sprintf("--volume \"%s:%s\" ", mountSource, mountTarget))
+		}
+	}
+
 	// - image
 	shellCommand.WriteString(fmt.Sprintf("%s ", image))
 	// - command to run inside of the container
