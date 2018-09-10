@@ -130,18 +130,20 @@ func main() {
 
 					// load project configuration
 					configurationLoader := ConfigurationLoader{}
-					if configurationLoader.getProjectDirectory() == "" {
-						log.Warnf("No project configuration found in current or parent directories. Only the globally defined commands are available.")
-						return nil
+					var projectDirectory = configurationLoader.getProjectDirectory()
+					if projectDirectory == "" {
+						log.Warnf("No project configuration found in current or parent directories. Only the global commands are available.")
+						projectDirectory = getWorkingDirectory()
 					}
-					projectConfig, _ := configurationLoader.loadProjectConfig(configurationLoader.getProjectDirectory() + "/.envcli.yml")
+					log.Debugf("Project Directory: %s", projectDirectory)
+					projectConfig, _ := configurationLoader.loadProjectConfig(projectDirectory + "/.envcli.yml")
 
 					// merge project and global configuration
 					var finalConfiguration = configurationLoader.mergeConfigurations(projectConfig, globalConfig)
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage = ""
-					var projectDirectory = ""
+					var containerDirectory = ""
 					var commandShell = ""
 					var commandWithBeforeScript = ""
 					var containerMounts []ContainerMount
@@ -152,7 +154,7 @@ func main() {
 							if providedCommand == commandName {
 								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
 								dockerImage = element.Image
-								projectDirectory = element.Directory
+								containerDirectory = element.Directory
 								commandShell = element.Shell
 
 								commandWithBeforeScript = commandWithArguments
@@ -164,7 +166,7 @@ func main() {
 								}
 
 								// project mount
-								containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: configurationLoader.getProjectDirectory(), target: projectDirectory})
+								containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: projectDirectory, target: containerDirectory})
 
 								// caching mounts
 								for _, cachingEntry := range element.Caching {
@@ -173,7 +175,7 @@ func main() {
 									containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, target: cachingEntry.ContainerDirectory})
 								}
 
-								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, projectDirectory)
+								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, containerDirectory)
 							}
 						}
 					}
@@ -201,7 +203,7 @@ func main() {
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", dockerImage)
 					docker := Docker{}
-					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, projectDirectory+"/"+configurationLoader.getRelativePathToWorkingDirectory(), environmentVariables, c.StringSlice("port"))
+					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},

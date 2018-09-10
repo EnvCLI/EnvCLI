@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"reflect"
 	"runtime"
+	"strings"
 )
 
 /**
@@ -56,6 +57,31 @@ func setLoglevel(loglevel string) {
  */
 func createDirectory(dir string) {
 	os.MkdirAll(dir, os.ModePerm)
+}
+
+/**
+ * Get the working directory
+ */
+func getWorkingDirectory() string {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Couldn't detect working directory!")
+	}
+
+	return workingDir
+}
+
+/**
+ * Get the relative path in relation to the rootDirectory
+ */
+func getPathRelativeToDirectory(currentDirectory string, rootDirectory string) string {
+	relativePath := strings.Replace(currentDirectory, rootDirectory, "", 1)
+	relativePath = strings.Replace(relativePath, "\\", "/", -1)
+	relativePath = strings.Trim(relativePath, "/")
+
+	return relativePath
 }
 
 /**

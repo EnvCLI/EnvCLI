@@ -135,24 +135,10 @@ func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
 }
 
 /**
- * Get the working directory
- */
-func (configurationLoader ConfigurationLoader) getWorkingDirectory() string {
-	workingDir, err := os.Getwd()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Couldn't detect working directory!")
-	}
-
-	return workingDir
-}
-
-/**
  * Get the project root directory by searching for the envcli config
  */
 func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
-	currentDirectory := configurationLoader.getWorkingDirectory()
+	currentDirectory := getWorkingDirectory()
 	var projectDirectory = ""
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
@@ -170,20 +156,6 @@ func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
 	}
 
 	return ""
-}
-
-/**
- * Get the relative path of the project directory to the current working directory
- */
-func (configurationLoader ConfigurationLoader) getRelativePathToWorkingDirectory() string {
-	currentDirectory := configurationLoader.getWorkingDirectory()
-	projectDirectory := configurationLoader.getProjectDirectory()
-
-	relativePath := strings.Replace(currentDirectory, projectDirectory, "", 1)
-	relativePath = strings.Replace(relativePath, "\\", "/", -1)
-	relativePath = strings.Trim(relativePath, "/")
-
-	return relativePath
 }
 
 /**
