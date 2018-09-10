@@ -40,7 +40,6 @@ commands:
   - npm
   - yarn
   image: docker.io/node:10-alpine
-  tag:
 ```
 
 When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:10-alpine` based on the provided commands.
