@@ -3,10 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
-	log "github.com/sirupsen/logrus" // imports as package "log"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	isatty "github.com/mattn/go-isatty"
+	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
 /**
@@ -82,7 +85,14 @@ func (docker Docker) containerExec(image string, commandShell string, command st
 		shellCommand.WriteString("docker-machine ssh envcli ")
 	}
 	// - docker
-	shellCommand.WriteString("docker run --rm --interactive --tty ")
+	shellCommand.WriteString("docker run --rm ")
+	// - terminal
+	_, ciVariableSet := os.LookupEnv("CI")
+	if ciVariableSet {
+		// env variable CI is set, we can't use --tty or --interactive here
+	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
+		shellCommand.WriteString("--tty --interactive ")
+	}
 	// - environment variables
 	for _, envVariable := range environment {
 		shellCommand.WriteString(fmt.Sprintf("--env %s ", envVariable))

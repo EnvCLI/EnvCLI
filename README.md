@@ -115,6 +115,7 @@ After that you have to share the drive containing your projects with virtualbox 
 - [Jinzhu / YML Configuration File](https://github.com/jinzhu/configor)
 - [Sirupsen / Logging](https://github.com/sirupsen/logrus)
 - [Urfave / CLI](https://github.com/urfave/cli)
+- [mattn / go-isatty](https://github.com/mattn/go-isatty)
 - [Mattn / Support of colors in Windows CLI](https://github.com/mattn/go-colorable)
 - [Inconshreveable / Go Update](https://github.com/inconshreveable/go-update)
 - [Blang / Semver](https://github.com/blang/semver)
