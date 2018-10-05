@@ -119,3 +119,15 @@ func getOrDefault(entity map[string]string, key string, defaultValue string) (va
 
 	return defaultValue
 }
+
+/**
+ * Detect CI
+ */
+func detectCIEnvironment() (val bool) {
+	value, found := os.LookupEnv("CI")
+	if found && value == "true" {
+		return true
+	}
+
+	return false
+}

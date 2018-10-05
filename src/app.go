@@ -14,13 +14,14 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.2.3"
+var appVersion = "v0.3.0"
 
 // Configuration
 var configurationLoader = ConfigurationLoader{}
 var defaultConfigurationDirectory = configurationLoader.getExecutionDirectory()
 
 // Constants
+var isCIEnvironment = detectCIEnvironment()
 var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path"}
 
 // Init Hook
@@ -37,7 +38,6 @@ func init() {
 
 // CLI Main Entrypoint
 func main() {
-
 	// Global Configuration
 	propConfig, propConfigErr := configurationLoader.loadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
@@ -186,6 +186,25 @@ func main() {
 
 					// environment variables
 					var environmentVariables []string = c.StringSlice("env")
+
+					// auto provide ci env variables (excludes system variables like PATH, ...)
+					if isCIEnvironment {
+						for _, e := range os.Environ() {
+							pair := strings.Split(e, "=")
+							var envName = pair[0]
+							var envValue = pair[1]
+
+							// filter vars
+							var systemVars = []string{"_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
+							isExluded, _ := inArray(strings.ToUpper(envName), systemVars)
+							if !isExluded {
+								log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
+								environmentVariables = append(environmentVariables, envName+"="+envValue)
+							} else {
+								log.Debugf("Excluded env variable %s [%s] from host based on the filter rule.", envName, envValue)
+							}
+						}
+					}
 
 					// - proxy environment
 					if propConfigErr == nil {
