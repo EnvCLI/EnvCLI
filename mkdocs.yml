@@ -7,6 +7,10 @@ pages:
 - Usage Examples:
     - 'Golang': 'examples/golang.md'
     - 'Node': 'examples/node.md'
+- Features:
+    - 'Aliases (omit envcli run)': 'features/alias.md'
+    - 'Official Docker Image': 'features/docker.md'
+    - 'Use in CI/CD with GitLab or simelar': 'features/ci.md'
 - Configuration:
     - 'EnvCLI.yml Specification': 'config/envcli-yml-specification.md'
     - 'Project Config': 'config/project-config.md'
