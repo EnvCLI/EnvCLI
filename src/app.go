@@ -228,6 +228,50 @@ func main() {
 				},
 			},
 			/**
+			 * Command: install-aliases
+			 */
+			{
+				Name:    "install-aliases",
+				Aliases: []string{},
+				Usage:   "installs aliases for the global / project scoped commands",
+				Action: func(c *cli.Context) error {
+					log.Debugf("Installing aliases ...")
+
+					// create global-scoped aliases
+					configurationLoader := ConfigurationLoader{}
+					var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+					log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
+					globalConfig, _ := configurationLoader.loadProjectConfig(globalConfigPath + "/.envcli.yml")
+
+					for _, element := range globalConfig.Images {
+						element.Scope = "Global"
+						log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
+
+						// for each provided command
+						for _, currentCommand := range element.Provides {
+							installAlias(currentCommand, element.Scope)
+						}
+					}
+
+					// create project-scoped aliases
+					var projectDirectory = configurationLoader.getProjectDirectory()
+					log.Debugf("Project Directory: %s", projectDirectory)
+					projectConfig, _ := configurationLoader.loadProjectConfig(projectDirectory + "/.envcli.yml")
+
+					for _, element := range projectConfig.Images {
+						element.Scope = "Project"
+						log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
+
+						// for each provided command
+						for _, currentCommand := range element.Provides {
+							installAlias(currentCommand, element.Scope)
+						}
+					}
+
+					return nil
+				},
+			},
+			/**
 			 * Command: config
 			 */
 			{
