@@ -16,7 +16,7 @@ func installAlias(command string, scope string) error {
 	if runtime.GOOS == "linux" {
 		log.Debugf("Detected Linux - Will place bash scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/develop/scripts/alias.sh"
-		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command + ".sh"
+		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {

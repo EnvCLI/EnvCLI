@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -79,7 +78,8 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 	var cfg ProjectConfigrationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return cfg, errors.New("project configuration file not found")
+		log.Debugf("Can't load config - file [%s] does not exist!", configFile)
+		return ProjectConfigrationFile{}, nil
 	}
 
 	log.Debugf("Loading project configuration file %s", configFile)
@@ -96,7 +96,8 @@ func (configurationLoader ConfigurationLoader) loadPropertyConfig(configFile str
 	cfg.Properties = make(map[string]string)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return cfg, errors.New("global property file not found")
+		log.Debugf("Can't load global properties - file [%s] does not exist!", configFile)
+		return cfg, nil
 	}
 
 	log.Debug("Loading property configuration file " + configFile)
@@ -138,21 +139,37 @@ func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
  * Get the project root directory by searching for the envcli config
  */
 func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
+	log.WithFields(log.Fields{
+		"method": "getProjectDirectory()",
+	}).Debugf("Trying to detect project directory ...")
+
 	currentDirectory := getWorkingDirectory()
 	var projectDirectory = ""
+	log.WithFields(log.Fields{
+		"method": "getProjectDirectory()",
+	}).Debugf("current working directory [%s]", currentDirectory)
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
 
 	for projectDirectory == "" {
 		if _, err := os.Stat(filepath.Join(currentDirectory, "/.envcli.yml")); err == nil {
+			log.WithFields(log.Fields{
+				"method": "getProjectDirectory()",
+			}).Debugf("found project config in directory [%s]", currentDirectory)
 			return currentDirectory
 		}
 
-		if directoryParts[0]+"\\" == currentDirectory {
+		if directoryParts[0]+"\\" == currentDirectory || currentDirectory == "/" {
+			log.WithFields(log.Fields{
+				"method": "getProjectDirectory()",
+			}).Debugf("didn't find a envcli project config in any parent directors")
 			return ""
 		}
 
 		currentDirectory = filepath.Dir(currentDirectory)
+		log.WithFields(log.Fields{
+			"method": "getProjectDirectory()",
+		}).Debugf("proceed to search next directory [%s]", currentDirectory)
 	}
 
 	return ""

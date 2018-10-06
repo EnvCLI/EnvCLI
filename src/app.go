@@ -129,7 +129,6 @@ func main() {
 					globalConfig, _ := configurationLoader.loadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 					// load project configuration
-					configurationLoader := ConfigurationLoader{}
 					var projectDirectory = configurationLoader.getProjectDirectory()
 					if projectDirectory == "" {
 						log.Warnf("No project configuration found in current or parent directories. Only the global commands are available.")
@@ -297,7 +296,6 @@ func main() {
 						Name: "set",
 						Action: func(c *cli.Context) error {
 							// Load Config
-							configurationLoader := ConfigurationLoader{}
 							propConfig, _ := configurationLoader.loadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
 							// Check Parameters
