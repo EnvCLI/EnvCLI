@@ -189,7 +189,7 @@ func main() {
 					// auto provide ci env variables (excludes system variables like PATH, ...)
 					if isCIEnvironment {
 						for _, e := range os.Environ() {
-							pair := strings.Split(e, "=")
+							pair := strings.SplitN(e, "=", 2)
 							var envName = pair[0]
 							var envValue = pair[1]
 
@@ -198,7 +198,7 @@ func main() {
 							isExluded, _ := inArray(strings.ToUpper(envName), systemVars)
 							if !isExluded {
 								log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
-								environmentVariables = append(environmentVariables, envName+"="+envValue)
+								environmentVariables = append(environmentVariables, envName+`=`+envValue)
 							} else {
 								log.Debugf("Excluded env variable %s [%s] from host based on the filter rule.", envName, envValue)
 							}
@@ -209,12 +209,12 @@ func main() {
 					if propConfigErr == nil {
 						httpProxy := getOrDefault(propConfig.Properties, "http-proxy", "")
 						if httpProxy != "" {
-							environmentVariables = append(environmentVariables, "http_proxy="+httpProxy)
+							environmentVariables = append(environmentVariables, `http_proxy=`+httpProxy)
 						}
 
 						httpsProxy := getOrDefault(propConfig.Properties, "https-proxy", "")
 						if httpsProxy != "" {
-							environmentVariables = append(environmentVariables, "https_proxy="+httpsProxy)
+							environmentVariables = append(environmentVariables, `https_proxy=`+httpsProxy)
 						}
 					}
 

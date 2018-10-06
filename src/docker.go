@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 
 	isatty "github.com/mattn/go-isatty"
@@ -95,7 +96,11 @@ func (docker Docker) containerExec(image string, commandShell string, command st
 	}
 	// - environment variables
 	for _, envVariable := range environment {
-		shellCommand.WriteString(fmt.Sprintf("--env %s ", envVariable))
+		pair := strings.SplitN(envVariable, "=", 2)
+		var envName = pair[0]
+		var envValue = pair[1]
+
+		shellCommand.WriteString(fmt.Sprintf("--env %s=%s ", envName, strconv.Quote(envValue)))
 	}
 	// - publish ports
 	for _, publishVariable := range publish {
