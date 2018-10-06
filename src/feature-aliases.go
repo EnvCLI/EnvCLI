@@ -15,7 +15,7 @@ func installAlias(command string, scope string) error {
 	// download alias script for each used command
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		log.Debugf("Detected Linux - Will place bash scripts into PATH ...")
-		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/develop/scripts/alias.sh"
+		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.sh"
 		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
@@ -35,7 +35,7 @@ func installAlias(command string, scope string) error {
 		}
 	} else if runtime.GOOS == "windows" {
 		log.Debugf("Detected Windows - Will place cmd scripts into PATH ...")
-		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/develop/scripts/alias.cmd"
+		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.cmd"
 		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command + ".cmd"
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
