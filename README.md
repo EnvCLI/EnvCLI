@@ -5,19 +5,20 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/master/LICENSE.md)
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
-*EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the configuration file.
+*EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the envcli configuration file.
 It currently supports the following providers: [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
-
-This project aims at dockerizing your development environment, which is the missing counterpart of dockerizing your application.
 
 **What merits does this have?**
 
-- Reproducible builds (always use the specified version of Node, Go, ...)
+- Reproducible builds (every developer and ci always use the specified version of Node, Go, ...)
+- Official Docker Image for CI
+- You don't have to build docker images with node & angular cli or golang & dep - just use the official containers directly
 - Quick on-boarding (just install Docker and EnvCLI and you can start coding without setting up any other dependencies or spending time on configurations)
 - Enforce identical development environments (every developer has the same version of the compilers/gradle/...)
 - Never install dependencies manually or deal with leftovers of old versions (containers are ethereal)
 - Tools (ex. Ruby -> Changelog generator) can be defined in the `.envcli.yml` without installing Ruby or a specific version which might break other tools
-- Need to use the coreos config transpiler to create a config to boot CoreOS? Just use the system-scoped configuration and use `ct` in any directory without installing anything or modifiding your path variables.
+- Supports a system-scoped configuration to define tools you need like for example htop, grep, ct (coreos config transpiler), overcommit or other tools
+- Suppports the creation of aliases, just use `npm install x` like you usually do and you won't even notice your commands are executed within docker containers by envcli
 
 ---
 
@@ -43,6 +44,8 @@ commands:
 ```
 
 When you run `envcli run npm init` *EnvCLI* will take the executed command and match it to the [Docker](https://www.docker.com/) Image `node:10-alpine` based on the provided commands.
+
+You can also use `envcli install-aliases --scope project` to install the project defined aliases and use `npm init` directly - envcli will create a script in your path that will redirect your command to envcli and cause it to be executed within a container.
 
 #### What does EnvCLI do?
 
