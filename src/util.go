@@ -47,10 +47,18 @@ func systemExec(command string) error {
  * Sets the loglevel according to the flag on each command run
  */
 func setLoglevel(loglevel string) {
-	if loglevel == "info" {
+	if loglevel == "panic" {
+		log.SetLevel(log.PanicLevel)
+	} else if loglevel == "fatal" {
+		log.SetLevel(log.FatalLevel)
+	} else if loglevel == "warn" {
+		log.SetLevel(log.WarnLevel)
+	} else if loglevel == "info" {
 		log.SetLevel(log.InfoLevel)
 	} else if loglevel == "debug" {
 		log.SetLevel(log.DebugLevel)
+	} else if loglevel == "trace" {
+		log.SetLevel(log.TraceLevel)
 	}
 }
 

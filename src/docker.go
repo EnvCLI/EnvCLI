@@ -111,8 +111,8 @@ func (docker Docker) containerExec(image string, commandShell string, command st
 	// - volume mounts
 	for _, containerMount := range mounts {
 		if containerMount.mountType == "directory" {
-			var mountSource string = containerMount.source
-			var mountTarget string = containerMount.target
+			var mountSource = containerMount.source
+			var mountTarget = containerMount.target
 			// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
 			if docker.isDockerToolbox() && runtime.GOOS == "windows" {
 				driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
