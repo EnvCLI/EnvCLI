@@ -3,13 +3,13 @@ images:
   description: Go (golang) is a general purpose, higher-level, imperative programming language.
   provides:
   - go
-  image: golang:latest
+  image: golang:1.11-alpine
   directory: /go/src/project
   shell: sh
 - name: godep
   description: dep is a prototype dependency management tool for Go. It requires Go 1.8 or newer to compile.
   provides:
   - dep
-  image: philippheuer/docker-go-dep:latest
+  image: envcli/go-dep:0.5.0
   directory: /go/src/project
   shell: sh
