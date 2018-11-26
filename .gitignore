@@ -16,6 +16,7 @@
 # Dep vendor folder
 vendor/*
 vendor.orig/*
+.vendor-new/*
 
 # Build
 build/*
