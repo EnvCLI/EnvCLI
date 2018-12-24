@@ -8,6 +8,7 @@ import (
 	"time"
 
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
+	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
 	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v2"
@@ -15,7 +16,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.3.1"
+var appVersion = "v0.3.2"
 
 // Configuration
 var configurationLoader = config.ConfigurationLoader{}
@@ -146,7 +147,7 @@ func main() {
 					var containerDirectory = ""
 					var commandShell = ""
 					var commandWithBeforeScript = ""
-					var containerMounts []ContainerMount
+					var containerMounts []docker.ContainerMount
 
 					for _, element := range finalConfiguration.Images {
 						log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
@@ -166,13 +167,13 @@ func main() {
 								}
 
 								// project mount
-								containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: projectDirectory, target: containerDirectory})
+								containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: projectDirectory, Target: containerDirectory})
 
 								// caching mounts
 								for _, cachingEntry := range element.Caching {
 									var cacheFolder = getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 									createDirectory(cacheFolder)
-									containerMounts = append(containerMounts, ContainerMount{mountType: "directory", source: getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, target: cachingEntry.ContainerDirectory})
+									containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
 								}
 
 								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, containerDirectory)
@@ -221,8 +222,8 @@ func main() {
 
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", dockerImage)
-					docker := Docker{}
-					docker.containerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
+					docker := docker.Docker{}
+					docker.ContainerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},

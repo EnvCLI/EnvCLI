@@ -1,85 +1,23 @@
-package main
+package docker
 
 import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
 
 	isatty "github.com/mattn/go-isatty"
-	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
-/**
- * All functions to interact with docker
- */
-type Docker struct {
-}
-
-type ContainerMount struct {
-
-	/**
-	 * Mount Type
-	 */
-	mountType string
-
-	/**
-	 * Source Directory (Host) / Source Volume
-	 */
-	source string
-
-	/**
-	 * Target Directory (Container)
-	 */
-	target string
-}
-
-/**
- * Detect Docker native
- */
-func (docker Docker) isDockerNative() bool {
-	path, err := exec.LookPath("docker")
-	if err != nil {
-		return false
-	}
-
-	log.Debugf("Found Docker native at [%s].", path)
-	return true
-}
-
-/**
- * Detect Docker Toolbox
- */
-func (docker Docker) isDockerToolbox() bool {
-	path, err := exec.LookPath("docker-machine")
-	if err != nil || strings.Contains(path, "Docker Toolbox") == false {
-		return false
-	}
-
-	log.Debugf("Found Docker Toolbox at [%s].", path)
-	return true
-}
-
-/**
- * Run a Command in Docker
- */
-func (docker Docker) containerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
+// TODO: This function does more than one job.
+//       Split this into another functions
+func (docker *Docker) ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
 	// Shell (wrap the command within the container into a shell)
-	if commandShell == "powershell" {
-		command = fmt.Sprintf("powershell %s", command)
-	} else if commandShell == "sh" {
-		command = strings.Replace(command, "\"", "\\\"", -1)
-		command = fmt.Sprintf("/usr/bin/env sh -c \"%s\"", command)
-	} else if commandShell == "bash" {
-		command = strings.Replace(command, "\"", "\\\"", -1)
-		command = fmt.Sprintf("/usr/bin/env bash -c \"%s\" -l", command)
-	}
-
+	command = sanitizeCommand(commandShell, command)
 	// build docker command
 	// - docker machine prefix
 	if docker.isDockerToolbox() {
@@ -110,9 +48,9 @@ func (docker Docker) containerExec(image string, commandShell string, command st
 	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
 	// - volume mounts
 	for _, containerMount := range mounts {
-		if containerMount.mountType == "directory" {
-			var mountSource = containerMount.source
-			var mountTarget = containerMount.target
+		if containerMount.MountType == "directory" {
+			var mountSource = containerMount.Source
+			var mountTarget = containerMount.Target
 			// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
 			if docker.isDockerToolbox() && runtime.GOOS == "windows" {
 				driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
