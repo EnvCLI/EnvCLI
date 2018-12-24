@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"io/ioutil"
@@ -12,69 +12,9 @@ import (
 )
 
 /**
- * ConfigurationLoader contains all methods to load/save configuration files
- */
-type ConfigurationLoader struct {
-}
-
-/**
- * The Project Configuration
- */
-type ProjectConfigrationFile struct {
-	Images []struct {
-		// name of the container
-		Name string
-
-		// description for the  container
-		Description string
-
-		// the commands provided by the image
-		Provides []string
-
-		// container image
-		Image string
-
-		// target directory to mount your project inside of the container
-		Directory string `default:"/project"`
-
-		// wrap the executed command inside of the container into a shell (ex. if you use globs)
-		Shell string `default:"none"`
-
-		// commands that should run in the container before the actual command is executed
-		BeforeScript []string `yaml:"before_script"`
-
-		// Caching of container-directories
-		Caching []CachingEntry `yaml:"cache"`
-
-		// the command scope (internal use only) - global or project
-		Scope string
-	}
-}
-
-type CachingEntry struct {
-
-	/**
-	 * Name of the caching entry
-	 */
-	Name string `yaml:"name",default:""`
-
-	/**
-	 * Directory inside of the container that should be mounted on the host within the cache directory
-	 */
-	ContainerDirectory string `yaml:"directory",default:""`
-}
-
-/**
- * The EnvCLI Configuration
- */
-type PropertyConfigurationFile struct {
-	Properties map[string]string
-}
-
-/**
  * Load the project config
  */
-func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
+func (configurationLoader ConfigurationLoader) LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 	var cfg ProjectConfigrationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
@@ -91,7 +31,7 @@ func (configurationLoader ConfigurationLoader) loadProjectConfig(configFile stri
 /**
  * Load the property config
  */
-func (configurationLoader ConfigurationLoader) loadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
+func (configurationLoader ConfigurationLoader) LoadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
 	var cfg PropertyConfigurationFile
 	cfg.Properties = make(map[string]string)
 
@@ -109,7 +49,7 @@ func (configurationLoader ConfigurationLoader) loadPropertyConfig(configFile str
 /**
  * Save the global config
  */
-func (configurationLoader ConfigurationLoader) savePropertyConfig(configFile string, cfg PropertyConfigurationFile) error {
+func (configurationLoader ConfigurationLoader) SavePropertyConfig(configFile string, cfg PropertyConfigurationFile) error {
 	log.Debug("Saving property configuration file " + configFile)
 
 	fileContent, err := yaml.Marshal(&cfg)
@@ -123,7 +63,7 @@ func (configurationLoader ConfigurationLoader) savePropertyConfig(configFile str
 /**
  * Get the execution directory
  */
-func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
+func (configurationLoader ConfigurationLoader) GetExecutionDirectory() string {
 	ex, err := os.Executable()
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -138,12 +78,12 @@ func (configurationLoader ConfigurationLoader) getExecutionDirectory() string {
 /**
  * Get the project root directory by searching for the envcli config
  */
-func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
+func (configurationLoader ConfigurationLoader) GetProjectDirectory() string {
 	log.WithFields(log.Fields{
 		"method": "getProjectDirectory()",
 	}).Debugf("Trying to detect project directory ...")
 
-	currentDirectory := getWorkingDirectory()
+	currentDirectory := GetWorkingDirectory()
 	var projectDirectory = ""
 	log.WithFields(log.Fields{
 		"method": "getProjectDirectory()",
@@ -179,7 +119,7 @@ func (configurationLoader ConfigurationLoader) getProjectDirectory() string {
  * Merge two configurations and keep the origin in the Scope
  * TODO: Handle conflicts with a warning / by order project definition have precedence right now
  */
-func (configurationLoader ConfigurationLoader) mergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
+func (configurationLoader ConfigurationLoader) MergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
 	var cfg = ProjectConfigrationFile{}
 
 	for _, image := range configProject.Images {

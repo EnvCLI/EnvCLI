@@ -1,9 +1,10 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus" // imports as package "log"
 	"os"
 	"runtime"
+
+	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
 /**
@@ -16,7 +17,7 @@ func installAlias(command string, scope string) error {
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		log.Debugf("Detected Linux - Will place bash scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.sh"
-		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command
+		aliasScriptFilepath := configurationLoader.GetExecutionDirectory() + "/" + command
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
@@ -36,7 +37,7 @@ func installAlias(command string, scope string) error {
 	} else if runtime.GOOS == "windows" {
 		log.Debugf("Detected Windows - Will place cmd scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.cmd"
-		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command + ".cmd"
+		aliasScriptFilepath := configurationLoader.GetExecutionDirectory() + "/" + command + ".cmd"
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
