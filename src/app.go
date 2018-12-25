@@ -9,7 +9,7 @@ import (
 
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
-	"github.com/EnvCLI/EnvCLI/pkg/updater"
+	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v2"
