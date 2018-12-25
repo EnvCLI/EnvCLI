@@ -2,46 +2,10 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus" // imports as package "log"
-	"io"
-	"net/http"
 	"os"
-	"os/exec"
 	"reflect"
-	"runtime"
 	"strings"
 )
-
-/**
- * CLI Command Passthru with input/output
- */
-func systemExec(command string) error {
-	log.Debugf("Running Command: %s", command)
-
-	// Run Command
-	if runtime.GOOS == "linux" {
-		cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
-			return err
-		}
-	} else if runtime.GOOS == "windows" {
-		cmd := exec.Command("powershell", command)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
-			return err
-		}
-	}
-
-	return nil
-}
 
 /**
  * Sets the loglevel according to the flag on each command run
@@ -140,32 +104,4 @@ func detectCIEnvironment() (val bool) {
 	}
 
 	return false
-}
-
-/**
- * DownloadFile will download a url to a local file.
- */
-func DownloadFile(filepath string, url string) error {
-
-	// Create the file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

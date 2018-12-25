@@ -13,14 +13,14 @@ import (
 
 // TODO: This function does more than one job.
 //       Split this into another functions
-func (docker *Docker) ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
+func ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
 	// Shell (wrap the command within the container into a shell)
 	command = sanitizeCommand(commandShell, command)
 	// build docker command
 	// - docker machine prefix
-	if docker.isDockerToolbox() {
+	if isDockerToolbox() {
 		shellCommand.WriteString("docker-machine ssh envcli ")
 	}
 	// - docker
@@ -52,7 +52,7 @@ func (docker *Docker) ContainerExec(image string, commandShell string, command s
 			var mountSource = containerMount.Source
 			var mountTarget = containerMount.Target
 			// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
-			if docker.isDockerToolbox() && runtime.GOOS == "windows" {
+			if isDockerToolbox() && runtime.GOOS == "windows" {
 				driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 				for _, element := range driveLetters {
 					mountSource = strings.Replace(mountSource, element+":\\", "/"+element+"_DRIVE/", 1)

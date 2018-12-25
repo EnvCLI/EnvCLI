@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
@@ -20,8 +21,7 @@ var appName = "EnvCLI Utility"
 var appVersion = "v0.3.2"
 
 // Configuration
-var configurationLoader = config.ConfigurationLoader{}
-var defaultConfigurationDirectory = configurationLoader.GetExecutionDirectory()
+var defaultConfigurationDirectory = config.GetExecutionDirectory()
 
 // Constants
 var isCIEnvironment = detectCIEnvironment()
@@ -42,7 +42,7 @@ func init() {
 // CLI Main Entrypoint
 func main() {
 	// Global Configuration
-	propConfig, propConfigErr := configurationLoader.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
+	propConfig, propConfigErr := config.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
 	// Configure Proxy Server
 	if propConfigErr == nil {
@@ -129,19 +129,19 @@ func main() {
 					// load global (user-scope) configuration
 					var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 					log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
-					globalConfig, _ := configurationLoader.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
+					globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 					// load project configuration
-					var projectDirectory = configurationLoader.GetProjectDirectory()
+					var projectDirectory = config.GetProjectDirectory()
 					if projectDirectory == "" {
 						log.Warnf("No project configuration found in current or parent directories. Only the global commands are available.")
 						projectDirectory = config.GetWorkingDirectory()
 					}
 					log.Debugf("Project Directory: %s", projectDirectory)
-					projectConfig, _ := configurationLoader.LoadProjectConfig(projectDirectory + "/.envcli.yml")
+					projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
 
 					// merge project and global configuration
-					var finalConfiguration = configurationLoader.MergeConfigurations(projectConfig, globalConfig)
+					var finalConfiguration = config.MergeConfigurations(projectConfig, globalConfig)
 
 					// check for command prefix and get the matching configuration entry
 					var dockerImage = ""
@@ -223,7 +223,6 @@ func main() {
 
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", dockerImage)
-					docker := docker.Docker{}
 					docker.ContainerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
 
 					return nil
@@ -248,13 +247,11 @@ func main() {
 					log.Debugf("Installing aliases ...")
 					scopeFilter := c.String("scope")
 
-					configurationLoader := config.ConfigurationLoader{}
-
 					// create global-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "global" {
 						var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 						log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
-						globalConfig, _ := configurationLoader.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
+						globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 						for _, element := range globalConfig.Images {
 							element.Scope = "Global"
@@ -262,16 +259,16 @@ func main() {
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
-								installAlias(currentCommand, element.Scope)
+								aliases.InstallAlias(appVersion, currentCommand, element.Scope)
 							}
 						}
 					}
 
 					// create project-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "project" {
-						var projectDirectory = configurationLoader.GetProjectDirectory()
+						var projectDirectory = config.GetProjectDirectory()
 						log.Debugf("Project Directory: %s", projectDirectory)
-						projectConfig, _ := configurationLoader.LoadProjectConfig(projectDirectory + "/.envcli.yml")
+						projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
 
 						for _, element := range projectConfig.Images {
 							element.Scope = "Project"
@@ -279,7 +276,7 @@ func main() {
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
-								installAlias(currentCommand, element.Scope)
+								aliases.InstallAlias(appVersion, currentCommand, element.Scope)
 							}
 						}
 					}
@@ -299,7 +296,7 @@ func main() {
 						Name: "set",
 						Action: func(c *cli.Context) error {
 							// Load Config
-							propConfig, _ := configurationLoader.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
+							propConfig, _ := config.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
 
 							// Check Parameters
 							if c.NArg() != 2 {
@@ -315,7 +312,7 @@ func main() {
 								log.Infof("Set value of %s to [%s]", varName, varValue)
 
 								// Save Config
-								configurationLoader.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
+								config.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 							} else {
 								log.Warnf("Unknown variable [%s]", varName)
 							}
@@ -370,7 +367,7 @@ func main() {
 								log.Infof("Value of variable %s set to [].", varName)
 
 								// Save Config
-								configurationLoader.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
+								config.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
 							} else {
 								log.Warnf("Unknown variable [%s]", varName)
 							}

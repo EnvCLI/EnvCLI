@@ -13,7 +13,7 @@ import (
 /**
  * Detect Docker native
  */
-func (docker Docker) isDockerNative() bool {
+func isDockerNative() bool {
 	path, err := exec.LookPath("docker")
 	if err != nil {
 		return false
@@ -26,7 +26,7 @@ func (docker Docker) isDockerNative() bool {
 /**
  * Detect Docker Toolbox
  */
-func (docker Docker) isDockerToolbox() bool {
+func isDockerToolbox() bool {
 	path, err := exec.LookPath("docker-machine")
 	if err != nil || strings.Contains(path, "Docker Toolbox") == false {
 		return false

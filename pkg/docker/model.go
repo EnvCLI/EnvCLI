@@ -1,11 +1,5 @@
 package docker
 
-/**
- * All functions to interact with docker
- */
-type Docker struct {
-}
-
 type ContainerMount struct {
 
 	/**

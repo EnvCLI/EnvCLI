@@ -2,7 +2,6 @@ package updater
 
 /**
  * The Application Update Configuration
- * Using equinox.io
  */
 type ApplicationUpdater struct {
 	BintrayOrg        string
