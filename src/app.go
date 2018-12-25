@@ -9,6 +9,7 @@ import (
 
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
+	"github.com/EnvCLI/EnvCLI/pkg/updater"
 	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v2"
@@ -94,8 +95,8 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater := ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
-					appUpdater.update("latest", c.Bool("force"))
+					appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
+					appUpdater.Update("latest", c.Bool("force"), appVersion)
 
 					return nil
 				},
