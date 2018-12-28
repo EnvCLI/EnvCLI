@@ -41,6 +41,16 @@ func publishPorts(shellCommand *bytes.Buffer, publish *[]string) {
 
 }
 
+func setEnvironmentVariables(shellCommand *bytes.Buffer, environment *[]string) {
+	for _, envVariable := range *environment {
+		pair := strings.SplitN(envVariable, "=", 2)
+		var envName = pair[0]
+		var envValue = pair[1]
+
+		shellCommand.WriteString(fmt.Sprintf("--env %s=%s ", envName, strconv.Quote(envValue)))
+	}
+}
+
 // TODO: This function does more than one job.
 //       Split this into another functions
 func ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
@@ -63,13 +73,7 @@ func ContainerExec(image string, commandShell string, command string, mounts []C
 		shellCommand.WriteString("--tty --interactive ")
 	}
 	// - environment variables
-	for _, envVariable := range environment {
-		pair := strings.SplitN(envVariable, "=", 2)
-		var envName = pair[0]
-		var envValue = pair[1]
-
-		shellCommand.WriteString(fmt.Sprintf("--env %s=%s ", envName, strconv.Quote(envValue)))
-	}
+	setEnvironmentVariables(&shellCommand, &environment)
 	// - publish ports
 	publishPorts(&shellCommand, &publish)
 	// - set working directory
