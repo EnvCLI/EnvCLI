@@ -34,6 +34,13 @@ func volumeMount(shellCommand *bytes.Buffer, mounts *[]ContainerMount) {
 
 }
 
+func publishPorts(shellCommand *bytes.Buffer, publish *[]string) {
+	for _, publishVariable := range *publish {
+		shellCommand.WriteString(fmt.Sprintf("--publish %s ", publishVariable))
+	}
+
+}
+
 // TODO: This function does more than one job.
 //       Split this into another functions
 func ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
@@ -64,9 +71,7 @@ func ContainerExec(image string, commandShell string, command string, mounts []C
 		shellCommand.WriteString(fmt.Sprintf("--env %s=%s ", envName, strconv.Quote(envValue)))
 	}
 	// - publish ports
-	for _, publishVariable := range publish {
-		shellCommand.WriteString(fmt.Sprintf("--publish %s ", publishVariable))
-	}
+	publishPorts(&shellCommand, &publish)
 	// - set working directory
 	shellCommand.WriteString(fmt.Sprintf("--workdir %s ", workingdir))
 	// - volume mounts
