@@ -61,8 +61,7 @@ func isCISet(shellCommand *bytes.Buffer) {
 	}
 }
 
-// TODO: This function does more than one job.
-//       Split this into another functions
+// Run docker instance
 func ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
