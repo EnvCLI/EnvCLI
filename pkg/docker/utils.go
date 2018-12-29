@@ -13,7 +13,7 @@ import (
 /**
  * Is CI Environment
  */
-func isCIEnvironment() {
+func isCIEnvironment() bool {
 	_, ciVariableSet := os.LookupEnv("CI")
 	if ciVariableSet {
 		return true
