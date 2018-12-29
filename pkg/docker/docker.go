@@ -51,10 +51,8 @@ func setEnvironmentVariables(shellCommand *bytes.Buffer, environment *[]string) 
 	}
 }
 
-// isCISet ...
-func isCISet(shellCommand *bytes.Buffer) {
-	_, ciVariableSet := os.LookupEnv("CI")
-	if ciVariableSet {
+func setTerminalParameters(shellCommand *bytes.Buffer) {
+	if isCIEnvironment() {
 		// env variable CI is set, we can't use --tty or --interactive here
 	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		shellCommand.WriteString("--tty --interactive ")
@@ -75,7 +73,7 @@ func ContainerExec(image string, commandShell string, command string, mounts []C
 	// - docker
 	shellCommand.WriteString("docker run --rm ")
 	// - terminal
-	isCISet(&shellCommand)
+	setTerminalParameters(&shellCommand)
 	// - environment variables
 	setEnvironmentVariables(&shellCommand, &environment)
 	// - publish ports

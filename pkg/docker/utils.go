@@ -11,6 +11,18 @@ import (
 )
 
 /**
+ * Is CI Environment
+ */
+func isCIEnvironment() {
+	_, ciVariableSet := os.LookupEnv("CI")
+	if ciVariableSet {
+		return true
+	}
+
+	return false
+}
+
+/**
  * Detect Docker native
  */
 func isDockerNative() bool {
