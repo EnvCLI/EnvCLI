@@ -10,13 +10,16 @@ services:
 Build EnvCLI:
   stage: build
   script:
-  - envcli run dep ensure
+  - envcli run dep ensure --vendor-only
   - envcli run --env GOOS=windows --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_windows_386 src/*
   - envcli run --env GOOS=windows --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_windows_amd64 src/*
   - envcli run --env GOOS=linux --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_linux_386 src/*
   - envcli run --env GOOS=linux --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_linux_amd64 src/*
   - envcli run --env GOOS=darwin --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_darwin_386 src/*
   - envcli run --env GOOS=darwin --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_darwin_amd64 src/*
+  only:
+  - master
+  - develop
   artifacts:
     paths:
     - build/
@@ -26,7 +29,7 @@ Create Sentry Release:
   stage: release
   script:
   # Create a release
-  - envcli run sentry-cli releases new -p envcli $CI_COMMIT_REF_NAME
+  - envcli run sentry-cli releases --org philipp-heuer new --project envcli $CI_COMMIT_REF_NAME
   # Associate commits with the release
   - envcli run sentry-cli releases set-commits --auto $CI_COMMIT_REF_NAME
   only:
