@@ -4,12 +4,12 @@ images:
   provides:
   - go
   image: golang:1.11-alpine
-  directory: /go/src/project
+  directory: /go/src/github.com/EnvCLI/EnvCLI
   shell: sh
 - name: godep
   description: dep is a prototype dependency management tool for Go. It requires Go 1.8 or newer to compile.
   provides:
   - dep
   image: envcli/go-dep:0.5.0
-  directory: /go/src/project
+  directory: /go/src/github.com/EnvCLI/EnvCLI
   shell: sh

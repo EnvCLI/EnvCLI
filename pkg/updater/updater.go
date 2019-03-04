@@ -1,4 +1,4 @@
-package main
+package updater
 
 import (
 	"context"
@@ -8,34 +8,13 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
-	"github.com/google/go-github/github"
+	github "github.com/google/go-github/github"
 	update "github.com/inconshreveable/go-update"
 	log "github.com/sirupsen/logrus"
 )
 
-/**
- * The Application Update Configuration
- * Using equinox.io
- */
-type ApplicationUpdater struct {
-	BintrayOrg        string
-	BintrayRepository string
-	BintrayPackage    string
-	GitHubOrg         string
-	GitHubRepository  string
-}
-
-/**
- * Update to version `version`
- */
-func (appUpdater ApplicationUpdater) update(version string, force bool) {
-	// current application version
-	applicationVersion, err := semver.Make(strings.TrimLeft(appVersion, "v"))
-	if err != nil {
-		log.Errorf("Unexpected Error: %s", err)
-		return
-	}
-
+// Find the latest version of the applicaton
+func (appUpdater ApplicationUpdater) getLatestVersion(version string, applicationVersion semver.Version) string {
 	// Get Latest Version from Link
 	if version == "latest" {
 		ctx := context.Background()
@@ -44,7 +23,7 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 		tags, _, err := client.Repositories.ListTags(ctx, appUpdater.GitHubOrg, appUpdater.GitHubRepository, opt)
 		if err != nil {
 			log.Errorf("Unexpected GitHub Error: %s", err)
-			return
+			return ""
 		}
 
 		// Find newest tag
@@ -57,7 +36,7 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 				log.Debugf("Unexpected error parsing the github tag: %s", err)
 				continue
 			}
-
+			// GTE: sourceVersion greater than or equal to targetVersion
 			if tagVersion.GTE(applicationVersion) && tagVersion.GTE(currentVersion) {
 				currentVersion = tagVersion
 				version = fmt.Sprintf("v%s", tagVersion.String())
@@ -66,11 +45,66 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 
 		if version == "latest" {
 			log.Errorf("You already have the latest version [%s].", applicationVersion)
-			return
+			return ""
 		} else {
 			log.Debugf("Latest version is [%s].", version)
 		}
+
+		return version
 	}
+	return ""
+}
+
+// applyUpdate ...
+func applyUpdate(resp *http.Response) {
+	opts := update.Options{}
+	err := opts.CheckPermissions()
+	if err != nil {
+		log.Errorf("Missing permissions, update can't be executed: %s", err)
+		return
+	}
+	err = update.Apply(resp.Body, opts)
+	if err != nil {
+		if rerr := update.RollbackError(err); rerr != nil {
+			log.Errorf("Broken update, failed to rollback. Please reinstall the application. [%s]", err)
+		} else {
+			log.Errorf("Broken update detected, aborted. [%s]", err)
+		}
+		return
+	}
+}
+
+// newVersionDownloader ...
+func (appUpdater ApplicationUpdater) newVersionDownloader(version string) {
+	var downloadURL = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/envcli_%s_%s",
+		appUpdater.BintrayOrg, appUpdater.BintrayRepository, appUpdater.BintrayPackage, version, runtime.GOOS, runtime.GOARCH)
+	log.Debugf("Starting download from remote: %v", downloadURL)
+
+	// download new version
+	resp, err := http.Get(downloadURL)
+	if err != nil {
+		log.Errorf("Unexpected Error: %s", err)
+		return
+	}
+	if resp.StatusCode != 200 {
+		log.Error("Update not found on remote server ... aborting.")
+		return
+	}
+
+	defer resp.Body.Close()
+	applyUpdate(resp)
+}
+
+// Update interface
+func (appUpdater ApplicationUpdater) Update(version string, force bool, appVersion string) {
+	// current application version
+	applicationVersion, err := semver.Make(strings.TrimLeft(appVersion, "v"))
+	if err != nil {
+		log.Errorf("Unexpected Error: %s", err)
+		return
+	}
+
+	version = appUpdater.getLatestVersion(version, applicationVersion)
 
 	// update target version
 	updateTargetVersion, err := semver.Make(strings.TrimLeft(version, "v"))
@@ -87,39 +121,7 @@ func (appUpdater ApplicationUpdater) update(version string, force bool) {
 	if force == true {
 		log.Debugf("Initiating forced update to version: %s", updateTargetVersion.String())
 	}
-
-	var downloadURL = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/envcli_%s_%s", appUpdater.BintrayOrg, appUpdater.BintrayRepository, appUpdater.BintrayPackage, version, runtime.GOOS, runtime.GOARCH)
-	log.Debugf("Starting download from remote: %v", downloadURL)
-
-	// download new version
-	resp, err := http.Get(downloadURL)
-	if err != nil {
-		log.Errorf("Unexpected Error: %s", err)
-		return
-	}
-	if resp.StatusCode != 200 {
-		log.Error("Update not found on remote server ... aborting.")
-		return
-	}
-
-	defer resp.Body.Close()
-	opts := update.Options{}
-	err = opts.CheckPermissions()
-	if err != nil {
-		log.Errorf("Missing permissions, update can't be executed: %s", err)
-		return
-	}
-	err = update.Apply(resp.Body, opts)
-	if err != nil {
-		if rerr := update.RollbackError(err); rerr != nil {
-			log.Errorf("Broken update, failed to rollback. Please reinstall the application. [%s]", err)
-		} else {
-			log.Errorf("Broken update detected, aborted. [%s]", err)
-		}
-
-		return
-	}
-
+	appUpdater.newVersionDownloader(version)
 	// Log Result
 	if applicationVersion.GT(updateTargetVersion) {
 		log.Infof("Successfully downgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())

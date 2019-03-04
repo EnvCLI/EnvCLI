@@ -10,6 +10,19 @@
   version = "v0.3.1"
 
 [[projects]]
+  branch = "feature/refactor"
+  digest = "1:3c2d8793c3f8d98bdf84164887024f93486f56101ac37d3248fa5b6f06741d80"
+  name = "github.com/EnvCLI/EnvCLI"
+  packages = [
+    "pkg/aliases",
+    "pkg/config",
+    "pkg/docker",
+    "pkg/updater",
+  ]
+  pruneopts = ""
+  revision = "e4df5b64837b4b7f717bdb5ffd97d0624ce717f1"
+
+[[projects]]
   digest = "1:79421244ba5848aae4b0a5c41e633a04e4894cb0b164a219dc8c15ec7facb7f1"
   name = "github.com/blang/semver"
   packages = ["."]
@@ -124,6 +137,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/EnvCLI/EnvCLI/pkg/aliases",
+    "github.com/EnvCLI/EnvCLI/pkg/config",
+    "github.com/EnvCLI/EnvCLI/pkg/docker",
+    "github.com/EnvCLI/EnvCLI/pkg/updater",
     "github.com/blang/semver",
     "github.com/google/go-github/github",
     "github.com/inconshreveable/go-update",

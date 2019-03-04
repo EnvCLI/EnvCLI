@@ -1,22 +1,24 @@
-package main
+package aliases
 
 import (
-	log "github.com/sirupsen/logrus" // imports as package "log"
 	"os"
 	"runtime"
+
+	config "github.com/EnvCLI/EnvCLI/pkg/config"
+	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
 /**
  * CLI Command Passthru with input/output
  */
-func installAlias(command string, scope string) error {
+func InstallAlias(appVersion string, command string, scope string) error {
 	log.Debugf("Creating alias for command: %s [Scope: %s]", command, scope)
 
 	// download alias script for each used command
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		log.Debugf("Detected Linux - Will place bash scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.sh"
-		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command
+		aliasScriptFilepath := config.GetExecutionDirectory() + "/" + command
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
@@ -36,7 +38,7 @@ func installAlias(command string, scope string) error {
 	} else if runtime.GOOS == "windows" {
 		log.Debugf("Detected Windows - Will place cmd scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.cmd"
-		aliasScriptFilepath := configurationLoader.getExecutionDirectory() + "/" + command + ".cmd"
+		aliasScriptFilepath := config.GetExecutionDirectory() + "/" + command + ".cmd"
 
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
