@@ -22,3 +22,7 @@
 [[constraint]]
   name = "github.com/mattn/go-isatty"
   version = "0.0.4"
+
+[[constraint]]
+  name = "github.com/getsentry/raven-go"
+  version = "0.2.0"

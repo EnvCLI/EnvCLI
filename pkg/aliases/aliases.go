@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
+	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
@@ -23,6 +24,7 @@ func InstallAlias(appVersion string, command string, scope string) error {
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
 			log.Errorf("Can't create alias [%s], download failed.", command)
+			sentry.HandleError(err)
 			panic(err)
 		} else {
 			log.Debugf("Created alias for [%s]!", command)
@@ -31,6 +33,7 @@ func InstallAlias(appVersion string, command string, scope string) error {
 			chmodErr := os.Chmod(aliasScriptFilepath, 0744)
 			if chmodErr != nil {
 				log.Errorf("Failed to make the alias script for [%s] executable!", command)
+				sentry.HandleError(chmodErr)
 			} else {
 				log.Debugf("Made alias script for [%s] executable!", command)
 			}
@@ -43,6 +46,7 @@ func InstallAlias(appVersion string, command string, scope string) error {
 		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
 			log.Errorf("Can't create alias [%s], download failed.", command)
+			sentry.HandleError(err)
 			panic(err)
 		} else {
 			log.Debugf("Created alias for [%s]!", command)

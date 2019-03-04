@@ -10,6 +10,7 @@ import (
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
+	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +19,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.3.2"
+var appVersion = "v0.4.0"
 
 // Configuration
 var defaultConfigurationDirectory = config.GetExecutionDirectory()
@@ -29,6 +30,10 @@ var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-co
 
 // Init Hook
 func init() {
+	// Initialize SentryIO
+	sentry.InitializeSentryIO(appVersion)
+
+	// Logging
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
 

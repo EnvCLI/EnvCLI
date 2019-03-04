@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 
+	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,6 +16,7 @@ func GetWorkingDirectory() string {
 		log.WithFields(log.Fields{
 			"error": err,
 		}).Fatal("Couldn't detect working directory!")
+		sentry.HandleError(err)
 	}
 
 	return workingDir

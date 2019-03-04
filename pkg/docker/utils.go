@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
@@ -81,6 +82,7 @@ func systemExec(command string) error {
 		err := cmd.Run()
 		if err != nil {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			sentry.HandleError(err)
 			return err
 		}
 	} else if runtime.GOOS == "windows" {
@@ -91,6 +93,7 @@ func systemExec(command string) error {
 		err := cmd.Run()
 		if err != nil {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			sentry.HandleError(err)
 			return err
 		}
 	}
