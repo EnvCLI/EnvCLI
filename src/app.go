@@ -156,6 +156,7 @@ func main() {
 					var commandWithBeforeScript = ""
 					var containerMounts []docker.ContainerMount
 
+				configLoop:
 					for _, element := range finalConfiguration.Images {
 						log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
 						for _, providedCommand := range element.Provides {
@@ -185,6 +186,7 @@ func main() {
 								}
 
 								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, containerDirectory)
+								break configLoop
 							}
 						}
 					}
