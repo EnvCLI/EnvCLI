@@ -13,3 +13,9 @@ images:
   image: envcli/go-dep:0.5.0
   directory: /go/src/github.com/EnvCLI/EnvCLI
   shell: sh
+- name: sentryio
+  description: This is a Sentry command line client for some generic tasks.
+  provides:
+  - sentry-cli
+  image: getsentry/sentry-cli:1.40.0
+  shell: sh

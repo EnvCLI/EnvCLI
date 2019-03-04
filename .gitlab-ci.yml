@@ -1,0 +1,33 @@
+image: docker.io/envcli/envcli:latest
+
+stages:
+- build
+- release
+
+services:
+- docker:stable-dind
+
+Build EnvCLI:
+  stage: build
+  script:
+  - envcli run dep ensure
+  - envcli run --env GOOS=windows --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_windows_386 src/*
+  - envcli run --env GOOS=windows --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_windows_amd64 src/*
+  - envcli run --env GOOS=linux --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_linux_386 src/*
+  - envcli run --env GOOS=linux --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_linux_amd64 src/*
+  - envcli run --env GOOS=darwin --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_darwin_386 src/*
+  - envcli run --env GOOS=darwin --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_darwin_amd64 src/*
+  artifacts:
+    paths:
+    - build/
+    expire_in: 1 week
+
+Create Sentry Release:
+  stage: release
+  script:
+  # Create a release
+  - envcli run sentry-cli releases new -p envcli $CI_COMMIT_REF_NAME
+  # Associate commits with the release
+  - envcli run sentry-cli releases set-commits --auto $CI_COMMIT_REF_NAME
+  only:
+  - /^v[0-9]+\.[0-9]+\.[0-9]+$/
