@@ -8,6 +8,8 @@
 *EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the envcli configuration file.
 It currently supports the following providers: [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
 
+[![Discord Server](https://discordapp.com/api/guilds/488047700764393505/embed.png?style=banner2)](https://discord.gg/9m8tWns)
+
 **What merits does this have?**
 
 - Reproducible builds (every developer and ci always use the specified version of Node, Go, ...)
