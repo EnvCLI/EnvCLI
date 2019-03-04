@@ -151,6 +151,7 @@ func main() {
 					// check for command prefix and get the matching configuration entry
 					var dockerImage = ""
 					var containerDirectory = ""
+					var entrypoint = ""
 					var commandShell = ""
 					var commandWithBeforeScript = ""
 					var containerMounts []docker.ContainerMount
@@ -162,6 +163,7 @@ func main() {
 								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
 								dockerImage = element.Image
 								containerDirectory = element.Directory
+								entrypoint = element.Entrypoint
 								commandShell = element.Shell
 
 								commandWithBeforeScript = commandWithArguments
@@ -228,7 +230,7 @@ func main() {
 
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", dockerImage)
-					docker.ContainerExec(dockerImage, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
+					docker.ContainerExec(dockerImage, entrypoint, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},

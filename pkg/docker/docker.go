@@ -59,8 +59,14 @@ func setTerminalParameters(shellCommand *bytes.Buffer) {
 	}
 }
 
+func setEntrypoint(shellCommand *bytes.Buffer, entrypoint *string) {
+	if *entrypoint != "original" {
+		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s", strconv.Quote(*entrypoint)))
+	}
+}
+
 // Run docker instance
-func ContainerExec(image string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
+func ContainerExec(image string, entrypoint string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
 	// Shell (wrap the command within the container into a shell)
@@ -74,6 +80,8 @@ func ContainerExec(image string, commandShell string, command string, mounts []C
 	shellCommand.WriteString("docker run --rm ")
 	// - terminal
 	setTerminalParameters(&shellCommand)
+	// - entrypoint
+	setEntrypoint(&shellCommand, &entrypoint)
 	// - environment variables
 	setEnvironmentVariables(&shellCommand, &environment)
 	// - publish ports

@@ -18,4 +18,4 @@ images:
   provides:
   - sentry-cli
   image: getsentry/sentry-cli:1.40.0
-  shell: sh
+  entrypoint: ""

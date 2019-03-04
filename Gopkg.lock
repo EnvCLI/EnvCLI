@@ -2,169 +2,152 @@
 
 
 [[projects]]
-  digest = "1:e4b30804a381d7603b8a344009987c1ba351c26043501b23b8c7ce21f0b67474"
+  digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
   version = "v0.3.1"
 
 [[projects]]
-  branch = "feature/refactor"
-  digest = "1:3c2d8793c3f8d98bdf84164887024f93486f56101ac37d3248fa5b6f06741d80"
-  name = "github.com/EnvCLI/EnvCLI"
-  packages = [
-    "pkg/aliases",
-    "pkg/config",
-    "pkg/docker",
-    "pkg/updater",
-  ]
-  pruneopts = ""
-  revision = "e4df5b64837b4b7f717bdb5ffd97d0624ce717f1"
-
-[[projects]]
-  digest = "1:79421244ba5848aae4b0a5c41e633a04e4894cb0b164a219dc8c15ec7facb7f1"
+  digest = "1:705c40022f5c03bf96ffeb6477858d88565064485a513abcd0f11a0911546cb6"
   name = "github.com/blang/semver"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
   version = "v3.5.1"
 
 [[projects]]
-  digest = "1:8722889ad027febfced94665914d1e7be8f1b703d31f2ef9461c59e4d40fe974"
+  digest = "1:fed1f537c2f1269fe475a8556c393fe466641682d73ef8fd0491cd3aa1e47bad"
   name = "github.com/certifi/gocertifi"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "deb3ae2ef2610fde3330947281941c562861188b"
   version = "2018.01.18"
 
 [[projects]]
-  digest = "1:40548207236a3c3d02b4dae094f5901d662a792e015948287dc3e9ea1bd50674"
+  digest = "1:d18f6f088d7d8365df47f49dfa24b6ff6701a941118ffda30c589d1bd954074b"
   name = "github.com/getsentry/raven-go"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "f04e7487e9a6b9d9837d52743fb5f40576c56411"
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:c5e3c78cae31c64ee8f2c4ad33f05083ccace2cd7b4d327fb9f7eb4a3528021d"
+  digest = "1:b4303d38d92c00af6603f3b865a9bd20e3c50cebe55489e5aeb721c26750e375"
   name = "github.com/google/go-github"
   packages = ["github"]
-  pruneopts = ""
-  revision = "35781f7f4db7b3d7fc3359527472838da65023c6"
-  version = "v19.1.0"
+  pruneopts = "UT"
+  revision = "7462feb2032c2da9e3b85e9b04e6853a6e9e14ca"
+  version = "v24.0.1"
 
 [[projects]]
-  digest = "1:cea4aa2038169ee558bf507d5ea02c94ca85bcca28a4c7bb99fd59b31e43a686"
+  digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
   name = "github.com/google/go-querystring"
   packages = ["query"]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "44c6ddd0a2342c386950e880b658017258da92fc"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:32c49a8cbcb20989c4fc0825f792cb1ea079af601c11b5ed0a92a48433171db3"
+  digest = "1:f3b0cfd42716269884bf06df5d5be9e54161d5af0a2f0ccca08717928dd45fc5"
   name = "github.com/inconshreveable/go-update"
   packages = [
     ".",
     "internal/binarydist",
     "internal/osext",
   ]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "8152e7eb6ccf8679a64582a66b78519688d156ad"
 
 [[projects]]
-  branch = "master"
-  digest = "1:39a9a3473afa490a1e7fd359a16e7edea7bd29493c928376fdd2161f07db5571"
+  digest = "1:0f65b10afa740ebce239838198b7647ca95c6395738bbaec5748aceece17b07c"
   name = "github.com/jinzhu/configor"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "4edaf76fe18865e36de734d887f4c01bd05707af"
+  version = "v1.0.0"
 
 [[projects]]
-  digest = "1:6a874e3ddfb9db2b42bd8c85b6875407c702fa868eed20634ff489bc896ccfd3"
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
-  pruneopts = ""
-  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
-  version = "v1.0.1"
+  pruneopts = "UT"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
-  digest = "1:9ea83adf8e96d6304f394d40436f2eb44c1dc3250d223b74088cc253a6cd0a1c"
+  digest = "1:2fa7b0155cd54479a755c629de26f888a918e13f8857a2c442205d825368e084"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
-  pruneopts = ""
-  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
-  version = "v0.0.9"
+  pruneopts = "UT"
+  revision = "3a70a971f94a22f2fa562ffcc7a0eb45f5daf045"
+  version = "v0.1.1"
 
 [[projects]]
-  digest = "1:3140e04675a6a91d2a20ea9d10bdadf6072085502e6def6768361260aee4b967"
+  digest = "1:3bb9c8451d199650bfd303e0068d86f135952fead374ad87c09a9b8a2cc4bd7c"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
-  pruneopts = ""
-  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
-  version = "v0.0.4"
+  pruneopts = "UT"
+  revision = "369ecd8cea9851e459abb67eb171853e3986591e"
+  version = "v0.0.6"
 
 [[projects]]
-  digest = "1:1d7e1867c49a6dd9856598ef7c3123604ea3daabf5b83f303ff457bcbc410b1d"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:9d57e200ef5ccc4217fe0a34287308bac652435e7c6513f6263e0493d2245c56"
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  pruneopts = ""
-  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
-  version = "v1.2.0"
+  pruneopts = "UT"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:e8e4a203435ece7d6a119a9c2bd5078c401e94a4b93db3ca37ae0394ce77a919"
+  digest = "1:058e9504b9a79bfe86092974d05bb3298d2aa0c312d266d43148de289a5065d9"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  pruneopts = ""
-  revision = "e657309f52e71501f9934566ac06dc5c2f7f11a1"
+  pruneopts = "UT"
+  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
 
 [[projects]]
   branch = "master"
-  digest = "1:303c0ee48d6229a2423950f41b3ccb5a2067dc4c7b65f8863cfbd962bef05a85"
+  digest = "1:450c8a5021490079d681cae207e762e2bfffd25a861c39f6da1fa9de9742c682"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
-  pruneopts = ""
-  revision = "62eef0e2fa9b2c385f7b2778e763486da6880d37"
+  pruneopts = "UT"
+  revision = "e844e0132e93db857c984c24fd4fc86815e43be3"
 
 [[projects]]
   branch = "v2"
-  digest = "1:eaef15d38dc2b0f15ecce8d3aff44bd0301ce7e6574e935446e6a7d629546669"
+  digest = "1:927bc5076aef9916f1920f2a07e3723e9da1dcd52baa84d29893a3f417c867b4"
   name = "gopkg.in/urfave/cli.v2"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "d3ae77c26ac8db90639677e4831a728d33c36111"
 
 [[projects]]
   branch = "v2"
-  digest = "1:cedccf16b71e86db87a24f8d4c70b0a855872eb967cb906a66b95de56aefbd0d"
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/EnvCLI/EnvCLI/pkg/aliases",
-    "github.com/EnvCLI/EnvCLI/pkg/config",
-    "github.com/EnvCLI/EnvCLI/pkg/docker",
-    "github.com/EnvCLI/EnvCLI/pkg/updater",
     "github.com/blang/semver",
     "github.com/getsentry/raven-go",
     "github.com/google/go-github/github",

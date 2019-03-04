@@ -26,6 +26,9 @@ type ProjectConfigrationFile struct {
 		// target directory to mount your project inside of the container
 		Directory string `default:"/project"`
 
+		// overwrite the default entrypoint
+		Entrypoint string `default:"original"`
+
 		// wrap the executed command inside of the container into a shell (ex. if you use globs)
 		Shell string `default:"none"`
 
