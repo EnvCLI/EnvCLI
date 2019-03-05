@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	isatty "github.com/mattn/go-isatty"
+	log "github.com/sirupsen/logrus"
 )
 
 // Mounting volumes
@@ -94,6 +95,8 @@ func ContainerExec(image string, entrypoint string, commandShell string, command
 	shellCommand.WriteString(fmt.Sprintf("%s ", image))
 	// - command to run inside of the container
 	shellCommand.WriteString(fmt.Sprintf("%s", command))
+
+	log.Debugf("Executed ShellCommand: %s", shellCommand.String())
 
 	// execute command
 	systemExec(shellCommand.String())

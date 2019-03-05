@@ -3,7 +3,7 @@ images:
   description: Go (golang) is a general purpose, higher-level, imperative programming language.
   provides:
   - go
-  image: golang:1.11-alpine
+  image: golang:1.12-alpine
   directory: /go/src/github.com/EnvCLI/EnvCLI
   shell: sh
 - name: godep

@@ -7,8 +7,24 @@
 # ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
 #
 
+# Required modules
+required = [
+  "github.com/sirupsen/logrus",
+  "gopkg.in/urfave/cli.v2",
+  "gopkg.in/yaml.v2",
+  "github.com/mattn/go-isatty",
+  "github.com/getsentry/raven-go",
+  "github.com/jpillora/go-ogle-analytics",
+  "github.com/blang/semver",
+  "github.com/jinzhu/configor",
+  "github.com/google/go-github/github",
+  "github.com/inconshreveable/go-update"
+]
+
 # Ignore modules that are part of this project
-ignored = ["github.com/EnvCLI/EnvCLI*"]
+ignored = [
+  "github.com/EnvCLI/EnvCLI/pkg*"
+]
 
 [prune]
   unused-packages = true
@@ -33,3 +49,7 @@ ignored = ["github.com/EnvCLI/EnvCLI*"]
 [[constraint]]
   name = "github.com/getsentry/raven-go"
   version = "0.2.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/jpillora/go-ogle-analytics"

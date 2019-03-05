@@ -8,6 +8,7 @@ import (
 	"time"
 
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
+	analytic "github.com/EnvCLI/EnvCLI/pkg/analytic"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
@@ -56,6 +57,9 @@ func main() {
 		os.Setenv("HTTPS_PROXY", getOrDefault(propConfig.Properties, "https-proxy", ""))
 	}
 
+	// Tracking: OS
+	analytic.TriggerEvent("OS", runtime.GOOS)
+
 	// CLI
 	app := &cli.App{
 		Name:                  appName,
@@ -103,6 +107,9 @@ func main() {
 					appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 					appUpdater.Update("latest", c.Bool("force"), appVersion)
 
+					// Tracking: Command
+					analytic.TriggerEvent("Update", "Execute")
+
 					return nil
 				},
 			},
@@ -130,6 +137,9 @@ func main() {
 					commandName := c.Args().First()
 					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
+
+					// Tracking: Command
+					analytic.TriggerEvent("CommandExecution", commandName)
 
 					// load global (user-scope) configuration
 					var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
@@ -289,6 +299,9 @@ func main() {
 							}
 						}
 					}
+
+					// Tracking: Command
+					analytic.TriggerEvent("Aliases", "Install")
 
 					return nil
 				},
