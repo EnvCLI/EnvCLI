@@ -16,7 +16,7 @@ var defaultConfigurationDirectory = GetExecutionDirectory()
 var defaultConfigurationFile = ".envclirc"
 
 // Constants
-var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path"}
+var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path", "last-update-check"}
 
 /**
  * Load the project config

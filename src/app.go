@@ -4,6 +4,7 @@ import (
 	"os"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -61,6 +62,19 @@ func main() {
 
 	// Tracking: OS
 	analytic.TriggerEvent("OS", runtime.GOOS)
+	analytic.TriggerEvent("Version", appVersion)
+
+	// Update Check, once a day (not in CI)
+	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
+	var lastUpdateCheck, _ = strconv.ParseInt(getOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
+	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
+		if appUpdater.IsUpdateAvailable(appVersion) {
+			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
+		}
+	}
+	if isCIEnvironment == false {
+		config.SetPropertyConfigEntry("last-update-check", strconv.Itoa(int(time.Now().Unix())))
+	}
 
 	// CLI
 	app := &cli.App{
@@ -106,7 +120,6 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 					appUpdater.Update("latest", c.Bool("force"), appVersion)
 
 					// Tracking: Command

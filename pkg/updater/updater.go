@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	"github.com/blang/semver"
 	github "github.com/google/go-github/github"
 	update "github.com/inconshreveable/go-update"
@@ -14,45 +15,38 @@ import (
 )
 
 // Find the latest version of the applicaton
-func (appUpdater ApplicationUpdater) getLatestVersion(version string, applicationVersion semver.Version) string {
+func (appUpdater ApplicationUpdater) getLatestVersion() string {
 	// Get Latest Version from Link
-	if version == "latest" {
-		ctx := context.Background()
-		client := github.NewClient(nil)
-		opt := &github.ListOptions{Page: 0, PerPage: 500}
-		tags, _, err := client.Repositories.ListTags(ctx, appUpdater.GitHubOrg, appUpdater.GitHubRepository, opt)
-		if err != nil {
-			log.Errorf("Unexpected GitHub Error: %s", err)
-			return ""
-		}
-
-		// Find newest tag
-		currentVersion, _ := semver.Make("0.0.0")
-		for _, tag := range tags {
-			log.Debugf("Found Tag in Source Repository: %s [%s] %d", *tag.Name, *tag.Commit.SHA)
-
-			tagVersion, err := semver.Make(strings.TrimLeft(*tag.Name, "v"))
-			if err != nil {
-				log.Debugf("Unexpected error parsing the github tag: %s", err)
-				continue
-			}
-			// GTE: sourceVersion greater than or equal to targetVersion
-			if tagVersion.GTE(applicationVersion) && tagVersion.GTE(currentVersion) {
-				currentVersion = tagVersion
-				version = fmt.Sprintf("v%s", tagVersion.String())
-			}
-		}
-
-		if version == "latest" {
-			log.Errorf("You already have the latest version [%s].", applicationVersion)
-			return ""
-		} else {
-			log.Debugf("Latest version is [%s].", version)
-		}
-
-		return version
+	var version = ""
+	ctx := context.Background()
+	client := github.NewClient(nil)
+	opt := &github.ListOptions{Page: 0, PerPage: 500}
+	tags, _, err := client.Repositories.ListTags(ctx, appUpdater.GitHubOrg, appUpdater.GitHubRepository, opt)
+	if err != nil {
+		sentry.HandleError(err)
+		log.Errorf("Unexpected GitHub Error: %s", err)
+		return ""
 	}
-	return ""
+
+	// Find newest tag
+	currentVersion, _ := semver.Make("0.0.0")
+	for _, tag := range tags {
+		log.Debugf("Found Tag in Source Repository: %s [%s]", *tag.Name, *tag.Commit.SHA)
+
+		tagVersion, err := semver.Make(strings.TrimLeft(*tag.Name, "v"))
+		if err != nil {
+			log.Debugf("Unexpected error parsing the github tag: %s", err)
+			continue
+		}
+		// GTE: sourceVersion greater than or equal to targetVersion
+		if tagVersion.GTE(currentVersion) {
+			currentVersion = tagVersion
+			version = fmt.Sprintf("v%s", tagVersion.String())
+		}
+	}
+
+	log.Debugf("Latest version is [%s].", version)
+	return version
 }
 
 // applyUpdate ...
@@ -100,15 +94,20 @@ func (appUpdater ApplicationUpdater) Update(version string, force bool, appVersi
 	// current application version
 	applicationVersion, err := semver.Make(strings.TrimLeft(appVersion, "v"))
 	if err != nil {
+		sentry.HandleError(err)
 		log.Errorf("Unexpected Error: %s", err)
 		return
 	}
 
-	version = appUpdater.getLatestVersion(version, applicationVersion)
+	// set to latest version of no version is specified
+	if version == "latest" {
+		version = appUpdater.getLatestVersion()
+	}
 
 	// update target version
 	updateTargetVersion, err := semver.Make(strings.TrimLeft(version, "v"))
 	if err != nil {
+		sentry.HandleError(err)
 		log.Errorf("Unexpected Error: %s", err)
 		return
 	}
@@ -130,4 +129,32 @@ func (appUpdater ApplicationUpdater) Update(version string, force bool, appVersi
 	} else {
 		log.Infof("Successfully downloaded [%s]!", applicationVersion.String())
 	}
+}
+
+// Update interface
+func (appUpdater ApplicationUpdater) IsUpdateAvailable(appVersion string) bool {
+	// current application version
+	applicationVersion, err := semver.Make(strings.TrimLeft(appVersion, "v"))
+	if err != nil {
+		sentry.HandleError(err)
+		log.Errorf("Unexpected Error: %s", err)
+		return false
+	}
+
+	var version = appUpdater.getLatestVersion()
+
+	// update target version
+	updateTargetVersion, err := semver.Make(strings.TrimLeft(version, "v"))
+	if err != nil {
+		sentry.HandleError(err)
+		log.Errorf("Unexpected Error: %s", err)
+		return false
+	}
+
+	// Evaluate
+	if applicationVersion.LT(updateTargetVersion) {
+		return true
+	}
+
+	return false
 }
