@@ -18,7 +18,8 @@ required = [
   "github.com/blang/semver",
   "github.com/jinzhu/configor",
   "github.com/google/go-github/github",
-  "github.com/inconshreveable/go-update"
+  "github.com/inconshreveable/go-update",
+  "github.com/denisbrodbeck/machineid"
 ]
 
 # Ignore modules that are part of this project

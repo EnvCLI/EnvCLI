@@ -26,6 +26,14 @@
   version = "2018.01.18"
 
 [[projects]]
+  digest = "1:f437050b131c1ef54301a6b5f2fb17dc7d6fddb0ecb083ee1740e9b31bf8694a"
+  name = "github.com/denisbrodbeck/machineid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f07179bb15a0bec252453468aa607c670f5c12b5"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:d18f6f088d7d8365df47f49dfa24b6ff6701a941118ffda30c589d1bd954074b"
   name = "github.com/getsentry/raven-go"
   packages = ["."]
@@ -127,14 +135,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:32f8c7cc78e478c39ce1cbe83dc4d54e4c4eed86197c50ff28fb935e6a32e090"
+  digest = "1:d1a16e8ecfbdd815f31cdd558c0ef26dad27f91f2e57bd61f194e84fbe6226ed"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
+    "windows/registry",
   ]
   pruneopts = "UT"
-  revision = "30e92a19ae4a77dde818b8c3d41d51e4850cba12"
+  revision = "3e9a981b8ddba4cb37815d4ebf2171df73c5255b"
 
 [[projects]]
   branch = "v2"
@@ -157,6 +166,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/blang/semver",
+    "github.com/denisbrodbeck/machineid",
     "github.com/getsentry/raven-go",
     "github.com/google/go-github/github",
     "github.com/inconshreveable/go-update",

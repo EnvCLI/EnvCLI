@@ -27,12 +27,14 @@ var defaultConfigurationDirectory = config.GetExecutionDirectory()
 
 // Constants
 var isCIEnvironment = detectCIEnvironment()
-var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path"}
 
 // Init Hook
 func init() {
 	// Initialize SentryIO
 	sentry.InitializeSentryIO(appVersion)
+
+	// Initialize Analytics
+	analytic.InitializeAnalytics(appName, appName)
 
 	// Logging
 	log.SetOutput(os.Stdout)
@@ -48,7 +50,7 @@ func init() {
 // CLI Main Entrypoint
 func main() {
 	// Global Configuration
-	propConfig, propConfigErr := config.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
+	propConfig, propConfigErr := config.LoadPropertyConfig()
 
 	// Configure Proxy Server
 	if propConfigErr == nil {
@@ -217,7 +219,7 @@ func main() {
 
 							// filter vars
 							var systemVars = []string{"_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
-							isExluded, _ := inArray(strings.ToUpper(envName), systemVars)
+							isExluded, _ := config.InArray(strings.ToUpper(envName), systemVars)
 							if !isExluded {
 								log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
 								environmentVariables = append(environmentVariables, envName+`=`+envValue)
@@ -317,9 +319,6 @@ func main() {
 					&cli.Command{
 						Name: "set",
 						Action: func(c *cli.Context) error {
-							// Load Config
-							propConfig, _ := config.LoadPropertyConfig(defaultConfigurationDirectory + "/.envclirc")
-
 							// Check Parameters
 							if c.NArg() != 2 {
 								log.Fatal("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]")
@@ -328,16 +327,8 @@ func main() {
 							varValue := c.Args().Get(1)
 
 							// Set value
-							isValidValue, _ := inArray(varName, validConfigurationOptions)
-							if isValidValue {
-								propConfig.Properties[varName] = varValue
-								log.Infof("Set value of %s to [%s]", varName, varValue)
-
-								// Save Config
-								config.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
-							} else {
-								log.Warnf("Unknown variable [%s]", varName)
-							}
+							config.SetPropertyConfigEntry(varName, varValue)
+							log.Infof("Set value of %s to [%s]", varName, varValue)
 
 							return nil
 						},
@@ -352,12 +343,7 @@ func main() {
 							varName := c.Args().Get(0)
 
 							// Get Value
-							isValidValue, _ := inArray(varName, validConfigurationOptions)
-							if isValidValue {
-								log.Infof("%s [%s]", propConfig.Properties[varName])
-							} else {
-								log.Warnf("Unknown variable [%s]", varName)
-							}
+							log.Infof("%s [%s]", config.GetPropertyConfigEntry(varName))
 
 							return nil
 						},
@@ -382,17 +368,9 @@ func main() {
 							}
 							varName := c.Args().Get(0)
 
-							// Unset Value
-							isValidValue, _ := inArray(varName, validConfigurationOptions)
-							if isValidValue {
-								propConfig.Properties[varName] = ""
-								log.Infof("Value of variable %s set to [].", varName)
-
-								// Save Config
-								config.SavePropertyConfig(defaultConfigurationDirectory+"/.envclirc", propConfig)
-							} else {
-								log.Warnf("Unknown variable [%s]", varName)
-							}
+							// Unset value
+							config.UnsetPropertyConfigEntry(varName)
+							log.Infof("Value of variable %s set to [].", varName)
 
 							return nil
 						},

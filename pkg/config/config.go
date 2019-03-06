@@ -11,6 +11,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Configuration
+var defaultConfigurationDirectory = GetExecutionDirectory()
+var defaultConfigurationFile = ".envclirc"
+
+// Constants
+var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path"}
+
 /**
  * Load the project config
  */
@@ -31,7 +38,14 @@ func LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 /**
  * Load the property config
  */
-func LoadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
+func LoadPropertyConfig() (PropertyConfigurationFile, error) {
+	return LoadPropertyConfigFile(defaultConfigurationDirectory + "/" + defaultConfigurationFile)
+}
+
+/**
+ * Load the property config file
+ */
+func LoadPropertyConfigFile(configFile string) (PropertyConfigurationFile, error) {
 	var cfg PropertyConfigurationFile
 	cfg.Properties = make(map[string]string)
 
@@ -49,7 +63,14 @@ func LoadPropertyConfig(configFile string) (PropertyConfigurationFile, error) {
 /**
  * Save the global config
  */
-func SavePropertyConfig(configFile string, cfg PropertyConfigurationFile) error {
+func SavePropertyConfig(cfg PropertyConfigurationFile) error {
+	return SavePropertyConfigFile(defaultConfigurationDirectory+"/"+defaultConfigurationFile, cfg)
+}
+
+/**
+ * Save the global config file
+ */
+func SavePropertyConfigFile(configFile string, cfg PropertyConfigurationFile) error {
 	log.Debug("Saving property configuration file " + configFile)
 
 	fileContent, err := yaml.Marshal(&cfg)
@@ -58,6 +79,56 @@ func SavePropertyConfig(configFile string, cfg PropertyConfigurationFile) error 
 	}
 
 	return ioutil.WriteFile(configFile, fileContent, 0600)
+}
+
+/**
+ * Sets a property in the property config
+ */
+func SetPropertyConfigEntry(varName string, varValue string) {
+	// Load Config
+	propConfig, _ := LoadPropertyConfig()
+
+	// Set value
+	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	if isValidValue {
+		propConfig.Properties[varName] = varValue
+
+		// Save Config
+		SavePropertyConfig(propConfig)
+	}
+}
+
+/**
+ * Gets a property in the property config
+ */
+func GetPropertyConfigEntry(varName string) string {
+	// Load Config
+	propConfig, _ := LoadPropertyConfig()
+
+	// Get Value
+	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	if isValidValue {
+		return propConfig.Properties[varName]
+	}
+
+	return ""
+}
+
+/**
+ * Gets a property in the property config
+ */
+func UnsetPropertyConfigEntry(varName string) {
+	// Load Config
+	propConfig, _ := LoadPropertyConfig()
+
+	// Get Value
+	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	if isValidValue {
+		propConfig.Properties[varName] = ""
+
+		// Save Config
+		SavePropertyConfig(propConfig)
+	}
 }
 
 /**
