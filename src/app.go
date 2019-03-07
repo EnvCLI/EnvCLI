@@ -34,9 +34,6 @@ func init() {
 	// Initialize SentryIO
 	sentry.InitializeSentryIO(appVersion)
 
-	// Initialize Analytics
-	analytic.InitializeAnalytics(appName, appName)
-
 	// Logging
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.InfoLevel)
@@ -50,6 +47,7 @@ func init() {
 
 // CLI Main Entrypoint
 func main() {
+
 	// Global Configuration
 	propConfig, propConfigErr := config.LoadPropertyConfig()
 
@@ -58,6 +56,11 @@ func main() {
 		// Set Proxy Server
 		os.Setenv("HTTP_PROXY", getOrDefault(propConfig.Properties, "http-proxy", ""))
 		os.Setenv("HTTPS_PROXY", getOrDefault(propConfig.Properties, "https-proxy", ""))
+
+		// Initialize Analytics
+		if getOrDefault(propConfig.Properties, "analytics", "true") == "true" {
+			analytic.InitializeAnalytics(appName, appName)
+		}
 	}
 
 	// Tracking: OS
