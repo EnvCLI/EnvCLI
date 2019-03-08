@@ -19,7 +19,7 @@ func volumeMount(shellCommand *bytes.Buffer, mounts *[]ContainerMount) {
 			var mountSource = containerMount.Source
 			var mountTarget = containerMount.Target
 			// docker toolbox doesn't support direct mounts, so we have to use the shared folder feature
-			if isDockerToolbox() && runtime.GOOS == "windows" {
+			if IsDockerToolbox() && runtime.GOOS == "windows" {
 				driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 				for _, element := range driveLetters {
 					mountSource = strings.Replace(mountSource, element+":\\", "/"+element+"_DRIVE/", 1)
@@ -53,7 +53,7 @@ func setEnvironmentVariables(shellCommand *bytes.Buffer, environment *[]string) 
 }
 
 func setTerminalParameters(shellCommand *bytes.Buffer) {
-	if isCIEnvironment() {
+	if IsCIEnvironment() {
 		// env variable CI is set, we can't use --tty or --interactive here
 	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		shellCommand.WriteString("--tty --interactive ")
@@ -66,17 +66,13 @@ func setEntrypoint(shellCommand *bytes.Buffer, entrypoint *string) {
 	}
 }
 
-// Run docker instance
+/**
+ * ContainerExec runs a container and attaches the result to the current session
+ */
 func ContainerExec(image string, entrypoint string, commandShell string, command string, mounts []ContainerMount, workingdir string, environment []string, publish []string) {
 	var shellCommand bytes.Buffer
 
-	// Shell (wrap the command within the container into a shell)
-	command = sanitizeCommand(commandShell, command)
 	// build docker command
-	// - docker machine prefix
-	if isDockerToolbox() {
-		shellCommand.WriteString("docker-machine ssh envcli ")
-	}
 	// - docker
 	shellCommand.WriteString("docker run --rm ")
 	// - terminal
@@ -94,9 +90,27 @@ func ContainerExec(image string, entrypoint string, commandShell string, command
 	// - image
 	shellCommand.WriteString(fmt.Sprintf("%s ", image))
 	// - command to run inside of the container
+	command = sanitizeCommand(commandShell, command)
 	shellCommand.WriteString(fmt.Sprintf("%s", command))
 
 	log.Debugf("Executed ShellCommand: %s", shellCommand.String())
+
+	// execute command
+	RunDockerCommand(shellCommand.String())
+}
+
+/**
+ * RunDockerCommand executes a docker command and wrap's it for docker machine if needed
+ */
+func RunDockerCommand(command string) {
+	var shellCommand bytes.Buffer
+
+	// - docker machine prefix
+	if IsDockerToolbox() {
+		shellCommand.WriteString("docker-machine ssh envcli ")
+	}
+	// - docker
+	shellCommand.WriteString(command)
 
 	// execute command
 	systemExec(shellCommand.String())

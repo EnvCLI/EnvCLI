@@ -27,7 +27,7 @@ var appVersion = "v0.4.0"
 var defaultConfigurationDirectory = config.GetExecutionDirectory()
 
 // Constants
-var isCIEnvironment = detectCIEnvironment()
+var isCIEnvironment = DetectCIEnvironment()
 
 // Init Hook
 func init() {
@@ -63,9 +63,14 @@ func main() {
 		}
 	}
 
-	// Tracking: OS
+	// Tracking
 	analytic.TriggerEvent("OS", runtime.GOOS)
 	analytic.TriggerEvent("Version", appVersion)
+	if isCIEnvironment {
+		analytic.TriggerEvent("Platform", "CI")
+	} else {
+		analytic.TriggerEvent("Platform", "DESKTOP")
+	}
 
 	// Update Check, once a day (not in CI)
 	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}

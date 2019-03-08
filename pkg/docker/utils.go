@@ -14,7 +14,7 @@ import (
 /**
  * Is CI Environment
  */
-func isCIEnvironment() bool {
+func IsCIEnvironment() bool {
 	_, ciVariableSet := os.LookupEnv("CI")
 	if ciVariableSet {
 		return true
@@ -26,7 +26,7 @@ func isCIEnvironment() bool {
 /**
  * Detect Docker native
  */
-func isDockerNative() bool {
+func IsDockerNative() bool {
 	path, err := exec.LookPath("docker")
 	if err != nil {
 		return false
@@ -39,7 +39,7 @@ func isDockerNative() bool {
 /**
  * Detect Docker Toolbox
  */
-func isDockerToolbox() bool {
+func IsDockerToolbox() bool {
 	path, err := exec.LookPath("docker-machine")
 	if err != nil || strings.Contains(path, "Docker Toolbox") == false {
 		return false
