@@ -35,7 +35,8 @@ To use *EnvCLI* you have to install docker and envcli. (See **[Installation](#in
 After that you can create the `.envcli.yml` configuration file for your project.
 
 Example (A single image can provide multiple commands):
-```
+
+```yaml
 commands:
 - name: npm
   description: Node.js is a JavaScript-based platform for server-side and networking applications.
@@ -54,14 +55,24 @@ You can also use `envcli install-aliases --scope project` to install the project
 This project only provides the configuration file and the easy *envcli* commmand, therefore making it easier to use [Docker](https://www.docker.com/) when development your project. You can do the same without *EnvCLI*.
 
 **Plain Docker**:
-```
+
+```bash
 docker run --rm -it --workdir /go/src/project/ --volume "C:\SourceCodes\golang\envcli:/
 go/src/project" golang:latest /usr/bin/env sh -c "go build -o envcli src/*"
 ```
 
 **With EnvCLI**:
-```
+
+```bash
 envcli run go build -o envcli src/*
+```
+
+**With EnvCLI & Aliases**:
+
+Can be used by running `envcli install-aliases` once.
+
+```bash
+go build -o envcli src/*
 ```
 
 ## Installation
@@ -77,15 +88,17 @@ envcli run go build -o envcli src/*
 2. Install [EnvCLI]
 
 *32bit*
-```
-$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.0/envcli_linux_386
-$ chmod +x /usr/local/bin/envcli
+
+```bash
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.0/envcli_linux_386
+chmod +x /usr/local/bin/envcli
 ```
 
 *64bit*
-```
-$ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.0/envcli_linux_amd64
-$ chmod +x /usr/local/bin/envcli
+
+```bash
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.0/envcli_linux_amd64
+chmod +x /usr/local/bin/envcli
 ```
 
 #### **Docker Toolbox (Legacy)**
