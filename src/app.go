@@ -102,6 +102,12 @@ func main() {
 
 			return nil
 		},
+		After: func(c *cli.Context) error {
+			// cleanup
+			analytic.CleanUp()
+
+			return nil
+		},
 		Commands: []*cli.Command{
 			/**
 			 * Command: self-update

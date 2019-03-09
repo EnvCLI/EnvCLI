@@ -13,12 +13,13 @@ required = [
   "gopkg.in/urfave/cli.v2",
   "gopkg.in/yaml.v2",
   "github.com/mattn/go-isatty",
-  "github.com/getsentry/raven-go",
-  "github.com/jpillora/go-ogle-analytics",
   "github.com/blang/semver",
   "github.com/jinzhu/configor",
   "github.com/google/go-github/github",
   "github.com/inconshreveable/go-update",
+  # Error Monitoring
+  "github.com/getsentry/raven-go",
+  # Analytics
   "github.com/denisbrodbeck/machineid",
   "gopkg.in/segmentio/analytics-go.v3"
 ]
@@ -51,7 +52,3 @@ ignored = [
 [[constraint]]
   name = "github.com/getsentry/raven-go"
   version = "0.2.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/jpillora/go-ogle-analytics"

@@ -2,6 +2,7 @@ package analytic
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"strings"
@@ -25,4 +26,36 @@ func GetSystemLocale() (string, error) {
 	}
 
 	return "", fmt.Errorf("cannot determine locale")
+}
+
+/**
+ * GetHostname gets the hostname ...
+ */
+func GetHostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+
+	addrs, err := net.LookupIP(hostname)
+	if err != nil {
+		return hostname
+	}
+
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			ip, err := ipv4.MarshalText()
+			if err != nil {
+				return hostname
+			}
+			hosts, err := net.LookupAddr(string(ip))
+			if err != nil || len(hosts) == 0 {
+				return hostname
+			}
+			fqdn := hosts[0]
+			return strings.TrimSuffix(fqdn, ".")
+		}
+	}
+
+	return hostname
 }

@@ -78,14 +78,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:289a0aeeff2a467506d6faacb71c783a8610e53639e8f065e1997a569e622d6b"
-  name = "github.com/jpillora/go-ogle-analytics"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "14b04e0594ef6a9fd943363b135656f0ec8c9d0e"
-
-[[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
@@ -195,7 +187,6 @@
     "github.com/google/go-github/github",
     "github.com/inconshreveable/go-update",
     "github.com/jinzhu/configor",
-    "github.com/jpillora/go-ogle-analytics",
     "github.com/mattn/go-colorable",
     "github.com/mattn/go-isatty",
     "github.com/sirupsen/logrus",

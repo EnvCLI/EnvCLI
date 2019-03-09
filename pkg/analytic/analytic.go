@@ -2,6 +2,7 @@ package analytic
 
 import (
 	"runtime"
+	"strconv"
 
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
@@ -10,9 +11,9 @@ import (
 )
 
 var analyticsEnabled = false
-
-var segmentClient = segment.New("6B5KsCRcmam7tIFqpVqEStod6QAo4Ttp")
-var uniqueId = "random"
+var segmentClient segment.Client
+var segmentClientErr error
+var uniqueId = GetHostname()
 
 /**
  * InitializeAnalytics initialized the analytics client
@@ -20,6 +21,23 @@ var uniqueId = "random"
  */
 func InitializeAnalytics(appName string, appVersion string) {
 	analyticsEnabled = true
+
+	// Initialize Client
+	segmentClient, segmentClientErr = segment.NewWithConfig("6B5KsCRcmam7tIFqpVqEStod6QAo4Ttp", segment.Config{
+		BatchSize: 1,
+		DefaultContext: &segment.Context{
+			App: segment.AppInfo{
+				Name:    appName,
+				Version: appVersion,
+			},
+		},
+	})
+
+	// In case of error disable analytics to keep the tool working
+	if segmentClientErr != nil {
+		sentry.HandleError(segmentClientErr)
+		analyticsEnabled = false
+	}
 
 	// Unique User Id
 	deviceid, deviceidErr := machineid.ProtectedID(appName)
@@ -44,18 +62,18 @@ func InitializeAnalytics(appName string, appVersion string) {
 	}
 
 	// Segment Info
-	if analyticsEnabled {
-		segmentClient.Enqueue(segment.Identify{
-			UserId: uniqueId,
-			Traits: segment.NewTraits().
-				SetName(uniqueId).
-				Set("name", appName).
-				Set("version", appVersion).
-				Set("os", runtime.GOOS).
-				Set("platform", platform).
-				Set("locale", systemLocale),
-		})
-	}
+	segmentClient.Enqueue(segment.Identify{
+		UserId: uniqueId,
+		Traits: segment.NewTraits().
+			SetName(uniqueId).
+			Set("name", appName).
+			Set("version", appVersion).
+			Set("hostname", GetHostname()).
+			Set("os", runtime.GOOS).
+			Set("cpu_cores", strconv.Itoa(runtime.NumCPU())).
+			Set("platform", platform).
+			Set("locale", systemLocale),
+	})
 }
 
 /**
@@ -71,5 +89,14 @@ func TriggerEvent(eventName string, eventPayload string) {
 			Properties: segment.NewProperties().
 				Set("payload", eventPayload),
 		})
+	}
+}
+
+/**
+ * CleanUp makes sure, that all events have been trasmittet prior to ending the process.
+ */
+func CleanUp() {
+	if analyticsEnabled == true && segmentClient != nil {
+		segmentClient.Close()
 	}
 }
