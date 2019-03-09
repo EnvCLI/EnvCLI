@@ -118,6 +118,14 @@
   version = "v0.8.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:ec22607298efbafb122c4e4b2ca8ceb6c4ec1ba72e74705b84f9f2ce8ee77984"
+  name = "github.com/segmentio/backo-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "204274ad699c0983a70203a566887f17a717fef4"
+
+[[projects]]
   digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
@@ -127,15 +135,23 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:2f9538da7381bb981fb8451b2b0fb304c2bc7f1724228dc336a8f002e6fec704"
+  name = "github.com/xtgo/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a0b114877d4caeffbd7f87e3757c17fce570fea7"
+
+[[projects]]
+  branch = "master"
   digest = "1:058e9504b9a79bfe86092974d05bb3298d2aa0c312d266d43148de289a5065d9"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
+  revision = "c2843e01d9a2bc60bb26ad24e09734fdc2d9ec58"
 
 [[projects]]
   branch = "master"
-  digest = "1:d1a16e8ecfbdd815f31cdd558c0ef26dad27f91f2e57bd61f194e84fbe6226ed"
+  digest = "1:acfa1c687456c68288d8e40def3f79ecbb6c0a1c277a545a07cbf72665a3320e"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -143,7 +159,15 @@
     "windows/registry",
   ]
   pruneopts = "UT"
-  revision = "3e9a981b8ddba4cb37815d4ebf2171df73c5255b"
+  revision = "980fc434d28e11f0a5c1ae102a263b8c56641011"
+
+[[projects]]
+  digest = "1:fceac7b84ff0319c9b9775647e6b30758bb0e8550852cf88a2a5f3e43d6dbbf8"
+  name = "gopkg.in/segmentio/analytics-go.v3"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3b00f71eadd594f41e9b6af6d5198aca38ccaca5"
+  version = "v3.0.1"
 
 [[projects]]
   branch = "v2"
@@ -175,6 +199,7 @@
     "github.com/mattn/go-colorable",
     "github.com/mattn/go-isatty",
     "github.com/sirupsen/logrus",
+    "gopkg.in/segmentio/analytics-go.v3",
     "gopkg.in/urfave/cli.v2",
     "gopkg.in/yaml.v2",
   ]

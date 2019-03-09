@@ -29,7 +29,7 @@ var appVersion = "v0.4.0"
 var defaultConfigurationDirectory = util.GetExecutionDirectory()
 
 // Constants
-var isCIEnvironment = DetectCIEnvironment()
+var isCIEnvironment = util.IsCIEnvironment()
 
 // Init Hook
 func init() {
@@ -60,17 +60,8 @@ func main() {
 
 		// Initialize Analytics
 		if config.GetOrDefault(propConfig.Properties, "analytics", "true") == "true" {
-			analytic.InitializeAnalytics(appName, appName)
+			analytic.InitializeAnalytics(appName, appVersion)
 		}
-	}
-
-	// Tracking
-	analytic.TriggerEvent("OS", runtime.GOOS)
-	analytic.TriggerEvent("Version", appVersion)
-	if isCIEnvironment {
-		analytic.TriggerEvent("Platform", "CI")
-	} else {
-		analytic.TriggerEvent("Platform", "DESKTOP")
 	}
 
 	// Update Check, once a day (not in CI)
@@ -131,9 +122,6 @@ func main() {
 					// Run Update
 					appUpdater.Update("latest", c.Bool("force"), appVersion)
 
-					// Tracking: Command
-					analytic.TriggerEvent("Update", "Execute")
-
 					return nil
 				},
 			},
@@ -190,7 +178,7 @@ func main() {
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, strings.TrimSpace(commandWithArguments.String()))
 
 					// Tracking: command
-					analytic.TriggerEvent("CommandExecution", commandName)
+					analytic.TriggerEvent("Run", commandName)
 
 					// config: try to load command configuration
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
@@ -318,7 +306,7 @@ func main() {
 					}
 
 					// Tracking: Command
-					analytic.TriggerEvent("Aliases", "Install")
+					analytic.TriggerEvent("Aliases", scopeFilter)
 
 					return nil
 				},

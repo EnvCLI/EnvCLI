@@ -1,13 +1,18 @@
 package analytic
 
 import (
+	"runtime"
+
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
+	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	machineid "github.com/denisbrodbeck/machineid"
-	ogle "github.com/jpillora/go-ogle-analytics"
+	segment "gopkg.in/segmentio/analytics-go.v3"
 )
 
-var analyticsClient, analyticsClientErr = ogle.NewClient("UA-135644097-1")
 var analyticsEnabled = false
+
+var segmentClient = segment.New("6B5KsCRcmam7tIFqpVqEStod6QAo4Ttp")
+var uniqueId = "random"
 
 /**
  * InitializeAnalytics initialized the analytics client
@@ -16,44 +21,55 @@ var analyticsEnabled = false
 func InitializeAnalytics(appName string, appVersion string) {
 	analyticsEnabled = true
 
-	// check if we initialized the analticsClient successfully
-	if analyticsClientErr != nil {
-		// pass error to error handling and ignore, even if metrics don't work it doesn't matter for the user
-		sentry.HandleError(analyticsClientErr)
+	// Unique User Id
+	deviceid, deviceidErr := machineid.ProtectedID(appName)
+	if deviceidErr != nil {
+		sentry.HandleError(deviceidErr)
 	} else {
-		// App Info
-		analyticsClient = analyticsClient.ApplicationName(appName)
-		analyticsClient = analyticsClient.ApplicationVersion(appVersion)
+		uniqueId = deviceid
+	}
 
-		// Unique User Id
-		deviceid, deviceidErr := machineid.ProtectedID(appName)
-		if deviceidErr != nil {
-			sentry.HandleError(deviceidErr)
-		} else {
-			analyticsClient = analyticsClient.UserID(deviceid)
-		}
+	// Locale
+	var systemLocale, systemLocaleErr = GetSystemLocale()
+	if systemLocaleErr != nil {
+		// pass error to error handling and ignore, even if metrics don't work it doesn't matter for the user
+		sentry.HandleError(systemLocaleErr)
+		systemLocale = "XX_XX"
+	}
 
-		// Locale
-		var systemLocale, systemLocaleErr = GetSystemLocale()
-		if systemLocaleErr != nil {
-			// pass error to error handling and ignore, even if metrics don't work it doesn't matter for the user
-			sentry.HandleError(systemLocaleErr)
-		} else {
-			analyticsClient = analyticsClient.UserLanguage(systemLocale)
-		}
+	// Platform
+	var platform = "Desktop"
+	if util.IsCIEnvironment() {
+		platform = "CI"
+	}
+
+	// Segment Info
+	if analyticsEnabled {
+		segmentClient.Enqueue(segment.Identify{
+			UserId: uniqueId,
+			Traits: segment.NewTraits().
+				SetName(uniqueId).
+				Set("name", appName).
+				Set("version", appVersion).
+				Set("os", runtime.GOOS).
+				Set("platform", platform).
+				Set("locale", systemLocale),
+		})
 	}
 }
 
 /**
  * TriggerEvent triggers a tracked Event which will be visible in analytics
  */
-func TriggerEvent(eventCategory string, eventName string) {
+func TriggerEvent(eventName string, eventPayload string) {
 	// do nothing if opted-out
 	if analyticsEnabled {
-		var err = analyticsClient.Send(ogle.NewEvent(eventCategory, eventName))
-		if err != nil {
-			// pass error to error handling and ignore, even if metrics don't work it doesn't matter for the user
-			sentry.HandleError(err)
-		}
+		// segmentio
+		segmentClient.Enqueue(segment.Track{
+			UserId: uniqueId,
+			Event:  eventName,
+			Properties: segment.NewProperties().
+				Set("payload", eventPayload),
+		})
 	}
 }

@@ -19,7 +19,8 @@ required = [
   "github.com/jinzhu/configor",
   "github.com/google/go-github/github",
   "github.com/inconshreveable/go-update",
-  "github.com/denisbrodbeck/machineid"
+  "github.com/denisbrodbeck/machineid",
+  "gopkg.in/segmentio/analytics-go.v3"
 ]
 
 # Ignore modules that are part of this project

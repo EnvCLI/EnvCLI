@@ -2,7 +2,6 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus" // imports as package "log"
-	"os"
 )
 
 /**
@@ -22,16 +21,4 @@ func setLoglevel(loglevel string) {
 	} else if loglevel == "trace" {
 		log.SetLevel(log.TraceLevel)
 	}
-}
-
-/**
- * Detect CI
- */
-func DetectCIEnvironment() (val bool) {
-	value, found := os.LookupEnv("CI")
-	if found && value == "true" {
-		return true
-	}
-
-	return false
 }
