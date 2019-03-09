@@ -7,40 +7,45 @@ type ConfigurationLoader struct {
 }
 
 /**
- * The Project Configuration
+ * ProjectConfigrationFile is the schema for configuration files, that hold multiple command specifications
  */
 type ProjectConfigrationFile struct {
-	Images []struct {
-		// name of the container
-		Name string
+	Images []RunConfigurationEntry
+}
 
-		// description for the  container
-		Description string
+/**
+ * RunConfigurationEntry holds the configuration for a single command
+ */
+type RunConfigurationEntry struct {
+	// name of the container
+	Name string
 
-		// the commands provided by the image
-		Provides []string
+	// description for the  container
+	Description string
 
-		// container image
-		Image string
+	// the commands provided by the image
+	Provides []string
 
-		// target directory to mount your project inside of the container
-		Directory string `default:"/project"`
+	// container image
+	Image string
 
-		// overwrite the default entrypoint
-		Entrypoint string `default:"original"`
+	// target directory to mount your project inside of the container
+	Directory string `default:"/project"`
 
-		// wrap the executed command inside of the container into a shell (ex. if you use globs)
-		Shell string `default:"none"`
+	// overwrite the default entrypoint
+	Entrypoint string `default:"original"`
 
-		// commands that should run in the container before the actual command is executed
-		BeforeScript []string `yaml:"before_script"`
+	// wrap the executed command inside of the container into a shell (ex. if you use globs)
+	Shell string `default:"none"`
 
-		// Caching of container-directories
-		Caching []CachingEntry `yaml:"cache"`
+	// commands that should run in the container before the actual command is executed
+	BeforeScript []string `yaml:"before_script"`
 
-		// the command scope (internal use only) - global or project
-		Scope string
-	}
+	// Caching of container-directories
+	Caching []CachingEntry `yaml:"cache"`
+
+	// the command scope (internal use only) - global or project
+	Scope string
 }
 
 type CachingEntry struct {

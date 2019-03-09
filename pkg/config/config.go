@@ -1,18 +1,20 @@
 package config
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	"github.com/jinzhu/configor"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // Configuration
-var defaultConfigurationDirectory = GetExecutionDirectory()
+var defaultConfigurationDirectory = util.GetExecutionDirectory()
 var defaultConfigurationFile = ".envclirc"
 
 // Constants
@@ -132,18 +134,14 @@ func UnsetPropertyConfigEntry(varName string) {
 }
 
 /**
- * Get the execution directory
+ * GetProjectOrExecutionDirectory returns either the project directory, if one can be found or the execution directory
  */
-func GetExecutionDirectory() string {
-	ex, err := os.Executable()
-	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Couldn't detect execution directory!")
-		return ""
+func GetProjectOrExecutionDirectory() string {
+	var directory = GetProjectDirectory()
+	if directory == "" {
+		directory = util.GetExecutionDirectory()
 	}
-
-	return filepath.Dir(ex)
+	return directory
 }
 
 /**
@@ -188,7 +186,6 @@ func GetProjectDirectory() string {
 
 /**
  * Merge two configurations and keep the origin in the Scope
- * TODO: Handle conflicts with a warning / by order project definition have precedence right now
  */
 func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
 	var cfg = ProjectConfigrationFile{}
@@ -203,4 +200,43 @@ func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal Pro
 	}
 
 	return cfg
+}
+
+/**
+ * GetCommandConfiguration gets the configuration entry for a specified command in the specified directory
+ */
+func GetCommandConfiguration(commandName string, currentDirectory string) (RunConfigurationEntry, error) {
+	// Global Configuration
+	propConfig, propConfigErr := LoadPropertyConfig()
+	if propConfigErr != nil {
+		// error, when loading the config
+		var emptyEntry RunConfigurationEntry
+		return emptyEntry, propConfigErr
+	}
+
+	// load global (user-scope) configuration
+	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
+	globalConfig, _ := LoadProjectConfig(globalConfigPath + "/.envcli.yml")
+
+	// load project configuration
+	log.Debugf("Project Directory: %s", currentDirectory)
+	projectConfig, _ := LoadProjectConfig(currentDirectory + "/.envcli.yml")
+
+	// merge project and global configuration
+	var finalConfiguration = MergeConfigurations(projectConfig, globalConfig)
+	for _, element := range finalConfiguration.Images {
+		log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
+		for _, providedCommand := range element.Provides {
+			if providedCommand == commandName {
+				log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
+
+				return element, nil
+			}
+		}
+	}
+
+	// didn't find a match, error
+	var emptyEntry RunConfigurationEntry
+	return emptyEntry, errors.New("no configuration for command " + commandName + " found")
 }

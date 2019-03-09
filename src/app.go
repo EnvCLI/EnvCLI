@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"runtime"
 	"sort"
@@ -14,6 +15,7 @@ import (
 	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
+	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v2"
@@ -24,7 +26,7 @@ var appName = "EnvCLI Utility"
 var appVersion = "v0.4.0"
 
 // Configuration
-var defaultConfigurationDirectory = config.GetExecutionDirectory()
+var defaultConfigurationDirectory = util.GetExecutionDirectory()
 
 // Constants
 var isCIEnvironment = DetectCIEnvironment()
@@ -47,18 +49,17 @@ func init() {
 
 // CLI Main Entrypoint
 func main() {
-
 	// Global Configuration
 	propConfig, propConfigErr := config.LoadPropertyConfig()
 
 	// Configure Proxy Server
 	if propConfigErr == nil {
 		// Set Proxy Server
-		os.Setenv("HTTP_PROXY", getOrDefault(propConfig.Properties, "http-proxy", ""))
-		os.Setenv("HTTPS_PROXY", getOrDefault(propConfig.Properties, "https-proxy", ""))
+		os.Setenv("HTTP_PROXY", config.GetOrDefault(propConfig.Properties, "http-proxy", ""))
+		os.Setenv("HTTPS_PROXY", config.GetOrDefault(propConfig.Properties, "https-proxy", ""))
 
 		// Initialize Analytics
-		if getOrDefault(propConfig.Properties, "analytics", "true") == "true" {
+		if config.GetOrDefault(propConfig.Properties, "analytics", "true") == "true" {
 			analytic.InitializeAnalytics(appName, appName)
 		}
 	}
@@ -74,7 +75,7 @@ func main() {
 
 	// Update Check, once a day (not in CI)
 	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
-	var lastUpdateCheck, _ = strconv.ParseInt(getOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
+	var lastUpdateCheck, _ = strconv.ParseInt(config.GetOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
 		if appUpdater.IsUpdateAvailable(appVersion) {
 			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
@@ -158,80 +159,73 @@ func main() {
 				Action: func(c *cli.Context) error {
 					// parse command
 					commandName := c.Args().First()
-					commandWithArguments := strings.Join(append([]string{commandName}, c.Args().Tail()...), " ")
-					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
-					// Tracking: Command
+					// iterate and quote args if needed
+					commandArgs := append([]string{commandName}, c.Args().Tail()...)
+					var commandWithArguments bytes.Buffer
+					for _, arg := range commandArgs {
+						if strings.Contains(arg, " ") {
+							i := strings.Index(arg, "=")
+							if i > -1 {
+								argName := arg[0:i]
+								argValue := arg[i+1 : len(arg)]
+								fullArg := strings.Replace(argName+"="+strconv.Quote(argValue), "\"", "\\\"", -1)
+
+								// quote for powershell, differs from the quoting for unix-based systems
+								if runtime.GOOS == "windows" {
+									fullArg = strings.Replace(argName+"="+strconv.Quote(argValue), "\"", "`\"", -1)
+								}
+
+								commandWithArguments.WriteString(fullArg)
+							} else {
+								commandWithArguments.WriteString(arg)
+							}
+						} else {
+							commandWithArguments.WriteString(arg)
+						}
+
+						commandWithArguments.WriteString(" ")
+					}
+
+					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, strings.TrimSpace(commandWithArguments.String()))
+
+					// Tracking: command
 					analytic.TriggerEvent("CommandExecution", commandName)
 
-					// load global (user-scope) configuration
-					var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-					log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
-					globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
-
-					// load project configuration
-					var projectDirectory = config.GetProjectDirectory()
-					if projectDirectory == "" {
-						log.Warnf("No project configuration found in current or parent directories. Only the global commands are available.")
-						projectDirectory = config.GetWorkingDirectory()
-					}
-					log.Debugf("Project Directory: %s", projectDirectory)
-					projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
-
-					// merge project and global configuration
-					var finalConfiguration = config.MergeConfigurations(projectConfig, globalConfig)
-
-					// check for command prefix and get the matching configuration entry
-					var dockerImage = ""
-					var containerDirectory = ""
-					var entrypoint = ""
-					var commandShell = ""
-					var commandWithBeforeScript = ""
-					var containerMounts []docker.ContainerMount
-
-				configLoop:
-					for _, element := range finalConfiguration.Images {
-						log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
-						for _, providedCommand := range element.Provides {
-							if providedCommand == commandName {
-								log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
-								dockerImage = element.Image
-								containerDirectory = element.Directory
-								entrypoint = element.Entrypoint
-								commandShell = element.Shell
-
-								commandWithBeforeScript = commandWithArguments
-								if element.BeforeScript != nil {
-									commandWithBeforeScript = strings.Join(element.BeforeScript[:], ";") + " && " + commandWithArguments
-
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", getOrDefault(propConfig.Properties, "http-proxy", ""), -1)
-									commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", getOrDefault(propConfig.Properties, "https-proxy", ""), -1)
-								}
-
-								// project mount
-								containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: projectDirectory, Target: containerDirectory})
-
-								// caching mounts
-								for _, cachingEntry := range element.Caching {
-									var cacheFolder = getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
-									createDirectory(cacheFolder)
-									containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: getOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
-								}
-
-								log.Debugf("Image: %s | ImageDirectory: %s", dockerImage, containerDirectory)
-								break configLoop
-							}
-						}
-					}
-					if dockerImage == "" {
-						log.Errorf("No configuration for command [%s] found.", commandName)
+					// config: try to load command configuration
+					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
+					if commandConfigErr != nil {
+						log.Errorf(commandConfigErr.Error())
+						sentry.HandleError(commandConfigErr)
 						return nil
 					}
 
-					// environment variables
+					// feature: before_script
+					var commandWithBeforeScript = ""
+					commandWithBeforeScript = strings.TrimSpace(commandWithArguments.String())
+					if commandConfig.BeforeScript != nil {
+						commandWithBeforeScript = strings.Join(commandConfig.BeforeScript[:], ";") + " && " + commandWithBeforeScript
+
+						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", config.GetOrDefault(propConfig.Properties, "http-proxy", ""), -1)
+						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", config.GetOrDefault(propConfig.Properties, "https-proxy", ""), -1)
+					}
+
+					// feature: project mount
+					var containerMounts []docker.ContainerMount
+					var projectOrExecutionDir = config.GetProjectOrExecutionDirectory()
+					containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+
+					// feature: caching
+					for _, cachingEntry := range commandConfig.Caching {
+						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
+						util.CreateDirectory(cacheFolder)
+						containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
+					}
+
+					// feature: pass environment variables
 					var environmentVariables []string = c.StringSlice("env")
 
-					// auto provide ci env variables (excludes system variables like PATH, ...)
+					// feature: pass all env variables (excludes system variables like PATH, ...) in CI environments
 					if isCIEnvironment {
 						for _, e := range os.Environ() {
 							pair := strings.SplitN(e, "=", 2)
@@ -250,22 +244,22 @@ func main() {
 						}
 					}
 
-					// - proxy environment
+					// feature: proxy environment
 					if propConfigErr == nil {
-						httpProxy := getOrDefault(propConfig.Properties, "http-proxy", "")
+						httpProxy := config.GetOrDefault(propConfig.Properties, "http-proxy", "")
 						if httpProxy != "" {
 							environmentVariables = append(environmentVariables, `http_proxy=`+httpProxy)
 						}
 
-						httpsProxy := getOrDefault(propConfig.Properties, "https-proxy", "")
+						httpsProxy := config.GetOrDefault(propConfig.Properties, "https-proxy", "")
 						if httpsProxy != "" {
 							environmentVariables = append(environmentVariables, `https_proxy=`+httpsProxy)
 						}
 					}
 
 					// detect container service and send command
-					log.Infof("Executing command in container [%s].", dockerImage)
-					docker.ContainerExec(dockerImage, entrypoint, commandShell, commandWithBeforeScript, containerMounts, containerDirectory+"/"+getPathRelativeToDirectory(getWorkingDirectory(), projectDirectory), environmentVariables, c.StringSlice("port"))
+					log.Infof("Executing command in container [%s].", commandConfig.Image)
+					docker.ContainerExec(commandConfig.Image, commandConfig.Entrypoint, commandConfig.Shell, commandWithBeforeScript, containerMounts, commandConfig.Directory+"/"+util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir), environmentVariables, c.StringSlice("port"))
 
 					return nil
 				},
@@ -291,7 +285,7 @@ func main() {
 
 					// create global-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "global" {
-						var globalConfigPath = getOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+						var globalConfigPath = config.GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 						log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
 						globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 

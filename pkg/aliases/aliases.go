@@ -4,8 +4,8 @@ import (
 	"os"
 	"runtime"
 
-	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
+	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
@@ -19,9 +19,9 @@ func InstallAlias(appVersion string, command string, scope string) error {
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 		log.Debugf("Detected Linux - Will place bash scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.sh"
-		aliasScriptFilepath := config.GetExecutionDirectory() + "/" + command
+		aliasScriptFilepath := util.GetExecutionDirectory() + "/" + command
 
-		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
+		err := util.DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
 			log.Errorf("Can't create alias [%s], download failed.", command)
 			sentry.HandleError(err)
@@ -41,9 +41,9 @@ func InstallAlias(appVersion string, command string, scope string) error {
 	} else if runtime.GOOS == "windows" {
 		log.Debugf("Detected Windows - Will place cmd scripts into PATH ...")
 		aliasScriptURL := "https://raw.githubusercontent.com/EnvCLI/EnvCLI/" + appVersion + "/scripts/alias.cmd"
-		aliasScriptFilepath := config.GetExecutionDirectory() + "/" + command + ".cmd"
+		aliasScriptFilepath := util.GetExecutionDirectory() + "/" + command + ".cmd"
 
-		err := DownloadFile(aliasScriptFilepath, aliasScriptURL)
+		err := util.DownloadFile(aliasScriptFilepath, aliasScriptURL)
 		if err != nil {
 			log.Errorf("Can't create alias [%s], download failed.", command)
 			sentry.HandleError(err)

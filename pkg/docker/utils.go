@@ -57,10 +57,8 @@ func sanitizeCommand(commandShell string, command string) string {
 	if commandShell == "powershell" {
 		command = fmt.Sprintf("powershell %s", command)
 	} else if commandShell == "sh" {
-		command = strings.Replace(command, "\"", "\\\"", -1)
 		command = fmt.Sprintf("/usr/bin/env sh -c \"%s\"", command)
 	} else if commandShell == "bash" {
-		command = strings.Replace(command, "\"", "\\\"", -1)
 		command = fmt.Sprintf("/usr/bin/env bash -c \"%s\" -l", command)
 	}
 

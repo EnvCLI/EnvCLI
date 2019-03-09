@@ -1,4 +1,4 @@
-package aliases
+package util
 
 import (
 	"io"

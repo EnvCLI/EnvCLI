@@ -45,3 +45,16 @@ func InArray(val interface{}, array interface{}) (exists bool, index int) {
 
 	return
 }
+
+/**
+ * GetOrDefault gets the value or the specified default value if not found or empty
+ */
+func GetOrDefault(entity map[string]string, key string, defaultValue string) (val string) {
+	value, found := entity[key]
+
+	if found {
+		return value
+	}
+
+	return defaultValue
+}
