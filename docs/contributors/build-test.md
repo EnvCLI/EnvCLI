@@ -20,7 +20,7 @@ envcli run --env GOOS=darwin --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o 
 ## Build Binary on Windows for Local Testing
 
 ```bash
-envcli run --env GOOS=windows --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli.exe src/*
+envcli run --env GOOS=windows --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli.exe -ldflags="-w" src/*
 ```
 
 ## Run EnvCLI (to test your changes before building the final binaries)

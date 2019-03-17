@@ -221,7 +221,7 @@ func GetCommandConfiguration(commandName string, currentDirectory string) (RunCo
 
 	// load project configuration
 	log.Debugf("Project Directory: %s", currentDirectory)
-	projectConfig, _ := LoadProjectConfig(currentDirectory + "/.envcli.yml")
+	projectConfig, _ := LoadProjectConfig(GetProjectDirectory() + "/.envcli.yml")
 
 	// merge project and global configuration
 	var finalConfiguration = MergeConfigurations(projectConfig, globalConfig)
