@@ -134,12 +134,12 @@ func UnsetPropertyConfigEntry(varName string) {
 }
 
 /**
- * GetProjectOrExecutionDirectory returns either the project directory, if one can be found or the execution directory
+ * GetProjectOrWorkingDirectory returns either the project directory, if one can be found or the working directory
  */
-func GetProjectOrExecutionDirectory() string {
+func GetProjectOrWorkingDirectory() string {
 	var directory = GetProjectDirectory()
 	if directory == "" {
-		directory = util.GetExecutionDirectory()
+		directory = util.GetWorkingDirectory()
 	}
 	return directory
 }

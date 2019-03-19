@@ -206,7 +206,7 @@ func main() {
 
 					// feature: project mount
 					var containerMounts []docker.ContainerMount
-					var projectOrExecutionDir = config.GetProjectOrExecutionDirectory()
+					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
 					containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
 
 					// feature: caching
