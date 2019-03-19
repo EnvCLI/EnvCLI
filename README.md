@@ -80,7 +80,7 @@ go build -o envcli src/*
 #### **Docker for Windows**
 
 1. Install Docker for Windows from https://docs.docker.com/docker-for-windows/install/
-2. Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.4.1/EnvCLI-amd64.msi)
+2. Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.4.2/EnvCLI-amd64.msi)
 
 #### **Docker for Linux**
 
@@ -90,20 +90,20 @@ go build -o envcli src/*
 *32bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.1/envcli_linux_386
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.2/envcli_linux_386
 chmod +x /usr/local/bin/envcli
 ```
 
 *64bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.1/envcli_linux_amd64
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.4.2/envcli_linux_amd64
 chmod +x /usr/local/bin/envcli
 ```
 
 #### **Docker Toolbox (Legacy)**
 
-Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.4.1/EnvCLI-amd64.msi)
+Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.4.2/EnvCLI-amd64.msi)
 
 Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
 
