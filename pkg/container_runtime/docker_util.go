@@ -52,3 +52,16 @@ func setEnvironmentVariables(shellCommand *bytes.Buffer, environment *[]Environm
 		shellCommand.WriteString(fmt.Sprintf("-e %s=%s ", envVariable.Name, strconv.Quote(envVariable.Value)))
 	}
 }
+
+// toUnixPath converts the path
+func toUnixPath(path string) string {
+	driveLetters := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	for _, element := range driveLetters {
+		path = strings.Replace(path, element+":\\", "/"+element+"/", 1)
+	}
+
+	// replace windows path separator with linux path separator
+	path = strings.Replace(path, "\\", "/", -1)
+
+	return path
+}

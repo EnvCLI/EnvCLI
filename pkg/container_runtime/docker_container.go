@@ -43,7 +43,15 @@ func (c *Container) SetImage(newImage string) {
 
 // AddVolume mounts a directory into a container
 func (c *Container) AddVolume(mount ContainerMount) {
+	mount.Source = toUnixPath(mount.Source)
 	c.volumes = append(c.volumes, mount)
+}
+
+// AddCacheMount adds a cache mount to the container
+func (c *Container) AddCacheMount(name string, sourcePath string, targetPath string) {
+	c.AddVolume(ContainerMount{MountType: "directory", Source: toUnixPath(sourcePath), Target: targetPath})
+	c.AddEnvironmentVariable("cache_"+name+"_source", toUnixPath(sourcePath))
+	c.AddEnvironmentVariable("cache_"+name+"_target", targetPath)
 }
 
 // AllowContainerRuntimeAcccess allows the container to access the container runtime

@@ -230,8 +230,7 @@ func main() {
 					for _, cachingEntry := range commandConfig.Caching {
 						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 						util.CreateDirectory(cacheFolder)
-
-						container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
+						container.AddCacheMount(cachingEntry.Name, cacheFolder, cachingEntry.ContainerDirectory)
 					}
 
 					// feature: pass all env variables (excludes system variables like PATH, ...) in CI environments
