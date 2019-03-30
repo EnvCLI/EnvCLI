@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -19,10 +20,12 @@ func GetSystemLocale() (string, error) {
 	}
 
 	// Exec powershell Get-Culture on Windows.
-	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
-	output, err := cmd.Output()
-	if err == nil {
-		return strings.Trim(string(output), "\r\n"), nil
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
+		output, err := cmd.Output()
+		if err == nil {
+			return strings.Trim(string(output), "\r\n"), nil
+		}
 	}
 
 	return "", fmt.Errorf("cannot determine locale")

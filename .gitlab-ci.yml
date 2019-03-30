@@ -1,11 +1,21 @@
 image: docker.io/envcli/envcli:latest
 
 stages:
+- test
 - build
 - release
 
 services:
 - docker:stable-dind
+
+Test EnvCLI:
+  stage: test
+  script:
+  - envcli run dep ensure --vendor-only
+  - envcli run -env GOOS=linux --env GOARCH=amd64 --env CGO_ENABLED=0 go test src/*
+  only:
+  - master
+  - develop
 
 Build EnvCLI:
   stage: build

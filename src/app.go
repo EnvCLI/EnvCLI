@@ -352,7 +352,7 @@ func main() {
 							varName := c.Args().Get(0)
 
 							// Get Value
-							log.Infof("%s [%s]", config.GetPropertyConfigEntry(varName))
+							log.Infof("%s [%s]", varName, config.GetPropertyConfigEntry(varName))
 
 							return nil
 						},

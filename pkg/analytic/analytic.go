@@ -22,6 +22,13 @@ var uniqueId = GetHostname()
 func InitializeAnalytics(appName string, appVersion string) {
 	analyticsEnabled = true
 
+	// Locale
+	var systemLocale, systemLocaleErr = GetSystemLocale()
+	if systemLocaleErr != nil {
+		// set to default value if discovery failed
+		systemLocale = "XX_XX"
+	}
+
 	// Initialize Client
 	segmentClient, segmentClientErr = segment.NewWithConfig("6B5KsCRcmam7tIFqpVqEStod6QAo4Ttp", segment.Config{
 		BatchSize: 1,
@@ -30,6 +37,7 @@ func InitializeAnalytics(appName string, appVersion string) {
 				Name:    appName,
 				Version: appVersion,
 			},
+			Locale: systemLocale,
 		},
 	})
 
@@ -47,14 +55,6 @@ func InitializeAnalytics(appName string, appVersion string) {
 		uniqueId = deviceid
 	}
 
-	// Locale
-	var systemLocale, systemLocaleErr = GetSystemLocale()
-	if systemLocaleErr != nil {
-		// pass error to error handling and ignore, even if metrics don't work it doesn't matter for the user
-		sentry.HandleError(systemLocaleErr)
-		systemLocale = "XX_XX"
-	}
-
 	// Platform
 	var platform = "Desktop"
 	if util.IsCIEnvironment() {
@@ -66,8 +66,6 @@ func InitializeAnalytics(appName string, appVersion string) {
 		UserId: uniqueId,
 		Traits: segment.NewTraits().
 			SetName(uniqueId).
-			Set("name", appName).
-			Set("version", appVersion).
 			Set("hostname", GetHostname()).
 			Set("os", runtime.GOOS).
 			Set("cpu_cores", strconv.Itoa(runtime.NumCPU())).
