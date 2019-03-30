@@ -1,22 +1,8 @@
-package docker
+package container_runtime
 
 import (
 	"testing"
 )
-
-func TestIsCIEnvironment(t *testing.T) {
-	val := IsCIEnvironment()
-	if val != false {
-		t.Errorf("Ci is set")
-	}
-}
-
-func TestIsDockerNative(t *testing.T) {
-	result := IsDockerNative()
-	if result != true {
-		t.Errorf("Docker is not native")
-	}
-}
 
 func TestSanitizeCommandPowerShell(t *testing.T) {
 	command := sanitizeCommand("powershell", "command string")
@@ -45,5 +31,3 @@ func TestSystemExec(t *testing.T) {
 		t.Errorf("Error %s", err)
 	}
 }
-
-/* Add for windows...*/

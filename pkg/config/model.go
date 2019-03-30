@@ -41,6 +41,9 @@ type RunConfigurationEntry struct {
 	// commands that should run in the container before the actual command is executed
 	BeforeScript []string `yaml:"before_script"`
 
+	// allows a container to access the container runtime on the host
+	ContainerRuntimeAccess bool `yaml:"containerRuntimeAccess"`
+
 	// Caching of container-directories
 	Caching []CachingEntry `yaml:"cache"`
 

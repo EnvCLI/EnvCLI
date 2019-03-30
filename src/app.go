@@ -12,7 +12,7 @@ import (
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	analytic "github.com/EnvCLI/EnvCLI/pkg/analytic"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
-	docker "github.com/EnvCLI/EnvCLI/pkg/docker"
+	container_runtime "github.com/EnvCLI/EnvCLI/pkg/container_runtime"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
@@ -194,6 +194,22 @@ func main() {
 						return nil
 					}
 
+					// container runtime
+					containerRuntime := &container_runtime.ContainerRuntime{}
+					container := containerRuntime.NewContainer()
+					container.SetImage(commandConfig.Image)
+					container.SetEntrypoint(commandConfig.Entrypoint)
+					container.SetCommandShell(commandConfig.Shell)
+					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
+					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+					container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
+
+					// core: expose ports (command args)
+					container.AddContainerPorts(c.StringSlice("port"))
+
+					// core: pass environment variables (command args)
+					container.AddEnvironmentVariables(c.StringSlice("env"))
+
 					// feature: before_script
 					var commandWithBeforeScript = ""
 					commandWithBeforeScript = strings.TrimSpace(commandWithArguments.String())
@@ -203,57 +219,42 @@ func main() {
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", config.GetOrDefault(propConfig.Properties, "http-proxy", ""), -1)
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", config.GetOrDefault(propConfig.Properties, "https-proxy", ""), -1)
 					}
+					container.SetCommand(commandWithBeforeScript)
 
-					// feature: project mount
-					var containerMounts []docker.ContainerMount
-					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
-					containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+					// feature: container runtime access
+					if commandConfig.ContainerRuntimeAccess {
+						container.AllowContainerRuntimeAcccess()
+					}
 
 					// feature: caching
 					for _, cachingEntry := range commandConfig.Caching {
 						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 						util.CreateDirectory(cacheFolder)
-						containerMounts = append(containerMounts, docker.ContainerMount{MountType: "directory", Source: config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
-					}
 
-					// feature: pass environment variables
-					var environmentVariables []string = c.StringSlice("env")
+						container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name, Target: cachingEntry.ContainerDirectory})
+					}
 
 					// feature: pass all env variables (excludes system variables like PATH, ...) in CI environments
 					if isCIEnvironment {
-						for _, e := range os.Environ() {
-							pair := strings.SplitN(e, "=", 2)
-							var envName = pair[0]
-							var envValue = pair[1]
-
-							// filter vars
-							var systemVars = []string{"_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
-							isExluded, _ := config.InArray(strings.ToUpper(envName), systemVars)
-							if !isExluded {
-								log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
-								environmentVariables = append(environmentVariables, envName+`=`+envValue)
-							} else {
-								log.Debugf("Excluded env variable %s [%s] from host based on the filter rule.", envName, envValue)
-							}
-						}
+						container.AddAllEnvironmentVariables()
 					}
 
 					// feature: proxy environment
 					if propConfigErr == nil {
 						httpProxy := config.GetOrDefault(propConfig.Properties, "http-proxy", "")
 						if httpProxy != "" {
-							environmentVariables = append(environmentVariables, `http_proxy=`+httpProxy)
+							container.AddEnvironmentVariable("http_proxy", httpProxy)
 						}
 
 						httpsProxy := config.GetOrDefault(propConfig.Properties, "https-proxy", "")
 						if httpsProxy != "" {
-							environmentVariables = append(environmentVariables, `https_proxy=`+httpsProxy)
+							container.AddEnvironmentVariable("https_proxy", httpsProxy)
 						}
 					}
 
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", commandConfig.Image)
-					docker.ContainerExec(commandConfig.Image, commandConfig.Entrypoint, commandConfig.Shell, commandWithBeforeScript, containerMounts, commandConfig.Directory+"/"+util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir), environmentVariables, c.StringSlice("port"))
+					container.StartContainer()
 
 					return nil
 				},
