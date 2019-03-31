@@ -151,6 +151,10 @@ func (c *Container) GetRunCommand() string {
 	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		shellCommand.WriteString("-ti ") // tty + interactive
 	}
+	// - name
+	if len(c.name) > 0 {
+		shellCommand.WriteString(fmt.Sprintf("--name %s ", strconv.Quote(c.name)))
+	}
 	// - entrypoint
 	if c.entrypoint != "original" {
 		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s", strconv.Quote(c.entrypoint)))
@@ -161,7 +165,7 @@ func (c *Container) GetRunCommand() string {
 	publishPorts(&shellCommand, &c.containerPorts)
 	// - set working directory
 	if len(c.workingDirectory) > 0 {
-		shellCommand.WriteString(fmt.Sprintf("--workdir %s ", c.workingDirectory))
+		shellCommand.WriteString(fmt.Sprintf("--workdir %s ", strconv.Quote(c.workingDirectory)))
 	}
 	// - volume mounts
 	volumeMount(&shellCommand, &c.volumes)

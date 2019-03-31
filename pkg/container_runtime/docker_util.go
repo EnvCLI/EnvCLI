@@ -36,7 +36,7 @@ func volumeMount(shellCommand *bytes.Buffer, mounts *[]ContainerMount) {
 				mountSource = strings.Replace(mountSource, "\\", "/", -1)
 			}
 
-			shellCommand.WriteString(fmt.Sprintf("-v \"%s:%s\" ", mountSource, mountTarget))
+			shellCommand.WriteString(fmt.Sprintf("-v %s ", strconv.Quote(mountSource+":"+mountTarget)))
 		}
 	}
 }
