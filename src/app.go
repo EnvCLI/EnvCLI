@@ -23,7 +23,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.5.0"
+var appVersion = "v0.5.1"
 
 // Configuration
 var defaultConfigurationDirectory = util.GetExecutionDirectory()
@@ -149,6 +149,11 @@ func main() {
 						Aliases: []string{"p"},
 						Usage:   "Publish ports of the container",
 					},
+					&cli.StringFlag{
+						Name:    "userArgs",
+						Aliases: []string{},
+						Usage:   "Allows to specify custom arguments that will be passed to the docker run command for special cases",
+					},
 				},
 				Action: func(c *cli.Context) error {
 					// parse command
@@ -209,6 +214,11 @@ func main() {
 
 					// core: pass environment variables (command args)
 					container.AddEnvironmentVariables(c.StringSlice("env"))
+
+					// feature: user args
+					if len(c.String("userArgs")) > 0 {
+						container.SetUserArgs(c.String("userArgs"))
+					}
 
 					// feature: before_script
 					var commandWithBeforeScript = ""

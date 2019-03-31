@@ -67,6 +67,16 @@ func TestAddVolume(t *testing.T) {
 	}
 }
 
+func TestSetUserArgs(t *testing.T) {
+	container := Container{}
+	container.SetUserArgs("--link hello:world")
+
+	containerCmd := container.GetRunCommand()
+	if strings.Contains(containerCmd, "--link hello:world") == false {
+		t.Errorf("user args not passed correctly")
+	}
+}
+
 func TestSetImage(t *testing.T) {
 	container := Container{}
 	container.SetImage("alpine:latest")

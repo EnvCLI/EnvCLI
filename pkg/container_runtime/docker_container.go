@@ -24,6 +24,7 @@ type Container struct {
 	volumes          []ContainerMount
 	environment      []EnvironmentProperty
 	containerPorts   []ContainerPort
+	userArgs         string
 }
 
 // SetName sets a new name for the container
@@ -138,6 +139,11 @@ func (c *Container) AddAllEnvironmentVariables() {
 	}
 }
 
+// SetUserArgs allows the user to pass custom arguments to the container run command, for special cases in ci envs with service links / or similar
+func (c *Container) SetUserArgs(newArgs string) {
+	c.userArgs = newArgs
+}
+
 // GetRunCommand renders the command needed the run the container
 func (c *Container) GetRunCommand() string {
 	var shellCommand bytes.Buffer
@@ -169,6 +175,10 @@ func (c *Container) GetRunCommand() string {
 	}
 	// - volume mounts
 	volumeMount(&shellCommand, &c.volumes)
+	// - userArgs
+	if len(c.userArgs) > 0 {
+		shellCommand.WriteString(c.userArgs + " ")
+	}
 	// - image
 	shellCommand.WriteString(fmt.Sprintf("%s ", c.image))
 	// - command to run inside of the container
