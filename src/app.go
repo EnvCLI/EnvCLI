@@ -10,7 +10,6 @@ import (
 	"time"
 
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
-	analytic "github.com/EnvCLI/EnvCLI/pkg/analytic"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	container_runtime "github.com/EnvCLI/EnvCLI/pkg/container_runtime"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
@@ -57,11 +56,6 @@ func main() {
 		// Set Proxy Server
 		os.Setenv("HTTP_PROXY", config.GetOrDefault(propConfig.Properties, "http-proxy", ""))
 		os.Setenv("HTTPS_PROXY", config.GetOrDefault(propConfig.Properties, "https-proxy", ""))
-
-		// Initialize Analytics
-		if config.GetOrDefault(propConfig.Properties, "analytics", "true") == "true" {
-			analytic.InitializeAnalytics(appName, appVersion)
-		}
 	}
 
 	// Update Check, once a day (not in CI)
@@ -103,9 +97,6 @@ func main() {
 			return nil
 		},
 		After: func(c *cli.Context) error {
-			// cleanup
-			analytic.CleanUp()
-
 			return nil
 		},
 		Commands: []*cli.Command{
@@ -187,9 +178,6 @@ func main() {
 					}
 
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, strings.TrimSpace(commandWithArguments.String()))
-
-					// Tracking: command
-					analytic.TriggerEvent("Run", commandName)
 
 					// config: try to load command configuration
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
@@ -320,9 +308,6 @@ func main() {
 							}
 						}
 					}
-
-					// Tracking: Command
-					analytic.TriggerEvent("Aliases", scopeFilter)
 
 					return nil
 				},

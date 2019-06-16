@@ -18,7 +18,7 @@ var defaultConfigurationDirectory = util.GetExecutionDirectory()
 var defaultConfigurationFile = ".envclirc"
 
 // Constants
-var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path", "last-update-check", "analytics"}
+var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path", "last-update-check"}
 
 /**
  * Load the project config

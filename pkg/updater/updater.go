@@ -7,7 +7,6 @@ import (
 	"runtime"
 	"strings"
 
-	analytic "github.com/EnvCLI/EnvCLI/pkg/analytic"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	"github.com/blang/semver"
 	github "github.com/google/go-github/github"
@@ -125,13 +124,10 @@ func (appUpdater ApplicationUpdater) Update(version string, force bool, appVersi
 	// Log Result
 	if applicationVersion.GT(updateTargetVersion) {
 		log.Infof("Successfully downgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
-		analytic.TriggerEvent("Downgrade", updateTargetVersion.String())
 	} else if applicationVersion.LT(updateTargetVersion) {
 		log.Infof("Successfully upgraded from [%s] to [%s]!", applicationVersion.String(), updateTargetVersion.String())
-		analytic.TriggerEvent("Update", updateTargetVersion.String())
 	} else {
 		log.Infof("Successfully downloaded [%s]!", applicationVersion.String())
-		analytic.TriggerEvent("Update", updateTargetVersion.String())
 	}
 }
 
@@ -157,7 +153,6 @@ func (appUpdater ApplicationUpdater) IsUpdateAvailable(appVersion string) bool {
 
 	// Evaluate
 	if applicationVersion.LT(updateTargetVersion) {
-		analytic.TriggerEvent("UpdateAvailable", "true")
 		return true
 	}
 
