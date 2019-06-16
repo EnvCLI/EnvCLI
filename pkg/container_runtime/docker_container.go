@@ -148,6 +148,11 @@ func (c *Container) SetUserArgs(newArgs string) {
 func (c *Container) GetRunCommand() string {
 	var shellCommand bytes.Buffer
 
+	// detect cygwin -> needs winpty on windows 
+	if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
+		shellCommand.WriteString("winpty ")
+	}
+
 	// build docker command
 	// - docker
 	shellCommand.WriteString("docker run --rm ")
