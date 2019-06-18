@@ -22,7 +22,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.5.2"
+var appVersion = "v0.6.0"
 
 // Configuration
 var defaultConfigurationDirectory = util.GetExecutionDirectory()
@@ -229,6 +229,11 @@ func main() {
 						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 						util.CreateDirectory(cacheFolder)
 						container.AddCacheMount(cachingEntry.Name, cacheFolder, cachingEntry.ContainerDirectory)
+					}
+
+					// feature: capabilities
+					for _, cap := range commandConfig.CapAdd {
+						container.AddCapability(cap)
 					}
 
 					// feature: pass all env variables (excludes system variables like PATH, ...) in CI environments

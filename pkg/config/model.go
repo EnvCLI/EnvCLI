@@ -44,6 +44,9 @@ type RunConfigurationEntry struct {
 	// allows a container to access the container runtime on the host
 	ContainerRuntimeAccess bool `yaml:"containerRuntimeAccess"`
 
+	// add capabilities to the container
+	CapAdd []string `yaml:"capAdd"`
+
 	// Caching of container-directories
 	Caching []CachingEntry `yaml:"cache"`
 

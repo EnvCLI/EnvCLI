@@ -24,6 +24,7 @@ type Container struct {
 	volumes          []ContainerMount
 	environment      []EnvironmentProperty
 	containerPorts   []ContainerPort
+	capabilities     []string
 	userArgs         string
 }
 
@@ -91,6 +92,11 @@ func (c *Container) SetWorkingDirectory(newWorkingDirectory string) {
 // AddContainerPort publishes a port
 func (c *Container) AddContainerPort(port ContainerPort) {
 	c.containerPorts = append(c.containerPorts, port)
+}
+
+// AddCapability adds a capability to the container
+func (c *Container) AddCapability(capability string) {
+	c.capabilities = append(c.capabilities, capability)
 }
 
 // AddContainerPorts adds multiple published ports
@@ -174,6 +180,10 @@ func (c *Container) GetRunCommand() string {
 	setEnvironmentVariables(&shellCommand, &c.environment)
 	// - publish ports
 	publishPorts(&shellCommand, &c.containerPorts)
+	// - capabilities
+	for _, cap := range c.capabilities {
+		shellCommand.WriteString(fmt.Sprintf("--cap-add %s", strconv.Quote(cap)))
+	}
 	// - set working directory
 	if len(c.workingDirectory) > 0 {
 		shellCommand.WriteString(fmt.Sprintf("--workdir %s ", strconv.Quote(c.workingDirectory)))
