@@ -22,7 +22,7 @@ import (
 
 // App Properties
 var appName = "EnvCLI Utility"
-var appVersion = "v0.5.1"
+var appVersion = "v0.5.2"
 
 // Configuration
 var defaultConfigurationDirectory = util.GetExecutionDirectory()

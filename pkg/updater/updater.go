@@ -9,7 +9,7 @@ import (
 
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	"github.com/blang/semver"
-	github "github.com/google/go-github/github"
+	github "github.com/google/go-github/v26/github"
 	update "github.com/inconshreveable/go-update"
 	log "github.com/sirupsen/logrus"
 )
