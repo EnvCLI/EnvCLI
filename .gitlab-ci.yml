@@ -11,7 +11,6 @@ services:
 Test EnvCLI:
   stage: test
   script:
-  - envcli run dep ensure --vendor-only
   - envcli run -env GOOS=linux --env GOARCH=amd64 --env CGO_ENABLED=0 go test src/*.go
   - envcli run -env GOOS=linux --env GOARCH=amd64 --env CGO_ENABLED=0 go test pkg/container_runtime/*.go
   only:
@@ -21,7 +20,6 @@ Test EnvCLI:
 Build EnvCLI:
   stage: build
   script:
-  - envcli run dep ensure --vendor-only
   - envcli run --env GOOS=windows --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_windows_386 -ldflags="-w" src/*
   - envcli run --env GOOS=windows --env GOARCH=amd64 --env CGO_ENABLED=0 go build -o build/envcli_windows_amd64 -ldflags="-w" src/*
   - envcli run --env GOOS=linux --env GOARCH=386 --env CGO_ENABLED=0 go build -o build/envcli_linux_386 -ldflags="-w" src/*
@@ -35,13 +33,3 @@ Build EnvCLI:
     paths:
     - build/
     expire_in: 1 week
-
-Create Sentry Release:
-  stage: release
-  script:
-  # Create a release
-  - envcli run sentry-cli releases --org philipp-heuer new --project envcli $CI_COMMIT_REF_NAME
-  # Associate commits with the release
-  - envcli run sentry-cli releases set-commits --auto $CI_COMMIT_REF_NAME
-  only:
-  - /^v[0-9]+\.[0-9]+\.[0-9]+$/

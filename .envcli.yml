@@ -6,16 +6,3 @@ images:
   image: golang:1.12.6-stretch
   directory: /project
   shell: sh
-- name: godep
-  description: dep is a prototype dependency management tool for Go. It requires Go 1.8 or newer to compile.
-  provides:
-  - dep
-  image: envcli/go-dep:0.5.0
-  directory: /go/src/github.com/EnvCLI/EnvCLI
-  shell: sh
-- name: sentryio
-  description: This is a Sentry command line client for some generic tasks.
-  provides:
-  - sentry-cli
-  image: getsentry/sentry-cli:1.40.0
-  entrypoint: ""
