@@ -2,13 +2,11 @@ package container_runtime
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 
-	isatty "github.com/mattn/go-isatty"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -154,52 +152,15 @@ func (c *Container) SetUserArgs(newArgs string) {
 func (c *Container) GetRunCommand() string {
 	var shellCommand bytes.Buffer
 
-	// detect cygwin -> needs winpty on windows 
-	if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		shellCommand.WriteString("winpty ")
+	// autodetect container runtime
+	if IsPodman() {
+		shellCommand.WriteString(c.GetPodmanCommand())
+	} else if IsDockerNative() || IsDockerToolbox() {
+		shellCommand.WriteString(c.GetDockerCommand())
+	} else {
+		log.Fatalf("No supported container runtime found (podman, docker, docker toolbox)!")
 	}
 
-	// build docker command
-	// - docker
-	shellCommand.WriteString("docker run --rm ")
-	// - terminal
-	if IsCIEnvironment() {
-		// env variable CI is set, we can't use --tty or --interactive here
-	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		shellCommand.WriteString("-ti ") // tty + interactive
-	}
-	// - name
-	if len(c.name) > 0 {
-		shellCommand.WriteString(fmt.Sprintf("--name %s ", strconv.Quote(c.name)))
-	}
-	// - entrypoint
-	if c.entrypoint != "original" {
-		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s", strconv.Quote(c.entrypoint)))
-	}
-	// - environment variables
-	setEnvironmentVariables(&shellCommand, &c.environment)
-	// - publish ports
-	publishPorts(&shellCommand, &c.containerPorts)
-	// - capabilities
-	for _, cap := range c.capabilities {
-		shellCommand.WriteString(fmt.Sprintf("--cap-add %s", strconv.Quote(cap)))
-	}
-	// - set working directory
-	if len(c.workingDirectory) > 0 {
-		shellCommand.WriteString(fmt.Sprintf("--workdir %s ", strconv.Quote(c.workingDirectory)))
-	}
-	// - volume mounts
-	volumeMount(&shellCommand, &c.volumes)
-	// - userArgs
-	if len(c.userArgs) > 0 {
-		shellCommand.WriteString(c.userArgs + " ")
-	}
-	// - image
-	shellCommand.WriteString(fmt.Sprintf("%s ", c.image))
-	// - command to run inside of the container
-	shellCommand.WriteString(sanitizeCommand(c.commandShell, c.command))
-
-	log.Debugf("Executed ShellCommand: %s", shellCommand.String())
 	return shellCommand.String()
 }
 
@@ -207,14 +168,15 @@ func (c *Container) GetRunCommand() string {
 func (c *Container) StartContainer() {
 	var shellCommand bytes.Buffer
 
-	// - docker machine prefix
+	// - workaround for docker toolbox (will be deprecated and removed from envcli when WSL 2 is released)
 	if IsDockerToolbox() {
 		shellCommand.WriteString("docker-machine ssh envcli ")
 	}
 
-	// - docker
+	// - command
 	shellCommand.WriteString(c.GetRunCommand())
 
 	// execute command
+	log.Debugf("Executed ShellCommand: %s", shellCommand.String())
 	systemExec(shellCommand.String())
 }

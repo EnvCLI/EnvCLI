@@ -1,13 +1,17 @@
+# Image
 image: docker.io/envcli/envcli:latest
 
+# Services
+services:
+- docker:stable-dind
+
+# Stages
 stages:
 - test
 - build
 - release
 
-services:
-- docker:stable-dind
-
+# Run Tests
 Test EnvCLI:
   stage: test
   script:
@@ -17,6 +21,7 @@ Test EnvCLI:
   - master
   - develop
 
+# Run Builds
 Build EnvCLI:
   stage: build
   script:

@@ -25,6 +25,19 @@ func IsCIEnvironment() bool {
 }
 
 /**
+ * Detect Podman
+ */
+ func IsPodman() bool {
+	path, err := exec.LookPath("podman")
+	if err != nil {
+		return false
+	}
+
+	log.Debugf("Found Podman at [%s].", path)
+	return true
+}
+
+/**
  * Detect Docker native
  */
 func IsDockerNative() bool {

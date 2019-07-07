@@ -10,6 +10,7 @@ type ConfigurationLoader struct {
  * ProjectConfigrationFile is the schema for configuration files, that hold multiple command specifications
  */
 type ProjectConfigrationFile struct {
+	Version string `default:"v1"`
 	Images []RunConfigurationEntry
 }
 
