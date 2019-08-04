@@ -37,7 +37,7 @@ func init() {
 
 	// Logging
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.WarnLevel)
 
 	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
 	if runtime.GOOS == "windows" {
