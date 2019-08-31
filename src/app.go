@@ -183,7 +183,7 @@ func main() {
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
 					if commandConfigErr != nil {
 						log.Errorf(commandConfigErr.Error())
-						sentry.HandleError(commandConfigErr)
+						os.Exit(1)
 						return nil
 					}
 
