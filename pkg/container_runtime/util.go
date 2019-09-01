@@ -15,8 +15,15 @@ import (
  * Is CI Environment
  */
 func IsCIEnvironment() bool {
+	// usually set by ci
 	_, ciVariableSet := os.LookupEnv("CI")
 	if ciVariableSet {
+		return true
+	}
+
+	// set by normalize ci
+	_, nciVariableSet := os.LookupEnv("NCI")
+	if nciVariableSet {
 		return true
 	}
 
