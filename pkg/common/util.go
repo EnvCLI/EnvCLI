@@ -44,3 +44,11 @@ func ParseAndEscapeArgs(args []string) string {
 	command := commandWithArguments.String()
 	return command[:len(command)-1]
 }
+
+// CheckForError checks if a error happend and logs it, and ends the process
+func CheckForError(err error) {
+	if err != nil {
+		log.Panic(err)
+		panic(err)
+	}
+}

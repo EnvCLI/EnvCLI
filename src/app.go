@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,14 +14,15 @@ import (
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
-	colorable "github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	cli "gopkg.in/urfave/cli.v2"
 )
 
-// App Properties
-var appName = "EnvCLI Utility"
-var appVersion = "v0.6.0"
+// Version the binary was build from, injected at build time
+var Version string
+
+// CommitHash the binary was build from, injected at build time
+var CommitHash string
 
 // Configuration
 var defaultConfigurationDirectory = util.GetExecutionDirectory()
@@ -33,17 +33,16 @@ var isCIEnvironment = util.IsCIEnvironment()
 // Init Hook
 func init() {
 	// Initialize SentryIO
-	sentry.InitializeSentryIO(appVersion)
+	sentry.InitializeSentryIO("EnvCLI")
 
-	// Logging
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.WarnLevel)
 
-	// Fix color output for windows [https://github.com/Sirupsen/logrus/issues/172]
-	if runtime.GOOS == "windows" {
-		log.SetFormatter(&log.TextFormatter{ForceColors: true})
-		log.SetOutput(colorable.NewColorableStdout())
-	}
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
 }
 
 // CLI Main Entrypoint
@@ -62,7 +61,7 @@ func main() {
 	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 	var lastUpdateCheck, _ = strconv.ParseInt(config.GetOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
-		if appUpdater.IsUpdateAvailable(appVersion) {
+		if appUpdater.IsUpdateAvailable(Version) {
 			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
 		}
 	}
@@ -72,8 +71,8 @@ func main() {
 
 	// CLI
 	app := &cli.App{
-		Name:                  appName,
-		Version:               appVersion,
+		Name:                  "EnvCLI",
+		Version:               Version,
 		Compiled:              time.Now(),
 		EnableShellCompletion: true,
 		Authors: []*cli.Author{
@@ -117,7 +116,7 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater.Update("latest", c.Bool("force"), appVersion)
+					appUpdater.Update("latest", c.Bool("force"), Version)
 
 					return nil
 				},
@@ -269,7 +268,7 @@ func main() {
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
-								aliases.InstallAlias(appVersion, currentCommand, element.Scope)
+								aliases.InstallAlias(Version, currentCommand, element.Scope)
 							}
 						}
 					}
@@ -286,7 +285,7 @@ func main() {
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
-								aliases.InstallAlias(appVersion, currentCommand, element.Scope)
+								aliases.InstallAlias(Version, currentCommand, element.Scope)
 							}
 						}
 					}

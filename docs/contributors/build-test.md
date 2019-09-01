@@ -6,6 +6,12 @@
 envcli run dep ensure
 ```
 
+## Embed alias scripts using GoBindata
+
+```bash
+go-bindata -o pkg/aliases/scripts.go -pkg aliases scripts/
+```
+
 ## Build the Binaries (Windows/Linux/Mac)
 
 ```bash
