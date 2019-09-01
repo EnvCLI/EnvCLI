@@ -148,14 +148,26 @@ func (c *Container) SetUserArgs(newArgs string) {
 	c.userArgs = newArgs
 }
 
-// GetRunCommand renders the command needed the run the container
-func (c *Container) GetRunCommand() string {
+// DetectRuntime returns the first available container runtime
+func (c *Container) DetectRuntime() string {
+	// autodetect container runtime
+	if IsPodman() {
+		return "podman"
+	} else if IsDockerNative() || IsDockerToolbox() {
+		return "docker"
+	}
+
+	return "unknown"
+}
+
+// GetRunCommand gets the run command for the specified container runtime
+func (c *Container) GetRunCommand(runtime string) string {
 	var shellCommand bytes.Buffer
 
 	// autodetect container runtime
-	if IsPodman() {
+	if runtime == "podman" {
 		shellCommand.WriteString(c.GetPodmanCommand())
-	} else if IsDockerNative() || IsDockerToolbox() {
+	} else if runtime == "docker" {
 		shellCommand.WriteString(c.GetDockerCommand())
 	} else {
 		log.Fatalf("No supported container runtime found (podman, docker, docker toolbox)!")
@@ -174,7 +186,7 @@ func (c *Container) StartContainer() {
 	}
 
 	// - command
-	shellCommand.WriteString(c.GetRunCommand())
+	shellCommand.WriteString(c.GetRunCommand(c.DetectRuntime()))
 
 	// execute command
 	log.Debugf("Executed ShellCommand: %s", shellCommand.String())

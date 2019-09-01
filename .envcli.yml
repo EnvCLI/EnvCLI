@@ -3,6 +3,7 @@ images:
   description: Go (golang) is a general purpose, higher-level, imperative programming language.
   provides:
   - go
-  image: golang:1.12.6-stretch
-  directory: /project
-  shell: sh
+  image: docker.io/golang:1.12-buster
+  cache:
+  - name: golang-12
+    directory: /go/pkg

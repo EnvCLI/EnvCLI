@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 
-	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
@@ -27,7 +26,7 @@ func IsCIEnvironment() bool {
 /**
  * Detect Podman
  */
- func IsPodman() bool {
+func IsPodman() bool {
 	path, err := exec.LookPath("podman")
 	if err != nil {
 		return false
@@ -83,18 +82,16 @@ func sanitizeCommand(commandShell string, command string) string {
  * CLI Command Passthru with input/output
  */
 func systemExec(command string) error {
-	log.Debugf("Running Command: %s", command)
-
 	// Run Command
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		log.Debugf("Running Command: /usr/bin/env sh -c %s", command)
 		err := cmd.Run()
 		if err != nil {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())
-			sentry.HandleError(err)
 			return err
 		}
 	} else if runtime.GOOS == "windows" {
@@ -103,9 +100,9 @@ func systemExec(command string) error {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
+		log.Debugf("Running Command: powershell %s", command)
 		if err != nil {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())
-			sentry.HandleError(err)
 			return err
 		}
 	}

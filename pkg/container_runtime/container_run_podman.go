@@ -13,7 +13,7 @@ import (
 func (c *Container) GetPodmanCommand() string {
 	var shellCommand bytes.Buffer
 
-	// detect cygwin -> needs winpty on windows 
+	// detect cygwin -> needs winpty on windows
 	if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		shellCommand.WriteString("winpty ")
 	}
@@ -31,8 +31,10 @@ func (c *Container) GetPodmanCommand() string {
 		shellCommand.WriteString(fmt.Sprintf("--name %s ", strconv.Quote(c.name)))
 	}
 	// - entrypoint
-	if c.entrypoint != "original" {
+	if c.entrypoint != "unset" {
 		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s", strconv.Quote(c.entrypoint)))
+	} else {
+		shellCommand.WriteString("--entrypoint= ")
 	}
 	// - environment variables
 	setEnvironmentVariables(&shellCommand, &c.environment)

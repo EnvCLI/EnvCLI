@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"runtime"
 	"sort"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
+	common "github.com/EnvCLI/EnvCLI/pkg/common"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
 	container_runtime "github.com/EnvCLI/EnvCLI/pkg/container_runtime"
 	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
@@ -92,7 +92,7 @@ func main() {
 		},
 		Before: func(c *cli.Context) error {
 			// Set loglevel
-			setLoglevel(c.String("loglevel"))
+			common.SetLoglevel(c.String("loglevel"))
 
 			return nil
 		},
@@ -152,32 +152,9 @@ func main() {
 
 					// iterate and quote args if needed
 					commandArgs := append([]string{commandName}, c.Args().Tail()...)
-					var commandWithArguments bytes.Buffer
-					for _, arg := range commandArgs {
-						if strings.Contains(arg, " ") {
-							i := strings.Index(arg, "=")
-							if i > -1 {
-								argName := arg[0:i]
-								argValue := arg[i+1 : len(arg)]
-								fullArg := strings.Replace(argName+"="+strconv.Quote(argValue), "\"", "\\\"", -1)
+					commandWithArguments := common.ParseAndEscapeArgs(commandArgs)
 
-								// quote for powershell, differs from the quoting for unix-based systems
-								if runtime.GOOS == "windows" {
-									fullArg = strings.Replace(argName+"="+strconv.Quote(argValue), "\"", "`\"", -1)
-								}
-
-								commandWithArguments.WriteString(fullArg)
-							} else {
-								commandWithArguments.WriteString(arg)
-							}
-						} else {
-							commandWithArguments.WriteString(arg)
-						}
-
-						commandWithArguments.WriteString(" ")
-					}
-
-					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, strings.TrimSpace(commandWithArguments.String()))
+					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
 					// config: try to load command configuration
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
@@ -210,7 +187,7 @@ func main() {
 
 					// feature: before_script
 					var commandWithBeforeScript = ""
-					commandWithBeforeScript = strings.TrimSpace(commandWithArguments.String())
+					commandWithBeforeScript = strings.TrimSpace(commandWithArguments)
 					if commandConfig.BeforeScript != nil {
 						commandWithBeforeScript = strings.Join(commandConfig.BeforeScript[:], ";") + " && " + commandWithBeforeScript
 

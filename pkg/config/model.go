@@ -11,7 +11,7 @@ type ConfigurationLoader struct {
  */
 type ProjectConfigrationFile struct {
 	Version string `default:"v1"`
-	Images []RunConfigurationEntry
+	Images  []RunConfigurationEntry
 }
 
 /**
@@ -34,7 +34,7 @@ type RunConfigurationEntry struct {
 	Directory string `default:"/project"`
 
 	// overwrite the default entrypoint
-	Entrypoint string `default:"original"`
+	Entrypoint string `default:"unset"`
 
 	// wrap the executed command inside of the container into a shell (ex. if you use globs)
 	Shell string `default:"none"`
