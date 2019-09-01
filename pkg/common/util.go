@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"runtime"
 	"strings"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -14,16 +15,22 @@ import (
 func SetLoglevel(loglevel string) {
 	if loglevel == "panic" {
 		log.SetLevel(log.PanicLevel)
+		log.SetReportCaller(false)
 	} else if loglevel == "fatal" {
 		log.SetLevel(log.FatalLevel)
+		log.SetReportCaller(false)
 	} else if loglevel == "warn" {
 		log.SetLevel(log.WarnLevel)
+		log.SetReportCaller(false)
 	} else if loglevel == "info" {
 		log.SetLevel(log.InfoLevel)
+		log.SetReportCaller(false)
 	} else if loglevel == "debug" {
 		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
 	} else if loglevel == "trace" {
 		log.SetLevel(log.TraceLevel)
+		log.SetReportCaller(true)
 	}
 }
 
@@ -49,6 +56,6 @@ func ParseAndEscapeArgs(args []string) string {
 func CheckForError(err error) {
 	if err != nil {
 		log.Panic(err)
-		panic(err)
+		os.Exit(1)
 	}
 }

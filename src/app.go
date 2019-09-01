@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	common "github.com/EnvCLI/EnvCLI/pkg/common"
@@ -47,6 +48,9 @@ func init() {
 
 // CLI Main Entrypoint
 func main() {
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
+
 	// Global Configuration
 	propConfig, propConfigErr := config.LoadPropertyConfig()
 
@@ -85,7 +89,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "loglevel",
-				Value: "info",
+				Value: "warn",
 				Usage: "The loglevel used by envcli, use this to troubleshoot issues",
 			},
 		},
@@ -233,6 +237,35 @@ func main() {
 					// detect container service and send command
 					log.Infof("Executing command in container [%s].", commandConfig.Image)
 					container.StartContainer()
+
+					return nil
+				},
+			},
+			/**
+			 * Command: pull-image
+			 */
+			 {
+				Name:    "pull-image",
+				Aliases: []string{},
+				Usage:   "pulls the needed images for the specified commands",
+				Action: func(c *cli.Context) error {
+					commands := append([]string{c.Args().First()}, c.Args().Tail()...)
+					
+					// pull image for each provided command
+					fmt.Sprintf("Pulling images for [%s].\n", strings.Join(commands, ", "))
+					for _, cmd := range commands {
+						log.Debugf("Pulling image for command [%s].", cmd)
+
+						// config: try to load command configuration
+						commandConfig, err := config.GetCommandConfiguration(cmd, util.GetWorkingDirectory())
+						common.CheckForError(err)
+
+						// container
+						containerRuntime := &container_runtime.ContainerRuntime{}
+						container := containerRuntime.NewContainer()
+						container.SetImage(commandConfig.Image)
+						container.PullImage()
+					}
 
 					return nil
 				},

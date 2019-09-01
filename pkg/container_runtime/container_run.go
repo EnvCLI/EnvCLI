@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"errors"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -160,6 +161,18 @@ func (c *Container) DetectRuntime() string {
 	return "unknown"
 }
 
+// GetPullCommand gets the command to pull the required image
+func (c *Container) GetPullCommand(runtime string) (string, error) {
+	// autodetect container runtime
+	if runtime == "podman" {
+		return "podman pull "+c.image, nil
+	} else if runtime == "docker" {
+		return "docker pull "+c.image, nil
+	} else {
+		return "", errors.New("No supported container runtime found (podman, docker, docker toolbox)! ["+runtime+"]")
+	}
+}
+
 // GetRunCommand gets the run command for the specified container runtime
 func (c *Container) GetRunCommand(runtime string) string {
 	var shellCommand bytes.Buffer
@@ -189,6 +202,17 @@ func (c *Container) StartContainer() {
 	shellCommand.WriteString(c.GetRunCommand(c.DetectRuntime()))
 
 	// execute command
-	log.Debugf("Executed ShellCommand: %s", shellCommand.String())
 	systemExec(shellCommand.String())
 }
+
+// PullImage pulls the image for the container
+func (c *Container) PullImage() {
+	pullCmd, pullCmdErr := c.GetPullCommand(c.DetectRuntime())
+	if pullCmdErr == nil {
+		systemExec(pullCmd)
+	} else {
+		log.Errorf("Can't pull image: %s", pullCmdErr.Error())
+		os.Exit(1)
+	}
+}
+
