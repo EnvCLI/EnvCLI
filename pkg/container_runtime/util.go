@@ -32,7 +32,7 @@ func IsPodman() bool {
 		return false
 	}
 
-	log.Debugf("Found Podman at [%s].", path)
+	log.Tracef("Found Podman at [%s].", path)
 	return true
 }
 
@@ -45,7 +45,7 @@ func IsDockerNative() bool {
 		return false
 	}
 
-	log.Debugf("Found Docker native at [%s].", path)
+	log.Tracef("Found Docker native at [%s].", path)
 	return true
 }
 
@@ -58,7 +58,7 @@ func IsDockerToolbox() bool {
 		return false
 	}
 
-	log.Debugf("Found Docker Toolbox at [%s].", path)
+	log.Tracef("Found Docker Toolbox at [%s].", path)
 	return true
 }
 
@@ -68,11 +68,20 @@ func IsDockerToolbox() bool {
 func sanitizeCommand(commandShell string, command string) string {
 	// Shell (wrap the command within the container into a shell)
 	if commandShell == "powershell" {
+		// would be used for windows containers, never tested though
 		command = fmt.Sprintf("powershell %s", command)
 	} else if commandShell == "sh" {
-		command = fmt.Sprintf("/usr/bin/env sh -c \"%s\"", command)
+		if runtime.GOOS == "windows" {
+			command = fmt.Sprintf("\"/usr/bin/env\" \"sh\" \"-c\" \"%s\"", strings.Replace(command, "\"", "`\"", -1))
+		} else {
+			command = fmt.Sprintf("\"/usr/bin/env\" \"sh\" \"-c\" \"%s\"", strings.Replace(command, "\"", "\\\"", -1))
+		}
 	} else if commandShell == "bash" {
-		command = fmt.Sprintf("/usr/bin/env bash -c \"%s\" -l", command)
+		if runtime.GOOS == "windows" {
+			command = fmt.Sprintf("\"/usr/bin/env\" \"bash\" \"-l\" \"-c\" \"%s\"", strings.Replace(command, "\"", "`\"", -1))
+		} else {
+			command = fmt.Sprintf("\"/usr/bin/env\" \"bash\" \"-l\" \"-c\" \"%s\"", strings.Replace(command, "\"", "\\\"", -1))
+		}
 	}
 
 	return command

@@ -150,13 +150,13 @@ func GetProjectOrWorkingDirectory() string {
 func GetProjectDirectory() string {
 	log.WithFields(log.Fields{
 		"method": "getProjectDirectory()",
-	}).Debugf("Trying to detect project directory ...")
+	}).Tracef("Trying to detect project directory ...")
 
 	currentDirectory := GetWorkingDirectory()
 	var projectDirectory = ""
 	log.WithFields(log.Fields{
 		"method": "getProjectDirectory()",
-	}).Debugf("current working directory [%s]", currentDirectory)
+	}).Tracef("current working directory [%s]", currentDirectory)
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
 
@@ -178,7 +178,7 @@ func GetProjectDirectory() string {
 		currentDirectory = filepath.Dir(currentDirectory)
 		log.WithFields(log.Fields{
 			"method": "getProjectDirectory()",
-		}).Debugf("proceed to search next directory [%s]", currentDirectory)
+		}).Tracef("proceed to search next directory [%s]", currentDirectory)
 	}
 
 	return ""

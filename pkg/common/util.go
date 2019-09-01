@@ -38,7 +38,7 @@ func SetLoglevel(loglevel string) {
 func ParseAndEscapeArgs(args []string) string {
 	var commandWithArguments bytes.Buffer
 	for _, arg := range args {
-		log.Debug("Parsing arg: " + arg)
+		log.Trace("Parsing arg: " + arg)
 		if runtime.GOOS == "windows" {
 			quotedArg := "\"" + strings.Replace(strings.Trim(arg, "\""), "\"", "`\"", -1) + "\""
 			commandWithArguments.WriteString(quotedArg + " ")
@@ -55,7 +55,7 @@ func ParseAndEscapeArgs(args []string) string {
 // CheckForError checks if a error happend and logs it, and ends the process
 func CheckForError(err error) {
 	if err != nil {
-		log.Panic(err)
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 }

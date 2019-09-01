@@ -1,9 +1,9 @@
 # Build & Test EnvCLI
 
-## Download the Dependencies
+## Update all direct and indirect dependencies
 
 ```bash
-envcli run dep ensure
+go get -u=patch
 ```
 
 ## Embed alias scripts using GoBindata
