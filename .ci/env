@@ -1,0 +1,3 @@
+# pipeline config
+PROJECT_TYPE=golang-cli
+DEPLOYMENT_TYPE=bintray
