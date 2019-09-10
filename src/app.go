@@ -302,17 +302,24 @@ func main() {
 
 					// create project-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "project" {
-						var projectDirectory = config.GetProjectDirectory()
-						log.Debugf("Project Directory: %s", projectDirectory)
-						projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
-
-						for _, element := range projectConfig.Images {
-							element.Scope = "Project"
-							log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
-
-							// for each provided command
-							for _, currentCommand := range element.Provides {
-								aliases.InstallAlias(Version, currentCommand, element.Scope)
+						var projectDirectory, projectDirectoryErr = config.GetProjectDirectory()
+						if projectDirectoryErr != nil && scopeFilter == "project" {
+							log.Error("Can't install project-specific aliases as no valid project was found!")
+							os.Exit(1)
+						} else if projectDirectoryErr != nil {
+							log.Warnf("Can't find a project directory, not throwing a error since all aliases are supposed to be installed!")
+						} else {
+							log.Debugf("Project Directory: %s", projectDirectory)
+							projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
+	
+							for _, element := range projectConfig.Images {
+								element.Scope = "Project"
+								log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
+	
+								// for each provided command
+								for _, currentCommand := range element.Provides {
+									aliases.InstallAlias(Version, currentCommand, element.Scope)
+								}
 							}
 						}
 					}
@@ -333,14 +340,15 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 2 {
-								log.Fatal("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]")
+								fmt.Sprintf("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]\n")
+								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
 							varValue := c.Args().Get(1)
 
 							// Set value
 							config.SetPropertyConfigEntry(varName, varValue)
-							log.Infof("Set value of %s to [%s]", varName, varValue)
+							fmt.Sprintf("Set value of %s to [%s]\n", varName, varValue)
 
 							return nil
 						},
@@ -350,12 +358,13 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								log.Fatal("Please provide the variable name you want to read. [envcli config get variable]")
+								fmt.Sprintf("Please provide the variable name you want to read. [envcli config get variable]\n")
+								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
 
 							// Get Value
-							log.Infof("%s [%s]", varName, config.GetPropertyConfigEntry(varName))
+							fmt.Sprintf("%s [%s]\n", varName, config.GetPropertyConfigEntry(varName))
 
 							return nil
 						},
@@ -365,7 +374,7 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Print all values
 							for key, value := range propConfig.Properties {
-								log.Infof("%s [%s]", key, value)
+								fmt.Sprintf("%s [%s]\n", key, value)
 							}
 
 							return nil
@@ -376,13 +385,14 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								log.Fatal("Please provide the variable name you want to unset. [envcli config unset variable]")
+								fmt.Sprintf("Please provide the variable name you want to unset. [envcli config unset variable]\n")
+								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
 
 							// Unset value
 							config.UnsetPropertyConfigEntry(varName)
-							log.Infof("Value of variable %s set to [].", varName)
+							fmt.Sprintf("Value of variable %s set to [].\n", varName)
 
 							return nil
 						},

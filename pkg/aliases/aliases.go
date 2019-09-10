@@ -9,9 +9,7 @@ import (
 	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
-/**
- * CLI Command Passthru with input/output
- */
+// InstallAlias installs simple aliases that pass all parameters to envcli run
 func InstallAlias(appVersion string, command string, scope string) error {
 	log.Debugf("Creating alias for command: %s [Scope: %s]", command, scope)
 

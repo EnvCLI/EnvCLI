@@ -93,7 +93,7 @@ func TestSetCommand(t *testing.T) {
 	container.SetCommand("printenv")
 
 	containerCmd := container.GetRunCommand("docker")
-	if strings.HasSuffix(containerCmd, "/usr/bin/env sh -c \"printenv\"") == false {
+	if strings.HasSuffix(containerCmd, "\"/usr/bin/env\" \"sh\" \"-c\" \"printenv\"") == false {
 		t.Errorf("command not set correctly")
 	}
 }

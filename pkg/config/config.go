@@ -137,8 +137,8 @@ func UnsetPropertyConfigEntry(varName string) {
  * GetProjectOrWorkingDirectory returns either the project directory, if one can be found or the working directory
  */
 func GetProjectOrWorkingDirectory() string {
-	var directory = GetProjectDirectory()
-	if directory == "" {
+	var directory, err = GetProjectDirectory()
+	if err != nil {
 		directory = util.GetWorkingDirectory()
 	}
 	return directory
@@ -147,41 +147,31 @@ func GetProjectOrWorkingDirectory() string {
 /**
  * Get the project root directory by searching for the envcli config
  */
-func GetProjectDirectory() string {
-	log.WithFields(log.Fields{
-		"method": "getProjectDirectory()",
-	}).Tracef("Trying to detect project directory ...")
+func GetProjectDirectory() (string, error) {
+	log.Tracef("Trying to detect project directory ...")
 
 	currentDirectory := GetWorkingDirectory()
 	var projectDirectory = ""
-	log.WithFields(log.Fields{
-		"method": "getProjectDirectory()",
-	}).Tracef("current working directory [%s]", currentDirectory)
+	log.Tracef("current working directory [%s]", currentDirectory)
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
 
 	for projectDirectory == "" {
 		if _, err := os.Stat(filepath.Join(currentDirectory, "/.envcli.yml")); err == nil {
-			log.WithFields(log.Fields{
-				"method": "getProjectDirectory()",
-			}).Debugf("found project config in directory [%s]", currentDirectory)
-			return currentDirectory
+			log.Debugf("found project config in directory [%s]", currentDirectory)
+			return currentDirectory, nil
 		}
 
 		if directoryParts[0]+"\\" == currentDirectory || currentDirectory == "/" {
-			log.WithFields(log.Fields{
-				"method": "getProjectDirectory()",
-			}).Debugf("didn't find a envcli project config in any parent directors")
-			return ""
+			log.Debugf("didn't find a envcli project config in any parent directories")
+			return "", errors.New("Didn't find a envcli project config in any parent directories")
 		}
 
 		currentDirectory = filepath.Dir(currentDirectory)
-		log.WithFields(log.Fields{
-			"method": "getProjectDirectory()",
-		}).Tracef("proceed to search next directory [%s]", currentDirectory)
+		log.Tracef("proceed to search next directory [%s]", currentDirectory)
 	}
 
-	return ""
+	return "", errors.New("Didn't find a envcli project config in any parent directories")
 }
 
 /**
@@ -214,14 +204,20 @@ func GetCommandConfiguration(commandName string, currentDirectory string) (RunCo
 		return emptyEntry, propConfigErr
 	}
 
+	// project directory
+	projectDir, projectDirErr := GetProjectDirectory()
+
 	// load global (user-scope) configuration
 	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
 	globalConfig, _ := LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 	// load project configuration
-	log.Debugf("Project Directory: %s", currentDirectory)
-	projectConfig, _ := LoadProjectConfig(GetProjectDirectory() + "/.envcli.yml")
+	var projectConfig ProjectConfigrationFile
+	if projectDirErr == nil {
+		log.Debugf("Project Directory: %s", projectDir)
+		projectConfig, _ = LoadProjectConfig(projectDir + "/.envcli.yml")
+	}
 
 	// merge project and global configuration
 	var finalConfiguration = MergeConfigurations(projectConfig, globalConfig)

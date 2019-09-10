@@ -13,14 +13,14 @@ func TestSanitizeCommandPowerShell(t *testing.T) {
 
 func TestSanitizeCommandSh(t *testing.T) {
 	command := sanitizeCommand("sh", "command string")
-	if command != "/usr/bin/env sh -c \"command string\"" {
+	if command != "\"/usr/bin/env\" \"sh\" \"-c\" \"command string\"" {
 		t.Errorf("Command Sh error %s", command)
 	}
 }
 
 func TestSanitizeCommandBash(t *testing.T) {
 	command := sanitizeCommand("bash", "command string")
-	if command != "/usr/bin/env bash -c \"command string\" -l" {
+	if command != "\"/usr/bin/env\" \"bash\" \"-l\" \"-c\" \"command string\"" {
 		t.Errorf("Command bash error %s", command)
 	}
 }
