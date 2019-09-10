@@ -133,7 +133,7 @@ func (c *Container) AddAllEnvironmentVariables() {
 		var envValue = pair[1]
 
 		// filter vars
-		var systemVars = []string{"_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
+		var systemVars = []string{"", "_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
 		isExluded, _ := InArray(strings.ToUpper(envName), systemVars)
 		if !isExluded {
 			log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
