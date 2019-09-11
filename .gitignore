@@ -20,4 +20,4 @@ vendor.orig/*
 
 # Build
 dist/*
-EnvCLI-cache/*
+*-cache/*

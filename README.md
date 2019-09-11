@@ -90,14 +90,14 @@ go build -o envcli src/*
 *32bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/envcli_linux_386
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/linux_386
 chmod +x /usr/local/bin/envcli
 ```
 
 *64bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/envcli_linux_amd64
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/linux_amd64
 chmod +x /usr/local/bin/envcli
 ```
 

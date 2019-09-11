@@ -204,15 +204,13 @@ func GetCommandConfiguration(commandName string, currentDirectory string) (RunCo
 		return emptyEntry, propConfigErr
 	}
 
-	// project directory
-	projectDir, projectDirErr := GetProjectDirectory()
-
 	// load global (user-scope) configuration
 	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
 	globalConfig, _ := LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
-	// load project configuration
+	// project directory
+	projectDir, projectDirErr := GetProjectDirectory()
 	var projectConfig ProjectConfigrationFile
 	if projectDirErr == nil {
 		log.Debugf("Project Directory: %s", projectDir)

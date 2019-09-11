@@ -70,7 +70,7 @@ func applyUpdate(resp *http.Response) {
 
 // newVersionDownloader ...
 func (appUpdater ApplicationUpdater) newVersionDownloader(version string) {
-	var downloadURL = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/envcli_%s_%s",
+	var downloadURL = fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/%s_%s",
 		appUpdater.BintrayOrg, appUpdater.BintrayRepository, appUpdater.BintrayPackage, version, runtime.GOOS, runtime.GOARCH)
 	log.Debugf("Starting download from remote: %v", downloadURL)
 
