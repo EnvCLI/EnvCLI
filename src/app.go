@@ -109,12 +109,18 @@ func main() {
 						Name:    "force",
 						Aliases: []string{"f"},
 						Value:   false,
-						Usage:   "A forced update would also redownload the current version",
+						Usage:   "A forced update would also redownload the current version.",
 					},
+					&cli.StringFlag{
+						Name:  "target",
+						Value: "latest",
+						Usage: "A target version that should be upgraded/downgraded to.",
+					},
+
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater.Update("latest", c.Bool("force"), Version)
+					appUpdater.Update(c.String("target"), c.Bool("force"), Version)
 
 					return nil
 				},
