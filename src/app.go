@@ -66,7 +66,7 @@ func main() {
 	if isCIEnvironment == false {
 		config.SetPropertyConfigEntry("last-update-check", strconv.Itoa(int(time.Now().Unix())))
 	}
-
+	
 	// CLI
 	app := &cli.App{
 		Name:                  "EnvCLI",
@@ -246,7 +246,7 @@ func main() {
 					commands := append([]string{c.Args().First()}, c.Args().Tail()...)
 					
 					// pull image for each provided command
-					fmt.Sprintf("Pulling images for [%s].\n", strings.Join(commands, ", "))
+					fmt.Printf("Pulling images for [%s].\n", strings.Join(commands, ", "))
 					for _, cmd := range commands {
 						log.Debugf("Pulling image for command [%s].", cmd)
 
@@ -340,7 +340,7 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 2 {
-								fmt.Sprintf("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]\n")
+								fmt.Printf("Please provide the variable name and the value you want to set in this format. [envcli config set variable value]\n")
 								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
@@ -348,7 +348,7 @@ func main() {
 
 							// Set value
 							config.SetPropertyConfigEntry(varName, varValue)
-							fmt.Sprintf("Set value of %s to [%s]\n", varName, varValue)
+							fmt.Printf("Set value of %s to [%s]\n", varName, varValue)
 
 							return nil
 						},
@@ -358,13 +358,13 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								fmt.Sprintf("Please provide the variable name you want to read. [envcli config get variable]\n")
+								fmt.Printf("Please provide the variable name you want to read. [envcli config get variable]\n")
 								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
 
 							// Get Value
-							fmt.Sprintf("%s [%s]\n", varName, config.GetPropertyConfigEntry(varName))
+							fmt.Printf("%s [%s]\n", varName, config.GetPropertyConfigEntry(varName))
 
 							return nil
 						},
@@ -374,7 +374,7 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Print all values
 							for key, value := range propConfig.Properties {
-								fmt.Sprintf("%s [%s]\n", key, value)
+								fmt.Printf("%s [%s]\n", key, value)
 							}
 
 							return nil
@@ -385,14 +385,14 @@ func main() {
 						Action: func(c *cli.Context) error {
 							// Check Parameters
 							if c.NArg() != 1 {
-								fmt.Sprintf("Please provide the variable name you want to unset. [envcli config unset variable]\n")
+								fmt.Printf("Please provide the variable name you want to unset. [envcli config unset variable]\n")
 								os.Exit(1)
 							}
 							varName := c.Args().Get(0)
 
 							// Unset value
 							config.UnsetPropertyConfigEntry(varName)
-							fmt.Sprintf("Value of variable %s set to [].\n", varName)
+							fmt.Printf("Value of variable %s set to [].\n", varName)
 
 							return nil
 						},
