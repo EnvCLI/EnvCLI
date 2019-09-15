@@ -56,9 +56,7 @@ func IsDockerNative() bool {
 	return true
 }
 
-/**
- * Detect Docker Toolbox
- */
+// IsDockerToolbox returns true, if docker toolbox is used
 func IsDockerToolbox() bool {
 	path, err := exec.LookPath("docker-machine")
 	if err != nil || strings.Contains(path, "Docker Toolbox") == false {
@@ -67,6 +65,16 @@ func IsDockerToolbox() bool {
 
 	log.Tracef("Found Docker Toolbox at [%s].", path)
 	return true
+}
+
+// IsMinGW returns true, if the binary is called from a Minimalist GNU for Windows environment (cygwin / git bash)
+func IsMinGW() bool {
+	value, _ := os.LookupEnv("MSYSTEM")
+	if value == "MINGW64" {
+		return true
+	}
+
+	return false
 }
 
 /**

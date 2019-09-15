@@ -45,6 +45,13 @@ func (c *Container) SetImage(newImage string) {
 // AddVolume mounts a directory into a container
 func (c *Container) AddVolume(mount ContainerMount) {
 	mount.Source = toUnixPath(mount.Source)
+
+	// modify mount source on MinGW environments
+	if IsMinGW() {
+		// git bash / cygwin needs the host path escaped with a leading / -> //c so that it works correctly
+		mount.Source = "/"+mount.Source
+	}
+
 	c.volumes = append(c.volumes, mount)
 }
 
