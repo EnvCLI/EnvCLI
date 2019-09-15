@@ -200,6 +200,11 @@ func main() {
 
 					// feature: caching
 					for _, cachingEntry := range commandConfig.Caching {
+						if config.GetOrDefault(propConfig.Properties, "cache-path", "") == "" {
+							log.Warnf("CachePath not set, not using the specified cache directories.")
+							break;
+						}
+
 						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 						util.CreateDirectory(cacheFolder)
 						container.AddCacheMount(cachingEntry.Name, cacheFolder, cachingEntry.ContainerDirectory)
