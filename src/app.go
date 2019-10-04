@@ -36,8 +36,8 @@ func init() {
 	// Initialize SentryIO
 	sentry.InitializeSentryIO("EnvCLI")
 
-	// Output to stdout instead of the default stderr
-	log.SetOutput(os.Stdout)
+	// Output to Stderr to not pollute stdout redirects with logs
+	log.SetOutput(os.Stderr)
 
 	// Only log the warning severity or above.
 	log.SetLevel(log.WarnLevel)
