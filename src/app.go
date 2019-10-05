@@ -19,11 +19,12 @@ import (
 	cli "gopkg.in/urfave/cli.v2"
 )
 
-// Version the binary was build from, injected at build time
-var Version string
-
-// CommitHash the binary was build from, injected at build time
-var CommitHash string
+// Build Information
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 
 // Configuration
 var defaultConfigurationDirectory = util.GetExecutionDirectory()
@@ -59,7 +60,7 @@ func main() {
 	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 	var lastUpdateCheck, _ = strconv.ParseInt(config.GetOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
-		if appUpdater.IsUpdateAvailable(Version) {
+		if appUpdater.IsUpdateAvailable(version) {
 			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
 		}
 	}
@@ -70,7 +71,7 @@ func main() {
 	// CLI
 	app := &cli.App{
 		Name:                  "EnvCLI",
-		Version:               Version,
+		Version:               version,
 		Compiled:              time.Now(),
 		EnableShellCompletion: true,
 		Authors: []*cli.Author{
@@ -85,6 +86,11 @@ func main() {
 				Name:  "loglevel",
 				Value: "warn",
 				Usage: "The loglevel used by envcli, use this to troubleshoot issues",
+			},
+			&cli.StringSliceFlag{
+				Name:    "config-include",
+				Aliases: []string{},
+				Usage:   "Additionally include these configuration files, please take note that precedence will be in this order: project config, included, system config",
 			},
 		},
 		Before: func(c *cli.Context) error {
@@ -120,7 +126,7 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater.Update(c.String("target"), c.Bool("force"), Version)
+					appUpdater.Update(c.String("target"), c.Bool("force"), version)
 
 					return nil
 				},
@@ -160,7 +166,7 @@ func main() {
 					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
 
 					// config: try to load command configuration
-					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory())
+					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory(), c.StringSlice("config-include"))
 					if commandConfigErr != nil {
 						log.Errorf(commandConfigErr.Error())
 						os.Exit(1)
@@ -262,7 +268,7 @@ func main() {
 						log.Debugf("Pulling image for command [%s].", cmd)
 
 						// config: try to load command configuration
-						commandConfig, err := config.GetCommandConfiguration(cmd, util.GetWorkingDirectory())
+						commandConfig, err := config.GetCommandConfiguration(cmd, util.GetWorkingDirectory(), c.StringSlice("config-include"))
 						common.CheckForError(err)
 
 						// container
@@ -306,7 +312,7 @@ func main() {
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
-								aliases.InstallAlias(Version, currentCommand, element.Scope)
+								aliases.InstallAlias(currentCommand, element.Scope)
 							}
 						}
 					}
@@ -329,7 +335,7 @@ func main() {
 	
 								// for each provided command
 								for _, currentCommand := range element.Provides {
-									aliases.InstallAlias(Version, currentCommand, element.Scope)
+									aliases.InstallAlias(currentCommand, element.Scope)
 								}
 							}
 						}

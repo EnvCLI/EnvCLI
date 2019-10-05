@@ -195,7 +195,7 @@ func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal Pro
 /**
  * GetCommandConfiguration gets the configuration entry for a specified command in the specified directory
  */
-func GetCommandConfiguration(commandName string, currentDirectory string) (RunConfigurationEntry, error) {
+func GetCommandConfiguration(commandName string, currentDirectory string, customIncludes []string) (RunConfigurationEntry, error) {
 	// Global Configuration
 	propConfig, propConfigErr := LoadPropertyConfig()
 	if propConfigErr != nil {
@@ -204,21 +204,29 @@ func GetCommandConfiguration(commandName string, currentDirectory string) (RunCo
 		return emptyEntry, propConfigErr
 	}
 
-	// load global (user-scope) configuration
-	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
-	globalConfig, _ := LoadProjectConfig(globalConfigPath + "/.envcli.yml")
-
-	// project directory
+	// Configuration file list
+	var configFiles []string
+	// - project directory
 	projectDir, projectDirErr := GetProjectDirectory()
-	var projectConfig ProjectConfigrationFile
 	if projectDirErr == nil {
 		log.Debugf("Project Directory: %s", projectDir)
-		projectConfig, _ = LoadProjectConfig(projectDir + "/.envcli.yml")
+		configFiles = append(configFiles, projectDir + "/.envcli.yml")
+	}
+	// - custom includes
+	configFiles = append(configFiles, customIncludes...)
+	// - global (user-scope) configuration
+	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
+	configFiles = append(configFiles, globalConfigPath + "/.envcli.yml")
+
+	// load configuration files
+	var finalConfiguration ProjectConfigrationFile
+	for _, configFile := range configFiles {
+		configContent, _ := LoadProjectConfig(configFile)
+		finalConfiguration = MergeConfigurations(finalConfiguration, configContent)
 	}
 
-	// merge project and global configuration
-	var finalConfiguration = MergeConfigurations(projectConfig, globalConfig)
+	// search for command defintion
 	for _, element := range finalConfiguration.Images {
 		log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
 		for _, providedCommand := range element.Provides {
