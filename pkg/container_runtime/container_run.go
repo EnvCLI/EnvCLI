@@ -93,6 +93,12 @@ func (c *Container) SetCommand(newCommand string) {
 // SetWorkingDirectory sets the working directory
 func (c *Container) SetWorkingDirectory(newWorkingDirectory string) {
 	c.workingDirectory = newWorkingDirectory
+
+	// MinGW environments
+	if IsMinGW() {
+		// git bash / cygwin needs the host path escaped with a leading / -> //c so that it works correctly
+		c.workingDirectory = "/"+c.workingDirectory
+	}
 }
 
 // AddContainerPort publishes a port
