@@ -37,7 +37,7 @@ After that you can create the `.envcli.yml` configuration file for your project.
 Example (A single image can provide multiple commands):
 
 ```yaml
-commands:
+images:
 - name: npm
   description: Node.js is a JavaScript-based platform for server-side and networking applications.
   provides:
@@ -90,20 +90,20 @@ go build -o envcli src/*
 *32bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/linux_386
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.3/linux_386
 chmod +x /usr/local/bin/envcli
 ```
 
 *64bit*
 
 ```bash
-curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.0/linux_amd64
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.6.3/linux_amd64
 chmod +x /usr/local/bin/envcli
 ```
 
 #### **Docker Toolbox (Legacy)**
 
-Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.6.0/EnvCLI-amd64.msi)
+Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.6.3/EnvCLI-amd64.msi)
 
 Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
 
