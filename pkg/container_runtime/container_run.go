@@ -146,11 +146,37 @@ func (c *Container) AddAllEnvironmentVariables() {
 		var envValue = pair[1]
 
 		// filter vars
-		var systemVars = []string{"", "_", "PWD", "OLDPWD", "PATH", "HOME", "HOSTNAME", "TERM", "SHLVL", "HTTP_PROXY", "HTTPS_PROXY"}
+		var systemVars = []string{
+			"",
+			// unix
+			"_",
+			"PWD",
+			"OLDPWD",
+			"PATH",
+			"HOME",
+			"HOSTNAME",
+			"TERM",
+			"SHLVL",
+			// windows
+			"PROGRAMDATA",
+			"PROGRAMFILES",
+			"PROGRAMFILES(x86)", 
+			"PROGRAMW6432",
+			"COMMONPROGRAMFILES",
+			"COMMONPROGRAMFILES(x86)",
+			"COMMONPROGRAMW6432",
+			// proxy
+			"HTTP_PROXY",
+			"HTTPS_PROXY",
+		}
 		isExluded, _ := InArray(strings.ToUpper(envName), systemVars)
-		if !isExluded {
+		// recent issue of 2009 about git bash / mingw setting invalid unix variables with `var(86)=...`
+		isInvalidName := strings.Contains(envName, "(") || strings.Contains(envName, ")")
+		if !isExluded && !isInvalidName {
 			log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
 			c.AddEnvironmentVariable(envName, envValue)
+		} else if !isExluded {
+			log.Debugf("Excluded env variable %s [%s] from host because of a invalid variable name.", envName, envValue)
 		} else {
 			log.Debugf("Excluded env variable %s [%s] from host based on the filter rule.", envName, envValue)
 		}
