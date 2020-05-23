@@ -3,7 +3,7 @@
 ## Update all direct and indirect dependencies
 
 ```bash
-go get -u=patch
+go get -v all
 ```
 
 ## Embed alias scripts using GoBindata

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	common "github.com/EnvCLI/EnvCLI/pkg/common"
@@ -16,7 +16,7 @@ import (
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	log "github.com/sirupsen/logrus"
-	cli "gopkg.in/urfave/cli.v2"
+	cli "github.com/urfave/cli/v2"
 )
 
 // Build Information
@@ -67,13 +67,12 @@ func main() {
 	if isCIEnvironment == false {
 		config.SetPropertyConfigEntry("last-update-check", strconv.Itoa(int(time.Now().Unix())))
 	}
-	
+
 	// CLI
 	app := &cli.App{
-		Name:                  "EnvCLI",
-		Version:               version,
-		Compiled:              time.Now(),
-		EnableShellCompletion: true,
+		Name:     "EnvCLI",
+		Version:  version,
+		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
 				Name:  "Philipp Heuer",
@@ -122,7 +121,6 @@ func main() {
 						Value: "latest",
 						Usage: "A target version that should be upgraded/downgraded to.",
 					},
-
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
@@ -214,7 +212,7 @@ func main() {
 					for _, cachingEntry := range commandConfig.Caching {
 						if config.GetOrDefault(propConfig.Properties, "cache-path", "") == "" {
 							log.Warnf("CachePath not set, not using the specified cache directories.")
-							break;
+							break
 						}
 
 						var cacheFolder = config.GetOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
@@ -255,13 +253,13 @@ func main() {
 			/**
 			 * Command: pull-image
 			 */
-			 {
+			{
 				Name:    "pull-image",
 				Aliases: []string{},
 				Usage:   "pulls the needed images for the specified commands",
 				Action: func(c *cli.Context) error {
 					commands := append([]string{c.Args().First()}, c.Args().Tail()...)
-					
+
 					// pull image for each provided command
 					fmt.Printf("Pulling images for [%s].\n", strings.Join(commands, ", "))
 					for _, cmd := range commands {
@@ -328,11 +326,11 @@ func main() {
 						} else {
 							log.Debugf("Project Directory: %s", projectDirectory)
 							projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
-	
+
 							for _, element := range projectConfig.Images {
 								element.Scope = "Project"
 								log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
-	
+
 								// for each provided command
 								for _, currentCommand := range element.Provides {
 									aliases.InstallAlias(currentCommand, element.Scope)
