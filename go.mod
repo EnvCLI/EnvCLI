@@ -10,7 +10,7 @@ require (
 	github.com/getsentry/raven-go v0.2.0
 	github.com/google/go-github/v26 v26.1.3
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
-	github.com/jinzhu/configor v1.2.0
+	github.com/jinzhu/configor v1.1.1
 	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.12

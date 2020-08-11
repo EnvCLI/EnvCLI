@@ -179,10 +179,8 @@ func main() {
 					container.SetCommandShell(commandConfig.Shell)
 					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
 					log.Debugf("Adding volume mount: source=%s, target=%s", projectOrExecutionDir, commandConfig.Directory)
-					//container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
-					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: "/project"})
-					//container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
-					container.SetWorkingDirectory("/project")
+					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+					container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
 
 					// core: expose ports (command args)
 					container.AddContainerPorts(c.StringSlice("port"))
