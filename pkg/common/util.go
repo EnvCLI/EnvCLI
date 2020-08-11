@@ -42,6 +42,8 @@ func ParseAndEscapeArgs(args []string) string {
 		if runtime.GOOS == "windows" {
 			quotedArg := "\"" + strings.Replace(strings.Trim(arg, "\""), "\"", "`\"", -1) + "\""
 			commandWithArguments.WriteString(quotedArg + " ")
+		} else if runtime.GOOS == "darwin" {
+			commandWithArguments.WriteString(arg + " ")
 		} else {
 			quotedArg := "\"" + strings.Replace(strings.Trim(arg, "\""), "\"", "\\\"", -1) + "\""
 			commandWithArguments.WriteString(quotedArg + " ")

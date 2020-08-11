@@ -107,6 +107,7 @@ func sanitizeCommand(commandShell string, command string) string {
  */
 func systemExec(command string) error {
 	// Run Command
+	log.Tracef("systemExec: %s", command)
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
 		cmd.Stdin = os.Stdin
@@ -129,7 +130,18 @@ func systemExec(command string) error {
 			log.Fatalf("Failed to execute command: %s\n", err.Error())
 			return err
 		}
-	}
+	} else if runtime.GOOS == "darwin" {
+		cmd := exec.Command("sh", "-c", command)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		log.Debugf("Running Command: %s", cmd.String())
+		err := cmd.Run()
+		if err != nil {
+			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			return err
+		}
+    }
 
 	return nil
 }

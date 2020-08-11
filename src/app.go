@@ -178,8 +178,11 @@ func main() {
 					container.SetEntrypoint(commandConfig.Entrypoint)
 					container.SetCommandShell(commandConfig.Shell)
 					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
-					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
-					container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
+					log.Debugf("Adding volume mount: source=%s, target=%s", projectOrExecutionDir, commandConfig.Directory)
+					//container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: "/project"})
+					//container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
+					container.SetWorkingDirectory("/project")
 
 					// core: expose ports (command args)
 					container.AddContainerPorts(c.StringSlice("port"))
@@ -201,6 +204,7 @@ func main() {
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", config.GetOrDefault(propConfig.Properties, "http-proxy", ""), -1)
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", config.GetOrDefault(propConfig.Properties, "https-proxy", ""), -1)
 					}
+					log.Debugf("Setting new command with before_script: %s", commandWithBeforeScript)
 					container.SetCommand(commandWithBeforeScript)
 
 					// feature: container runtime access
