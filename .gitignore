@@ -21,3 +21,10 @@ vendor.orig/*
 # Build
 dist/*
 *-cache/*
+
+# IDE files
+.idea
+*.iml
+
+# build artifacts
+build

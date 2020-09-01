@@ -32,7 +32,7 @@ func (c *Container) GetDockerCommand() string {
 	}
 	// - entrypoint
 	if c.entrypoint != "unset" {
-		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s", strconv.Quote(c.entrypoint)))
+		shellCommand.WriteString(fmt.Sprintf("--entrypoint %s ", strconv.Quote(c.entrypoint)))
 	} else {
 		shellCommand.WriteString("--entrypoint= ")
 	}
