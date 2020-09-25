@@ -101,6 +101,18 @@ curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.
 chmod +x /usr/local/bin/envcli
 ```
 
+#### **OSX**
+
+1. Install the default Docker version from your favorite package manager.
+2. Install [EnvCLI]
+
+*64bit*
+
+```bash
+curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.7.0/darwin_amd64
+chmod +x /usr/local/bin/envcli
+```
+
 #### **Docker Toolbox (Legacy)**
 
 Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.7.0/EnvCLI-amd64.msi)
