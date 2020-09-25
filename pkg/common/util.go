@@ -2,9 +2,9 @@ package common
 
 import (
 	"bytes"
+	"os"
 	"runtime"
 	"strings"
-	"os"
 
 	log "github.com/sirupsen/logrus"
 )
