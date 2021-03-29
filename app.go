@@ -21,9 +21,9 @@ import (
 
 // Build Information
 var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	Version    = "dev"
+	CommitHash = "none"
+	BuildAt    = "unknown"
 )
 
 // Configuration
@@ -57,10 +57,10 @@ func main() {
 	}
 
 	// Update Check, once a day (not in CI)
-	appUpdater := updater.ApplicationUpdater{BintrayOrg: "envcli", BintrayRepository: "golang", BintrayPackage: "envcli", GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
+	appUpdater := updater.ApplicationUpdater{GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
 	var lastUpdateCheck, _ = strconv.ParseInt(config.GetOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
-		if appUpdater.IsUpdateAvailable(version) {
+		if appUpdater.IsUpdateAvailable(Version) {
 			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
 		}
 	}
@@ -71,7 +71,7 @@ func main() {
 	// CLI
 	app := &cli.App{
 		Name:     "EnvCLI",
-		Version:  version,
+		Version:  Version,
 		Compiled: time.Now(),
 		Authors: []*cli.Author{
 			&cli.Author{
@@ -124,7 +124,7 @@ func main() {
 				},
 				Action: func(c *cli.Context) error {
 					// Run Update
-					appUpdater.Update(c.String("target"), c.Bool("force"), version)
+					appUpdater.Update(c.String("target"), c.Bool("force"), Version)
 
 					return nil
 				},

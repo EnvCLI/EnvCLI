@@ -104,7 +104,7 @@ func scriptsAliasSh() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "scripts/alias.sh", size: 545, mode: os.FileMode(511), modTime: time.Unix(1567331319, 0)}
+	info := bindataFileInfo{name: "scripts/alias.sh", size: 545, mode: os.FileMode(511), modTime: time.Unix(1570305560, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
