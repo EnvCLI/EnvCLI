@@ -1,14 +1,12 @@
 [![Build Status](https://travis-ci.org/PhilippHeuer/EnvCLI.svg?branch=master)](https://travis-ci.org/PhilippHeuer/EnvCLI)
 [![Go Report Card](https://goreportcard.com/badge/philippheuer/envcli)](http://goreportcard.com/report/philippheuer/envcli)
-[![Maintenance](https://img.shields.io/maintenance/yes/2020.svg)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2021.svg)]()
 [![GitHub contributors](https://img.shields.io/github/contributors/PhilippHeuer/envcli.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/master/LICENSE.md)
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
 *EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the envcli configuration file.
 It currently supports the following providers: [Docker for Windows](https://docs.docker.com/docker-for-windows/install/), [Docker on Linux](https://docs.docker.com/engine/installation/) and [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
-
-[![Discord Server](https://discordapp.com/api/guilds/488047700764393505/embed.png?style=banner2)](https://discord.gg/9m8tWns)
 
 **What merits does this have?**
 
