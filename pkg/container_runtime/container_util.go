@@ -14,8 +14,8 @@ import (
 func setTerminalParameters(shellCommand *bytes.Buffer) {
 	if IsCIEnvironment() {
 		// env variable CI is set, we can't use --tty or --interactive here
-	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		shellCommand.WriteString("-t -i ") // --tty --interactive
+	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) || IsWindowsTerminal() {
+		shellCommand.WriteString("-ti") // --tty --interactive
 	}
 }
 

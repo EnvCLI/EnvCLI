@@ -21,11 +21,7 @@ func (c *Container) GetPodmanCommand() string {
 	// build command
 	shellCommand.WriteString("podman run --rm ")
 	// - terminal
-	if IsCIEnvironment() {
-		// env variable CI is set, we can't use --tty or --interactive here
-	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) {
-		shellCommand.WriteString("-ti ") // tty + interactive
-	}
+	setTerminalParameters(&shellCommand)
 	// - name
 	if len(c.name) > 0 {
 		shellCommand.WriteString(fmt.Sprintf("--name %s ", strconv.Quote(c.name)))

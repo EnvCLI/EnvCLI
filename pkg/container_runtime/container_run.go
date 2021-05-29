@@ -221,7 +221,7 @@ func (c *Container) GetRunCommand(runtime string) string {
 	} else if runtime == "docker" {
 		shellCommand.WriteString(c.GetDockerCommand())
 	} else {
-		log.Fatal().Msg("No supported container runtime found (podman, docker, docker toolbox)!")
+		log.Fatal().Str("runtime", runtime).Msg("Container Runtime is not supported!")
 	}
 
 	return shellCommand.String()

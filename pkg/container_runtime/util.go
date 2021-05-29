@@ -20,12 +20,6 @@ func IsCIEnvironment() bool {
 		return true
 	}
 
-	// set by normalize ci
-	_, nciVariableSet := os.LookupEnv("NCI")
-	if nciVariableSet {
-		return true
-	}
-
 	return false
 }
 
@@ -74,6 +68,12 @@ func IsMinGW() bool {
 	}
 
 	return false
+}
+
+// IsWindowsTerminal checks if the binary is executed from the new windows terminal
+func IsWindowsTerminal() bool {
+	_, isPresent := os.LookupEnv("WT_SESSION")
+	return isPresent
 }
 
 /**
