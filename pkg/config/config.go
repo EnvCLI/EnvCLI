@@ -2,19 +2,20 @@ package config
 
 import (
 	"errors"
+	"github.com/cidverse/cidverseutils/pkg/collection"
+	"github.com/cidverse/cidverseutils/pkg/filesystem"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
-	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	"github.com/jinzhu/configor"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // Configuration
-var defaultConfigurationDirectory = util.GetExecutionDirectory()
+var defaultConfigurationDirectory = filesystem.GetExecutionDirectory()
 var defaultConfigurationFile = ".envclirc"
 
 // Constants
@@ -91,7 +92,7 @@ func SetPropertyConfigEntry(varName string, varValue string) {
 	propConfig, _ := LoadPropertyConfig()
 
 	// Set value
-	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	isValidValue, _ := collection.InArray(varName, validConfigurationOptions)
 	if isValidValue {
 		propConfig.Properties[varName] = varValue
 
@@ -108,7 +109,7 @@ func GetPropertyConfigEntry(varName string) string {
 	propConfig, _ := LoadPropertyConfig()
 
 	// Get Value
-	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	isValidValue, _ := collection.InArray(varName, validConfigurationOptions)
 	if isValidValue {
 		return propConfig.Properties[varName]
 	}
@@ -124,7 +125,7 @@ func UnsetPropertyConfigEntry(varName string) {
 	propConfig, _ := LoadPropertyConfig()
 
 	// Get Value
-	isValidValue, _ := InArray(varName, validConfigurationOptions)
+	isValidValue, _ := collection.InArray(varName, validConfigurationOptions)
 	if isValidValue {
 		propConfig.Properties[varName] = ""
 
@@ -139,7 +140,7 @@ func UnsetPropertyConfigEntry(varName string) {
 func GetProjectOrWorkingDirectory() string {
 	var directory, err = GetProjectDirectory()
 	if err != nil {
-		directory = util.GetWorkingDirectory()
+		directory = filesystem.GetWorkingDirectory()
 	}
 	return directory
 }
@@ -150,7 +151,7 @@ func GetProjectOrWorkingDirectory() string {
 func GetProjectDirectory() (string, error) {
 	log.Trace().Msg("Trying to detect project directory ...")
 
-	currentDirectory := GetWorkingDirectory()
+	currentDirectory := filesystem.GetWorkingDirectory()
 	var projectDirectory = ""
 	log.Trace().Str("dir", currentDirectory).Msg("current working directory")
 
@@ -164,14 +165,14 @@ func GetProjectDirectory() (string, error) {
 
 		if directoryParts[0]+"\\" == currentDirectory || currentDirectory == "/" {
 			log.Debug().Msg("didn't find a envcli project config in any parent directories")
-			return "", errors.New("Didn't find a envcli project config in any parent directories")
+			return "", errors.New("didn't find a envcli project config in any parent directories")
 		}
 
 		currentDirectory = filepath.Dir(currentDirectory)
 		log.Trace().Str("dir", currentDirectory).Msg("proceed to search next directory")
 	}
 
-	return "", errors.New("Didn't find a envcli project config in any parent directories")
+	return "", errors.New("didn't find a envcli project config in any parent directories")
 }
 
 /**
@@ -215,7 +216,7 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 	// - custom includes
 	configFiles = append(configFiles, customIncludes...)
 	// - global (user-scope) configuration
-	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+	var globalConfigPath = collection.GetMapValueOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
 	log.Debug().Msg("Will load the global configuration from "+globalConfigPath+".")
 	configFiles = append(configFiles, globalConfigPath + "/.envcli.yml")
 

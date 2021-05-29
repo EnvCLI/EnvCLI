@@ -1,12 +1,12 @@
 package aliases
 
 import (
+	"github.com/cidverse/cidverseutils/pkg/filesystem"
 	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"runtime"
 
 	common "github.com/EnvCLI/EnvCLI/pkg/common"
-	util "github.com/EnvCLI/EnvCLI/pkg/util"
 )
 
 // InstallAlias installs simple aliases that pass all parameters to envcli run
@@ -20,7 +20,7 @@ func InstallAlias(command string, scope string) error {
 		scriptData, err := Asset("scripts/alias.sh")
 		common.CheckForError(err)
 
-		err = ioutil.WriteFile(util.GetExecutionDirectory()+"/"+command, scriptData, 0755)
+		err = ioutil.WriteFile(filesystem.GetExecutionDirectory()+"/"+command, scriptData, 0755)
 		common.CheckForError(err)
 
 		log.Debug().Str("command", command).Msg("Installed alias!")
@@ -30,7 +30,7 @@ func InstallAlias(command string, scope string) error {
 		scriptData, err := Asset("scripts/alias.cmd")
 		common.CheckForError(err)
 
-		err = ioutil.WriteFile(util.GetExecutionDirectory()+"/"+command+".cmd", scriptData, 0755)
+		err = ioutil.WriteFile(filesystem.GetExecutionDirectory()+"/"+command+".cmd", scriptData, 0755)
 		common.CheckForError(err)
 
 		log.Debug().Str("command", command).Msg("Installed alias!")

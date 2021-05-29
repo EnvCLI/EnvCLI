@@ -3,6 +3,8 @@ package container_runtime
 import (
 	"bytes"
 	"errors"
+	"github.com/cidverse/cidverseutils/pkg/cihelper"
+	"github.com/cidverse/cidverseutils/pkg/collection"
 	"github.com/rs/zerolog/log"
 	"os"
 	"runtime"
@@ -46,7 +48,7 @@ func (c *Container) AddVolume(mount ContainerMount) {
 	mount.Source = ToUnixPath(mount.Source)
 
 	// modify mount source on MinGW environments
-	if IsMinGW() {
+	if cihelper.IsMinGW() {
 		// git bash / cygwin needs the host path escaped with a leading / -> //c so that it works correctly
 		mount.Source = "/"+mount.Source
 	}
@@ -94,7 +96,7 @@ func (c *Container) SetWorkingDirectory(newWorkingDirectory string) {
 	c.workingDirectory = newWorkingDirectory
 
 	// MinGW environments
-	if IsMinGW() {
+	if cihelper.IsMinGW() {
 		// git bash / cygwin needs the host path escaped with a leading / -> //c so that it works correctly
 		c.workingDirectory = "/"+c.workingDirectory
 	}
@@ -168,13 +170,13 @@ func (c *Container) AddAllEnvironmentVariables() {
 			"HTTP_PROXY",
 			"HTTPS_PROXY",
 		}
-		isExluded, _ := InArray(strings.ToUpper(envName), systemVars)
+		isExcluded, _ := collection.InArray(strings.ToUpper(envName), systemVars)
 		// recent issue of 2009 about git bash / mingw setting invalid unix variables with `var(86)=...`
 		isInvalidName := strings.Contains(envName, "(") || strings.Contains(envName, ")")
-		if !isExluded && !isInvalidName {
+		if !isExcluded && !isInvalidName {
 			log.Debug().Msg("Added environment variable "+envName+" ["+envValue+"] from host!")
 			c.AddEnvironmentVariable(envName, envValue)
-		} else if !isExluded {
+		} else if !isExcluded {
 			log.Debug().Msg("Excluded env variable "+envName+" ["+envValue+"]  from host because of a invalid variable name.")
 		} else {
 			log.Debug().Msg("Excluded env variable "+envName+" ["+envValue+"]  from host based on the filter rule.")

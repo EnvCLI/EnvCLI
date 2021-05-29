@@ -3,18 +3,16 @@ package container_runtime
 import (
 	"bytes"
 	"fmt"
-	"os"
+	"github.com/cidverse/cidverseutils/pkg/cihelper"
 	"runtime"
 	"strconv"
 	"strings"
-
-	isatty "github.com/mattn/go-isatty"
 )
 
 func setTerminalParameters(shellCommand *bytes.Buffer) {
-	if IsCIEnvironment() {
+	if cihelper.IsCIEnvironment() {
 		// env variable CI is set, we can't use --tty or --interactive here
-	} else if isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()) || IsWindowsTerminal() {
+	} else if cihelper.IsInteractiveTerminal() {
 		shellCommand.WriteString("-ti") // --tty --interactive
 	}
 }

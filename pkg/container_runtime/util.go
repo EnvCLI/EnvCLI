@@ -2,51 +2,26 @@ package container_runtime
 
 import (
 	"fmt"
+	"github.com/cidverse/cidverseutils/pkg/cihelper"
 	"github.com/rs/zerolog/log"
 	"os"
 	"os/exec"
-	"reflect"
 	"runtime"
 	"strings"
 )
 
 /**
- * Is CI Environment
- */
-func IsCIEnvironment() bool {
-	// usually set by ci
-	_, ciVariableSet := os.LookupEnv("CI")
-	if ciVariableSet {
-		return true
-	}
-
-	return false
-}
-
-/**
  * Detect Podman
  */
 func IsPodman() bool {
-	path, err := exec.LookPath("podman")
-	if err != nil {
-		return false
-	}
-
-	log.Trace().Str("location", path).Msg("Found Podman")
-	return true
+	return cihelper.IsExecutableInPath("podman")
 }
 
 /**
  * Detect Docker native
  */
 func IsDockerNative() bool {
-	path, err := exec.LookPath("docker")
-	if err != nil {
-		return false
-	}
-
-	log.Trace().Str("location", path).Msg("Found Docker Native")
-	return true
+	return cihelper.IsExecutableInPath("docker")
 }
 
 // IsDockerToolbox returns true, if docker toolbox is used
@@ -56,24 +31,7 @@ func IsDockerToolbox() bool {
 		return false
 	}
 
-	log.Trace().Str("location", path).Msg("Found Docker Toolbox")
 	return true
-}
-
-// IsMinGW returns true, if the binary is called from a Minimalist GNU for Windows environment (cygwin / git bash)
-func IsMinGW() bool {
-	value, _ := os.LookupEnv("MSYSTEM")
-	if value == "MINGW64" {
-		return true
-	}
-
-	return false
-}
-
-// IsWindowsTerminal checks if the binary is executed from the new windows terminal
-func IsWindowsTerminal() bool {
-	_, isPresent := os.LookupEnv("WT_SESSION")
-	return isPresent
 }
 
 /**
@@ -143,27 +101,4 @@ func systemExec(command string) error {
     }
 
 	return nil
-}
-
-/**
- * Checks if a object is part of a array
- */
-func InArray(val interface{}, array interface{}) (exists bool, index int) {
-	exists = false
-	index = -1
-
-	switch reflect.TypeOf(array).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(array)
-
-		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
-				index = i
-				exists = true
-				return
-			}
-		}
-	}
-
-	return
 }
