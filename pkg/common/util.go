@@ -2,11 +2,10 @@ package common
 
 import (
 	"bytes"
-	"os"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"runtime"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 /**
@@ -14,23 +13,17 @@ import (
  */
 func SetLoglevel(loglevel string) {
 	if loglevel == "panic" {
-		log.SetLevel(log.PanicLevel)
-		log.SetReportCaller(false)
+		zerolog.SetGlobalLevel(zerolog.PanicLevel)
 	} else if loglevel == "fatal" {
-		log.SetLevel(log.FatalLevel)
-		log.SetReportCaller(false)
+		zerolog.SetGlobalLevel(zerolog.FatalLevel)
 	} else if loglevel == "warn" {
-		log.SetLevel(log.WarnLevel)
-		log.SetReportCaller(false)
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
 	} else if loglevel == "info" {
-		log.SetLevel(log.InfoLevel)
-		log.SetReportCaller(false)
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else if loglevel == "debug" {
-		log.SetLevel(log.DebugLevel)
-		log.SetReportCaller(true)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else if loglevel == "trace" {
-		log.SetLevel(log.TraceLevel)
-		log.SetReportCaller(true)
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 	}
 }
 
@@ -38,7 +31,7 @@ func SetLoglevel(loglevel string) {
 func ParseAndEscapeArgs(args []string) string {
 	var commandWithArguments bytes.Buffer
 	for _, arg := range args {
-		log.Trace("Parsing arg: " + arg)
+		log.Trace().Msg("Parsing arg: " + arg)
 		if runtime.GOOS == "windows" {
 			quotedArg := "\"" + strings.Replace(strings.Trim(arg, "\""), "\"", "`\"", -1) + "\""
 			commandWithArguments.WriteString(quotedArg + " ")
@@ -52,10 +45,9 @@ func ParseAndEscapeArgs(args []string) string {
 	return command[:len(command)-1]
 }
 
-// CheckForError checks if a error happend and logs it, and ends the process
+// CheckForError checks if a error happened and logs it, and ends the process
 func CheckForError(err error) {
 	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
+		log.Fatal().Err(err).Msg(err.Error())
 	}
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
 	"github.com/jinzhu/configor"
-	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -27,11 +27,11 @@ func LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 	var cfg ProjectConfigrationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debugf("Can't load config - file [%s] does not exist!", configFile)
+		log.Debug().Msg("Can't load config - file ["+configFile+"] does not exist!")
 		return ProjectConfigrationFile{}, nil
 	}
 
-	log.Debugf("Loading project configuration file %s", configFile)
+	log.Debug().Msg("Loading project configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg, nil
@@ -52,11 +52,11 @@ func LoadPropertyConfigFile(configFile string) (PropertyConfigurationFile, error
 	cfg.Properties = make(map[string]string)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debugf("Can't load global properties - file [%s] does not exist!", configFile)
+		log.Debug().Msg("Can't load global properties - file ["+configFile+"] does not exist!")
 		return cfg, nil
 	}
 
-	log.Debug("Loading property configuration file " + configFile)
+	log.Debug().Msg("Loading property configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg, nil
@@ -73,7 +73,7 @@ func SavePropertyConfig(cfg PropertyConfigurationFile) error {
  * Save the global config file
  */
 func SavePropertyConfigFile(configFile string, cfg PropertyConfigurationFile) error {
-	log.Debug("Saving property configuration file " + configFile)
+	log.Debug().Msg("Saving property configuration file " + configFile)
 
 	fileContent, err := yaml.Marshal(&cfg)
 	if err != nil {
@@ -148,27 +148,27 @@ func GetProjectOrWorkingDirectory() string {
  * Get the project root directory by searching for the envcli config
  */
 func GetProjectDirectory() (string, error) {
-	log.Tracef("Trying to detect project directory ...")
+	log.Trace().Msg("Trying to detect project directory ...")
 
 	currentDirectory := GetWorkingDirectory()
 	var projectDirectory = ""
-	log.Tracef("current working directory [%s]", currentDirectory)
+	log.Trace().Str("dir", currentDirectory).Msg("current working directory")
 
 	directoryParts := strings.Split(currentDirectory, string(os.PathSeparator))
 
 	for projectDirectory == "" {
 		if _, err := os.Stat(filepath.Join(currentDirectory, "/.envcli.yml")); err == nil {
-			log.Debugf("found project config in directory [%s]", currentDirectory)
+			log.Debug().Str("dir", currentDirectory).Msg("found project config in directory")
 			return currentDirectory, nil
 		}
 
 		if directoryParts[0]+"\\" == currentDirectory || currentDirectory == "/" {
-			log.Debugf("didn't find a envcli project config in any parent directories")
+			log.Debug().Msg("didn't find a envcli project config in any parent directories")
 			return "", errors.New("Didn't find a envcli project config in any parent directories")
 		}
 
 		currentDirectory = filepath.Dir(currentDirectory)
-		log.Tracef("proceed to search next directory [%s]", currentDirectory)
+		log.Trace().Str("dir", currentDirectory).Msg("proceed to search next directory")
 	}
 
 	return "", errors.New("Didn't find a envcli project config in any parent directories")
@@ -209,14 +209,14 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 	// - project directory
 	projectDir, projectDirErr := GetProjectDirectory()
 	if projectDirErr == nil {
-		log.Debugf("Project Directory: %s", projectDir)
+		log.Debug().Msg("Project Directory: " + projectDir)
 		configFiles = append(configFiles, projectDir + "/.envcli.yml")
 	}
 	// - custom includes
 	configFiles = append(configFiles, customIncludes...)
 	// - global (user-scope) configuration
 	var globalConfigPath = GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-	log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
+	log.Debug().Msg("Will load the global configuration from "+globalConfigPath+".")
 	configFiles = append(configFiles, globalConfigPath + "/.envcli.yml")
 
 	// load configuration files
@@ -228,10 +228,10 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 
 	// search for command defintion
 	for _, element := range finalConfiguration.Images {
-		log.Debugf("Checking for a match in image %s [Scope: %s]", element.Name, element.Scope)
+		log.Debug().Msg("Checking for a match in image "+element.Name+" [Scope: "+element.Scope+"]")
 		for _, providedCommand := range element.Provides {
 			if providedCommand == commandName {
-				log.Debugf("Matched command %s in package [%s]", commandName, element.Name)
+				log.Debug().Msg("Matched command "+commandName+" in package ["+element.Name+"]")
 
 				return element, nil
 			}

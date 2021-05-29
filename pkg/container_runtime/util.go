@@ -2,13 +2,12 @@ package container_runtime
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"os"
 	"os/exec"
 	"reflect"
 	"runtime"
 	"strings"
-
-	log "github.com/sirupsen/logrus" // imports as package "log"
 )
 
 /**
@@ -39,7 +38,7 @@ func IsPodman() bool {
 		return false
 	}
 
-	log.Tracef("Found Podman at [%s].", path)
+	log.Trace().Str("location", path).Msg("Found Podman")
 	return true
 }
 
@@ -52,7 +51,7 @@ func IsDockerNative() bool {
 		return false
 	}
 
-	log.Tracef("Found Docker native at [%s].", path)
+	log.Trace().Str("location", path).Msg("Found Docker Native")
 	return true
 }
 
@@ -63,7 +62,7 @@ func IsDockerToolbox() bool {
 		return false
 	}
 
-	log.Tracef("Found Docker Toolbox at [%s].", path)
+	log.Trace().Str("location", path).Msg("Found Docker Toolbox")
 	return true
 }
 
@@ -107,16 +106,16 @@ func sanitizeCommand(commandShell string, command string) string {
  */
 func systemExec(command string) error {
 	// Run Command
-	log.Tracef("systemExec: %s", command)
+	log.Trace().Msg("systemExec: " + command)
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("/usr/bin/env", "sh", "-c", command)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		log.Debugf("Running Command: /usr/bin/env sh -c %s", command)
+		log.Debug().Msg("Running Command: /usr/bin/env sh -c " + command)
 		err := cmd.Run()
 		if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			log.Fatal().Err(err).Msg("Failed to execute command")
 			return err
 		}
 	} else if runtime.GOOS == "windows" {
@@ -125,9 +124,9 @@ func systemExec(command string) error {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
-		log.Debugf("Running Command: powershell %s", command)
+		log.Debug().Msg("Running Command: powershell " + command)
 		if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			log.Fatal().Err(err).Msg("Failed to execute command")
 			return err
 		}
 	} else if runtime.GOOS == "darwin" {
@@ -135,10 +134,10 @@ func systemExec(command string) error {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		log.Debugf("Running Command: %s", cmd.String())
+		log.Debug().Msg("Running Command: " + cmd.String())
 		err := cmd.Run()
 		if err != nil {
-			log.Fatalf("Failed to execute command: %s\n", err.Error())
+			log.Fatal().Err(err).Msg("Failed to execute command")
 			return err
 		}
     }

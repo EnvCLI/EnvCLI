@@ -1,11 +1,9 @@
 package config
 
 import (
+	"github.com/rs/zerolog/log"
 	"os"
 	"reflect"
-
-	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
-	log "github.com/sirupsen/logrus"
 )
 
 /**
@@ -14,10 +12,7 @@ import (
 func GetWorkingDirectory() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Couldn't detect working directory!")
-		sentry.HandleError(err)
+		log.Fatal().Err(err).Msg("Couldn't detect working directory!")
 	}
 
 	return workingDir

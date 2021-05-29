@@ -1,16 +1,13 @@
 package util
 
 import (
+	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
-/**
- * Create folders if they don't exist
- */
+// CreateDirectory creates a new folder if not present, ignores errors
 func CreateDirectory(dir string) {
 	os.MkdirAll(dir, os.ModePerm)
 }
@@ -32,9 +29,7 @@ func GetPathRelativeToDirectory(currentDirectory string, rootDirectory string) s
 func GetExecutionDirectory() string {
 	ex, err := os.Executable()
 	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Couldn't detect execution directory!")
+		log.Fatal().Err(err).Msg("Couldn't detect execution directory!")
 		return ""
 	}
 
@@ -47,9 +42,7 @@ func GetExecutionDirectory() string {
 func GetWorkingDirectory() string {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Couldn't detect working directory!")
+		log.Fatal().Err(err).Msg("Couldn't detect working directory!")
 	}
 
 	return workingDir

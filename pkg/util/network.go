@@ -4,8 +4,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-
-	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
 )
 
 /**
@@ -16,7 +14,6 @@ func DownloadFile(filepath string, url string) error {
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
-		sentry.HandleError(err)
 		return err
 	}
 	defer out.Close()
@@ -24,7 +21,6 @@ func DownloadFile(filepath string, url string) error {
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
-		sentry.HandleError(err)
 		return err
 	}
 	defer resp.Body.Close()
@@ -32,7 +28,6 @@ func DownloadFile(filepath string, url string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
-		sentry.HandleError(err)
 		return err
 	}
 

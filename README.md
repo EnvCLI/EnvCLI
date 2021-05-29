@@ -126,6 +126,14 @@ After that you have to share the drive containing your projects with virtualbox 
  5. Share the drive which contains your projects (In this example C -> Folder_Path: `C:\`, Folder_Name: `C_DRIVE`) and select the options `Auto-mount` and `Permanent`
  6. Start the envcli machine `docker-machine start envcli`
 
+## Library
+
+You can use `envcli` as library in other projects.
+
+```bash
+go get -u github.com/EnvCLI/EnvCLI
+```
+
 ## Roadmap
 
 - [Features](https://github.com/PhilippHeuer/EnvCLI/labels/feature)

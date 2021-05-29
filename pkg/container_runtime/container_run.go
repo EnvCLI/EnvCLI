@@ -2,13 +2,12 @@ package container_runtime
 
 import (
 	"bytes"
+	"errors"
+	"github.com/rs/zerolog/log"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
-	"errors"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Container provides all methods to interact with the container runtime
@@ -44,7 +43,7 @@ func (c *Container) SetImage(newImage string) {
 
 // AddVolume mounts a directory into a container
 func (c *Container) AddVolume(mount ContainerMount) {
-	mount.Source = toUnixPath(mount.Source)
+	mount.Source = ToUnixPath(mount.Source)
 
 	// modify mount source on MinGW environments
 	if IsMinGW() {
@@ -57,8 +56,8 @@ func (c *Container) AddVolume(mount ContainerMount) {
 
 // AddCacheMount adds a cache mount to the container
 func (c *Container) AddCacheMount(name string, sourcePath string, targetPath string) {
-	c.AddVolume(ContainerMount{MountType: "directory", Source: toUnixPath(sourcePath), Target: targetPath})
-	c.AddEnvironmentVariable("cache_"+name+"_source", toUnixPath(sourcePath))
+	c.AddVolume(ContainerMount{MountType: "directory", Source: ToUnixPath(sourcePath), Target: targetPath})
+	c.AddEnvironmentVariable("cache_"+name+"_source", ToUnixPath(sourcePath))
 	c.AddEnvironmentVariable("cache_"+name+"_target", targetPath)
 }
 
@@ -173,12 +172,12 @@ func (c *Container) AddAllEnvironmentVariables() {
 		// recent issue of 2009 about git bash / mingw setting invalid unix variables with `var(86)=...`
 		isInvalidName := strings.Contains(envName, "(") || strings.Contains(envName, ")")
 		if !isExluded && !isInvalidName {
-			log.Debugf("Added environment variable %s [%s] from host!", envName, envValue)
+			log.Debug().Msg("Added environment variable "+envName+" ["+envValue+"] from host!")
 			c.AddEnvironmentVariable(envName, envValue)
 		} else if !isExluded {
-			log.Debugf("Excluded env variable %s [%s] from host because of a invalid variable name.", envName, envValue)
+			log.Debug().Msg("Excluded env variable "+envName+" ["+envValue+"]  from host because of a invalid variable name.")
 		} else {
-			log.Debugf("Excluded env variable %s [%s] from host based on the filter rule.", envName, envValue)
+			log.Debug().Msg("Excluded env variable "+envName+" ["+envValue+"]  from host based on the filter rule.")
 		}
 	}
 }
@@ -222,7 +221,7 @@ func (c *Container) GetRunCommand(runtime string) string {
 	} else if runtime == "docker" {
 		shellCommand.WriteString(c.GetDockerCommand())
 	} else {
-		log.Fatalf("No supported container runtime found (podman, docker, docker toolbox)!")
+		log.Fatal().Msg("No supported container runtime found (podman, docker, docker toolbox)!")
 	}
 
 	return shellCommand.String()
@@ -250,7 +249,7 @@ func (c *Container) PullImage() {
 	if pullCmdErr == nil {
 		systemExec(pullCmd)
 	} else {
-		log.Errorf("Can't pull image: %s", pullCmdErr.Error())
+		log.Error().Err(pullCmdErr).Msg("Can't pull image")
 		os.Exit(1)
 	}
 }

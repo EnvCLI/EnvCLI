@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/mattn/go-colorable"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"os"
 	"sort"
 	"strconv"
@@ -11,11 +14,9 @@ import (
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	common "github.com/EnvCLI/EnvCLI/pkg/common"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
-	container_runtime "github.com/EnvCLI/EnvCLI/pkg/container_runtime"
-	sentry "github.com/EnvCLI/EnvCLI/pkg/sentry"
+	"github.com/EnvCLI/EnvCLI/pkg/container_runtime"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	util "github.com/EnvCLI/EnvCLI/pkg/util"
-	log "github.com/sirupsen/logrus"
 	cli "github.com/urfave/cli/v2"
 )
 
@@ -34,14 +35,27 @@ var isCIEnvironment = util.IsCIEnvironment()
 
 // Init Hook
 func init() {
-	// Initialize SentryIO
-	sentry.InitializeSentryIO("EnvCLI")
+	// Initialize Global Logger
+	colorableOutput := colorable.NewColorableStdout()
+	log.Logger = zerolog.New(os.Stderr).Output(zerolog.ConsoleWriter{Out: colorableOutput}).With().Timestamp().Logger()
 
-	// Output to Stderr to not pollute stdout redirects with logs
-	log.SetOutput(os.Stderr)
+	// Timestamp Format
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// Only log the warning severity or above.
-	log.SetLevel(log.WarnLevel)
+	zerolog.SetGlobalLevel(zerolog.WarnLevel)
+
+	// detect debug mode
+	debugValue, debugIsSet := os.LookupEnv("ENVCLI_DEBUG")
+	if debugIsSet && strings.ToLower(debugValue) == "true" {
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	}
+
+	// show calling files
+	_, showCalls := os.LookupEnv("ENVCLI_SHOW_CALL")
+	if showCalls {
+		log.Logger = zerolog.New(os.Stderr).Output(zerolog.ConsoleWriter{Out: colorableOutput}).With().Timestamp().Caller().Logger()
+	}
 }
 
 // CLI Main Entrypoint
@@ -61,7 +75,7 @@ func main() {
 	var lastUpdateCheck, _ = strconv.ParseInt(config.GetOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
 		if appUpdater.IsUpdateAvailable(Version) {
-			log.Warnf("You are using a old version, please consider to update using `envcli self-update`!")
+			log.Warn().Msg("You are using a old version, please consider to update using `envcli self-update`!")
 		}
 	}
 	if isCIEnvironment == false {
@@ -161,12 +175,12 @@ func main() {
 					commandArgs := append([]string{commandName}, c.Args().Tail()...)
 					commandWithArguments := common.ParseAndEscapeArgs(commandArgs)
 
-					log.Debugf("Received request to run command [%s] - with Arguments [%s].", commandName, commandWithArguments)
+					log.Debug().Msg("Received request to run command ["+commandName+"] - with Arguments ["+commandWithArguments+"].")
 
 					// config: try to load command configuration
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, util.GetWorkingDirectory(), c.StringSlice("config-include"))
 					if commandConfigErr != nil {
-						log.Errorf(commandConfigErr.Error())
+						log.Error().Err(commandConfigErr).Msg("failed to load command config")
 						os.Exit(1)
 						return nil
 					}
@@ -178,7 +192,7 @@ func main() {
 					container.SetEntrypoint(commandConfig.Entrypoint)
 					container.SetCommandShell(commandConfig.Shell)
 					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
-					log.Debugf("Adding volume mount: source=%s, target=%s", projectOrExecutionDir, commandConfig.Directory)
+					log.Debug().Str("source", projectOrExecutionDir).Str("target", commandConfig.Directory).Msg("Adding volume mount")
 					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
 					container.SetWorkingDirectory(commandConfig.Directory + "/" + util.GetPathRelativeToDirectory(util.GetWorkingDirectory(), projectOrExecutionDir))
 
@@ -202,7 +216,7 @@ func main() {
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", config.GetOrDefault(propConfig.Properties, "http-proxy", ""), -1)
 						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", config.GetOrDefault(propConfig.Properties, "https-proxy", ""), -1)
 					}
-					log.Debugf("Setting new command with before_script: %s", commandWithBeforeScript)
+					log.Debug().Msg("Setting new command with before_script: " + commandWithBeforeScript)
 					container.SetCommand(commandWithBeforeScript)
 
 					// feature: container runtime access
@@ -213,7 +227,7 @@ func main() {
 					// feature: caching
 					for _, cachingEntry := range commandConfig.Caching {
 						if config.GetOrDefault(propConfig.Properties, "cache-path", "") == "" {
-							log.Warnf("CachePath not set, not using the specified cache directories.")
+							log.Warn().Msg("CachePath not set, not using the specified cache directories.")
 							break
 						}
 
@@ -246,7 +260,7 @@ func main() {
 					}
 
 					// detect container service and send command
-					log.Infof("Executing command in container [%s].", commandConfig.Image)
+					log.Info().Msg("Executing command in container ["+commandConfig.Image+"].")
 					container.StartContainer()
 
 					return nil
@@ -265,7 +279,7 @@ func main() {
 					// pull image for each provided command
 					fmt.Printf("Pulling images for [%s].\n", strings.Join(commands, ", "))
 					for _, cmd := range commands {
-						log.Debugf("Pulling image for command [%s].", cmd)
+						log.Debug().Msg("Pulling image for command ["+cmd+"].")
 
 						// config: try to load command configuration
 						commandConfig, err := config.GetCommandConfiguration(cmd, util.GetWorkingDirectory(), c.StringSlice("config-include"))
@@ -297,18 +311,18 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					log.Debugf("Installing aliases ...")
+					log.Debug().Msg("Installing aliases ...")
 					scopeFilter := c.String("scope")
 
 					// create global-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "global" {
 						var globalConfigPath = config.GetOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-						log.Debugf("Will load the global configuration from [%s].", globalConfigPath)
+						log.Debug().Msg("Will load the global configuration from ["+globalConfigPath+"].")
 						globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 						for _, element := range globalConfig.Images {
 							element.Scope = "Global"
-							log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
+							log.Debug().Msg("Created aliases for "+element.Name+" [Scope: "+element.Scope+"]")
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
@@ -321,17 +335,17 @@ func main() {
 					if scopeFilter == "all" || scopeFilter == "project" {
 						var projectDirectory, projectDirectoryErr = config.GetProjectDirectory()
 						if projectDirectoryErr != nil && scopeFilter == "project" {
-							log.Error("Can't install project-specific aliases as no valid project was found!")
+							log.Error().Msg("Can't install project-specific aliases as no valid project was found!")
 							os.Exit(1)
 						} else if projectDirectoryErr != nil {
-							log.Warnf("Can't find a project directory, not throwing a error since all aliases are supposed to be installed!")
+							log.Warn().Msg("Can't find a project directory, not throwing a error since all aliases are supposed to be installed!")
 						} else {
-							log.Debugf("Project Directory: %s", projectDirectory)
+							log.Debug().Msg("Project Directory: " + projectDirectory)
 							projectConfig, _ := config.LoadProjectConfig(projectDirectory + "/.envcli.yml")
 
 							for _, element := range projectConfig.Images {
 								element.Scope = "Project"
-								log.Debugf("Created aliases for %s [Scope: %s]", element.Name, element.Scope)
+								log.Debug().Msg("Created aliases for "+element.Name+" [Scope: "+element.Scope+"]")
 
 								// for each provided command
 								for _, currentCommand := range element.Provides {
