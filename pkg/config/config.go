@@ -21,14 +21,12 @@ var defaultConfigurationFile = ".envclirc"
 // Constants
 var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path", "last-update-check"}
 
-/**
- * Load the project config
- */
+// LoadProjectConfig loads the project configuration
 func LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 	var cfg ProjectConfigrationFile
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debug().Msg("Can't load config - file ["+configFile+"] does not exist!")
+		log.Debug().Msg("Can't load config - file [" + configFile + "] does not exist!")
 		return ProjectConfigrationFile{}, nil
 	}
 
@@ -38,22 +36,18 @@ func LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
 	return cfg, nil
 }
 
-/**
- * Load the property config
- */
+// LoadPropertyConfig loads the property data
 func LoadPropertyConfig() (PropertyConfigurationFile, error) {
 	return LoadPropertyConfigFile(defaultConfigurationDirectory + "/" + defaultConfigurationFile)
 }
 
-/**
- * Load the property config file
- */
+// LoadPropertyConfigFile loads the property config file
 func LoadPropertyConfigFile(configFile string) (PropertyConfigurationFile, error) {
 	var cfg PropertyConfigurationFile
 	cfg.Properties = make(map[string]string)
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debug().Msg("Can't load global properties - file ["+configFile+"] does not exist!")
+		log.Debug().Msg("Can't load global properties - file [" + configFile + "] does not exist!")
 		return cfg, nil
 	}
 
@@ -63,16 +57,12 @@ func LoadPropertyConfigFile(configFile string) (PropertyConfigurationFile, error
 	return cfg, nil
 }
 
-/**
- * Save the global config
- */
+// SavePropertyConfig saves the global config
 func SavePropertyConfig(cfg PropertyConfigurationFile) error {
 	return SavePropertyConfigFile(defaultConfigurationDirectory+"/"+defaultConfigurationFile, cfg)
 }
 
-/**
- * Save the global config file
- */
+// SavePropertyConfigFile saves the property file
 func SavePropertyConfigFile(configFile string, cfg PropertyConfigurationFile) error {
 	log.Debug().Msg("Saving property configuration file " + configFile)
 
@@ -84,9 +74,7 @@ func SavePropertyConfigFile(configFile string, cfg PropertyConfigurationFile) er
 	return ioutil.WriteFile(configFile, fileContent, 0600)
 }
 
-/**
- * Sets a property in the property config
- */
+// SetPropertyConfigEntry sets a property in the property config
 func SetPropertyConfigEntry(varName string, varValue string) {
 	// Load Config
 	propConfig, _ := LoadPropertyConfig()
@@ -101,9 +89,7 @@ func SetPropertyConfigEntry(varName string, varValue string) {
 	}
 }
 
-/**
- * Gets a property in the property config
- */
+// GetPropertyConfigEntry gets a property from the property config
 func GetPropertyConfigEntry(varName string) string {
 	// Load Config
 	propConfig, _ := LoadPropertyConfig()
@@ -117,9 +103,7 @@ func GetPropertyConfigEntry(varName string) string {
 	return ""
 }
 
-/**
- * Gets a property in the property config
- */
+// UnsetPropertyConfigEntry clears a property
 func UnsetPropertyConfigEntry(varName string) {
 	// Load Config
 	propConfig, _ := LoadPropertyConfig()
@@ -134,9 +118,7 @@ func UnsetPropertyConfigEntry(varName string) {
 	}
 }
 
-/**
- * GetProjectOrWorkingDirectory returns either the project directory, if one can be found or the working directory
- */
+// GetProjectOrWorkingDirectory returns either the project directory, if one can be found or the working directory
 func GetProjectOrWorkingDirectory() string {
 	var directory, err = GetProjectDirectory()
 	if err != nil {
@@ -145,9 +127,7 @@ func GetProjectOrWorkingDirectory() string {
 	return directory
 }
 
-/**
- * Get the project root directory by searching for the envcli config
- */
+// GetProjectDirectory searches for the project root directory by looking for the envcli config
 func GetProjectDirectory() (string, error) {
 	log.Trace().Msg("Trying to detect project directory ...")
 
@@ -175,9 +155,7 @@ func GetProjectDirectory() (string, error) {
 	return "", errors.New("didn't find a envcli project config in any parent directories")
 }
 
-/**
- * Merge two configurations and keep the origin in the Scope
- */
+// MergeConfigurations merges two configurations and keep the origin in the scope
 func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
 	var cfg = ProjectConfigrationFile{}
 
@@ -193,9 +171,7 @@ func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal Pro
 	return cfg
 }
 
-/**
- * GetCommandConfiguration gets the configuration entry for a specified command in the specified directory
- */
+// GetCommandConfiguration gets the configuration entry for a specified command in the specified directory
 func GetCommandConfiguration(commandName string, currentDirectory string, customIncludes []string) (RunConfigurationEntry, error) {
 	// Global Configuration
 	propConfig, propConfigErr := LoadPropertyConfig()
@@ -211,14 +187,14 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 	projectDir, projectDirErr := GetProjectDirectory()
 	if projectDirErr == nil {
 		log.Debug().Msg("Project Directory: " + projectDir)
-		configFiles = append(configFiles, projectDir + "/.envcli.yml")
+		configFiles = append(configFiles, projectDir+"/.envcli.yml")
 	}
 	// - custom includes
 	configFiles = append(configFiles, customIncludes...)
 	// - global (user-scope) configuration
-	var globalConfigPath = collection.GetMapValueOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-	log.Debug().Msg("Will load the global configuration from "+globalConfigPath+".")
-	configFiles = append(configFiles, globalConfigPath + "/.envcli.yml")
+	var globalConfigPath = collection.MapGetValueOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+	log.Debug().Msg("Will load the global configuration from " + globalConfigPath + ".")
+	configFiles = append(configFiles, globalConfigPath+"/.envcli.yml")
 
 	// load configuration files
 	var finalConfiguration ProjectConfigrationFile
@@ -229,10 +205,10 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 
 	// search for command defintion
 	for _, element := range finalConfiguration.Images {
-		log.Debug().Msg("Checking for a match in image "+element.Name+" [Scope: "+element.Scope+"]")
+		log.Debug().Msg("Checking for a match in image " + element.Name + " [Scope: " + element.Scope + "]")
 		for _, providedCommand := range element.Provides {
 			if providedCommand == commandName {
-				log.Debug().Msg("Matched command "+commandName+" in package ["+element.Name+"]")
+				log.Debug().Msg("Matched command " + commandName + " in package [" + element.Name + "]")
 
 				return element, nil
 			}

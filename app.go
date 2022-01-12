@@ -68,13 +68,13 @@ func main() {
 	// Configure Proxy Server
 	if propConfigErr == nil {
 		// Set Proxy Server
-		os.Setenv("HTTP_PROXY", collection.GetMapValueOrDefault(propConfig.Properties, "http-proxy", ""))
-		os.Setenv("HTTPS_PROXY", collection.GetMapValueOrDefault(propConfig.Properties, "https-proxy", ""))
+		os.Setenv("HTTP_PROXY", collection.MapGetValueOrDefault(propConfig.Properties, "http-proxy", ""))
+		os.Setenv("HTTPS_PROXY", collection.MapGetValueOrDefault(propConfig.Properties, "https-proxy", ""))
 	}
 
 	// Update Check, once a day (not in CI)
 	appUpdater := updater.ApplicationUpdater{GitHubOrg: "EnvCLI", GitHubRepository: "EnvCLI"}
-	var lastUpdateCheck, _ = strconv.ParseInt(collection.GetMapValueOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
+	var lastUpdateCheck, _ = strconv.ParseInt(collection.MapGetValueOrDefault(propConfig.Properties, "last-update-check", strconv.Itoa(int(time.Now().Unix()))), 10, 64)
 	if time.Now().Unix() >= lastUpdateCheck+86400 && isCIEnvironment == false {
 		if appUpdater.IsUpdateAvailable(Version) {
 			log.Warn().Msg("You are using a old version, please consider to update using `envcli self-update`!")
@@ -177,7 +177,7 @@ func main() {
 					commandArgs := append([]string{commandName}, c.Args().Tail()...)
 					commandWithArguments := common.ParseAndEscapeArgs(commandArgs)
 
-					log.Debug().Msg("Received request to run command ["+commandName+"] - with Arguments ["+commandWithArguments+"].")
+					log.Debug().Msg("Received request to run command [" + commandName + "] - with Arguments [" + commandWithArguments + "].")
 
 					// config: try to load command configuration
 					commandConfig, commandConfigErr := config.GetCommandConfiguration(commandName, filesystem.GetWorkingDirectory(), c.StringSlice("config-include"))
@@ -215,8 +215,8 @@ func main() {
 					if commandConfig.BeforeScript != nil {
 						commandWithBeforeScript = strings.Join(commandConfig.BeforeScript[:], ";") + " && " + commandWithBeforeScript
 
-						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", collection.GetMapValueOrDefault(propConfig.Properties, "http-proxy", ""), -1)
-						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", collection.GetMapValueOrDefault(propConfig.Properties, "https-proxy", ""), -1)
+						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPProxy}", collection.MapGetValueOrDefault(propConfig.Properties, "http-proxy", ""), -1)
+						commandWithBeforeScript = strings.Replace(commandWithBeforeScript, "{HTTPSProxy}", collection.MapGetValueOrDefault(propConfig.Properties, "https-proxy", ""), -1)
 					}
 					log.Debug().Msg("Setting new command with before_script: " + commandWithBeforeScript)
 					container.SetCommand(commandWithBeforeScript)
@@ -228,12 +228,12 @@ func main() {
 
 					// feature: caching
 					for _, cachingEntry := range commandConfig.Caching {
-						if collection.GetMapValueOrDefault(propConfig.Properties, "cache-path", "") == "" {
+						if collection.MapGetValueOrDefault(propConfig.Properties, "cache-path", "") == "" {
 							log.Warn().Msg("CachePath not set, not using the specified cache directories.")
 							break
 						}
 
-						var cacheFolder = collection.GetMapValueOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
+						var cacheFolder = collection.MapGetValueOrDefault(propConfig.Properties, "cache-path", "") + "/" + cachingEntry.Name
 						filesystem.CreateDirectory(cacheFolder)
 						container.AddCacheMount(cachingEntry.Name, cacheFolder, cachingEntry.ContainerDirectory)
 					}
@@ -250,19 +250,19 @@ func main() {
 
 					// feature: proxy environment
 					if propConfigErr == nil {
-						httpProxy := collection.GetMapValueOrDefault(propConfig.Properties, "http-proxy", "")
+						httpProxy := collection.MapGetValueOrDefault(propConfig.Properties, "http-proxy", "")
 						if httpProxy != "" {
 							container.AddEnvironmentVariable("http_proxy", httpProxy)
 						}
 
-						httpsProxy := collection.GetMapValueOrDefault(propConfig.Properties, "https-proxy", "")
+						httpsProxy := collection.MapGetValueOrDefault(propConfig.Properties, "https-proxy", "")
 						if httpsProxy != "" {
 							container.AddEnvironmentVariable("https_proxy", httpsProxy)
 						}
 					}
 
 					// detect container service and send command
-					log.Info().Msg("Executing command in container ["+commandConfig.Image+"].")
+					log.Info().Msg("Executing command in container [" + commandConfig.Image + "].")
 					container.StartContainer()
 
 					return nil
@@ -281,7 +281,7 @@ func main() {
 					// pull image for each provided command
 					fmt.Printf("Pulling images for [%s].\n", strings.Join(commands, ", "))
 					for _, cmd := range commands {
-						log.Debug().Msg("Pulling image for command ["+cmd+"].")
+						log.Debug().Msg("Pulling image for command [" + cmd + "].")
 
 						// config: try to load command configuration
 						commandConfig, err := config.GetCommandConfiguration(cmd, filesystem.GetWorkingDirectory(), c.StringSlice("config-include"))
@@ -318,13 +318,13 @@ func main() {
 
 					// create global-scoped aliases
 					if scopeFilter == "all" || scopeFilter == "global" {
-						var globalConfigPath = collection.GetMapValueOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
-						log.Debug().Msg("Will load the global configuration from ["+globalConfigPath+"].")
+						var globalConfigPath = collection.MapGetValueOrDefault(propConfig.Properties, "global-configuration-path", defaultConfigurationDirectory)
+						log.Debug().Msg("Will load the global configuration from [" + globalConfigPath + "].")
 						globalConfig, _ := config.LoadProjectConfig(globalConfigPath + "/.envcli.yml")
 
 						for _, element := range globalConfig.Images {
 							element.Scope = "Global"
-							log.Debug().Msg("Created aliases for "+element.Name+" [Scope: "+element.Scope+"]")
+							log.Debug().Msg("Created aliases for " + element.Name + " [Scope: " + element.Scope + "]")
 
 							// for each provided command
 							for _, currentCommand := range element.Provides {
@@ -347,7 +347,7 @@ func main() {
 
 							for _, element := range projectConfig.Images {
 								element.Scope = "Project"
-								log.Debug().Msg("Created aliases for "+element.Name+" [Scope: "+element.Scope+"]")
+								log.Debug().Msg("Created aliases for " + element.Name + " [Scope: " + element.Scope + "]")
 
 								// for each provided command
 								for _, currentCommand := range element.Provides {
