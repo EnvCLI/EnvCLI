@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cidverse/cidverseutils/pkg/cihelper"
 	"github.com/cidverse/cidverseutils/pkg/collection"
+	"github.com/cidverse/cidverseutils/pkg/container_runtime"
 	"github.com/cidverse/cidverseutils/pkg/filesystem"
 	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
@@ -17,7 +18,6 @@ import (
 	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
 	common "github.com/EnvCLI/EnvCLI/pkg/common"
 	config "github.com/EnvCLI/EnvCLI/pkg/config"
-	"github.com/EnvCLI/EnvCLI/pkg/container_runtime"
 	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
 	cli "github.com/urfave/cli/v2"
 )
