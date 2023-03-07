@@ -2,24 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/cidverse/cidverseutils/pkg/cihelper"
-	"github.com/cidverse/cidverseutils/pkg/collection"
-	"github.com/cidverse/cidverseutils/pkg/container_runtime"
-	"github.com/cidverse/cidverseutils/pkg/filesystem"
-	"github.com/mattn/go-colorable"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	aliases "github.com/EnvCLI/EnvCLI/pkg/aliases"
-	common "github.com/EnvCLI/EnvCLI/pkg/common"
-	config "github.com/EnvCLI/EnvCLI/pkg/config"
-	updater "github.com/EnvCLI/EnvCLI/pkg/updater"
-	cli "github.com/urfave/cli/v2"
+	"github.com/cidverse/cidverseutils/pkg/cihelper"
+	"github.com/cidverse/cidverseutils/pkg/collection"
+	"github.com/cidverse/cidverseutils/pkg/containerruntime"
+	"github.com/cidverse/cidverseutils/pkg/filesystem"
+	"github.com/mattn/go-colorable"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/EnvCLI/EnvCLI/pkg/aliases"
+	"github.com/EnvCLI/EnvCLI/pkg/common"
+	"github.com/EnvCLI/EnvCLI/pkg/config"
+	"github.com/EnvCLI/EnvCLI/pkg/updater"
+	"github.com/urfave/cli/v2"
 )
 
 // Build Information
@@ -188,14 +189,14 @@ func main() {
 					}
 
 					// container runtime
-					containerRuntime := &container_runtime.ContainerRuntime{}
+					containerRuntime := &containerruntime.ContainerRuntime{}
 					container := containerRuntime.NewContainer()
 					container.SetImage(commandConfig.Image)
 					container.SetEntrypoint(commandConfig.Entrypoint)
 					container.SetCommandShell(commandConfig.Shell)
 					var projectOrExecutionDir = config.GetProjectOrWorkingDirectory()
 					log.Debug().Str("source", projectOrExecutionDir).Str("target", commandConfig.Directory).Msg("Adding volume mount")
-					container.AddVolume(container_runtime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
+					container.AddVolume(containerruntime.ContainerMount{MountType: "directory", Source: projectOrExecutionDir, Target: commandConfig.Directory})
 					container.SetWorkingDirectory(commandConfig.Directory + "/" + filesystem.GetPathRelativeToDirectory(filesystem.GetWorkingDirectory(), projectOrExecutionDir))
 
 					// core: expose ports (command args)
@@ -288,7 +289,7 @@ func main() {
 						common.CheckForError(err)
 
 						// container
-						containerRuntime := &container_runtime.ContainerRuntime{}
+						containerRuntime := &containerruntime.ContainerRuntime{}
 						container := containerRuntime.NewContainer()
 						container.SetImage(commandConfig.Image)
 						container.PullImage()

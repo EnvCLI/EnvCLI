@@ -28,3 +28,7 @@ dist/*
 
 # build artifacts
 build
+
+# ci
+.dist
+.tmp
