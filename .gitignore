@@ -26,9 +26,6 @@ dist/*
 .idea
 *.iml
 
-# build artifacts
-build
-
 # ci
 .dist
 .tmp

@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/PhilippHeuer/EnvCLI.svg?branch=master)](https://travis-ci.org/PhilippHeuer/EnvCLI)
+[![Build Status](https://travis-ci.org/PhilippHeuer/EnvCLI.svg?branch=main)](https://travis-ci.org/PhilippHeuer/EnvCLI)
 [![Go Report Card](https://goreportcard.com/badge/philippheuer/envcli)](http://goreportcard.com/report/philippheuer/envcli)
-[![Maintenance](https://img.shields.io/maintenance/yes/2022.svg)]()
+[![Maintenance](https://img.shields.io/maintenance/yes/2023.svg)]()
 [![GitHub contributors](https://img.shields.io/github/contributors/PhilippHeuer/envcli.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/master/LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PhilippHeuer/envcli/blob/main/LICENSE.md)
 [![Version](https://img.shields.io/github/tag/philippheuer/envcli.svg)]()
 
 *EnvCLI* is a simple wrapper that allows you to run commands within *ethereal docker containers*. You can configure commands to run in docker images within the envcli configuration file.
@@ -110,21 +110,6 @@ chmod +x /usr/local/bin/envcli
 curl -L -o /usr/local/bin/envcli https://dl.bintray.com/envcli/golang/envcli/v0.7.0/darwin_amd64
 chmod +x /usr/local/bin/envcli
 ```
-
-#### **Docker Toolbox (Legacy)**
-
-Install [EnvCLI](https://dl.bintray.com/envcli/golang/envcli/v0.7.0/EnvCLI-amd64.msi)
-
-Now you have to configure a docker-machine for envcli: `docker-machine create envcli`
-
-After that you have to share the drive containing your projects with virtualbox and docker:
-
- 1. Stop the envcli machine `docker-machine stop envcli`
- 2. Open VirtualBox
- 3. Rightclick -> Settings on the envcli virtual Machine
- 4. Select Shared Folders and add a machine folder with the Path
- 5. Share the drive which contains your projects (In this example C -> Folder_Path: `C:\`, Folder_Name: `C_DRIVE`) and select the options `Auto-mount` and `Permanent`
- 6. Start the envcli machine `docker-machine start envcli`
 
 ## Library
 
