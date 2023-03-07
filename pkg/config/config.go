@@ -2,16 +2,16 @@ package config
 
 import (
 	"errors"
-	"github.com/cidverse/cidverseutils/pkg/collection"
-	"github.com/cidverse/cidverseutils/pkg/filesystem"
-	"github.com/rs/zerolog/log"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/cidverse/cidverseutils/pkg/collection"
+	"github.com/cidverse/cidverseutils/pkg/filesystem"
 	"github.com/jinzhu/configor"
-	yaml "gopkg.in/yaml.v2"
+	"github.com/rs/zerolog/log"
+
+	"gopkg.in/yaml.v2"
 )
 
 // Configuration
@@ -22,36 +22,42 @@ var defaultConfigurationFile = ".envclirc"
 var validConfigurationOptions = []string{"http-proxy", "https-proxy", "global-configuration-path", "cache-path", "last-update-check"}
 
 // LoadProjectConfig loads the project configuration
-func LoadProjectConfig(configFile string) (ProjectConfigrationFile, error) {
-	var cfg ProjectConfigrationFile
-
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debug().Msg("Can't load config - file [" + configFile + "] does not exist!")
-		return ProjectConfigrationFile{}, nil
-	}
-
+func LoadProjectConfig(configFile string) (ConfigurationFile, error) {
 	log.Debug().Msg("Loading project configuration file " + configFile)
-	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
+	var cfg ConfigurationFile
+
+	file, err := os.Open(configFile)
+	if err != nil {
+		return ConfigurationFile{}, err
+	}
+	defer file.Close()
+
+	decoder := yaml.NewDecoder(file)
+	err = decoder.Decode(&cfg)
+	if err != nil {
+		return ConfigurationFile{}, err
+	}
 
 	return cfg, nil
 }
 
 // LoadPropertyConfig loads the property data
 func LoadPropertyConfig() (PropertyConfigurationFile, error) {
-	return LoadPropertyConfigFile(defaultConfigurationDirectory + "/" + defaultConfigurationFile)
+	propConfigFile := defaultConfigurationDirectory + "/" + defaultConfigurationFile
+
+	if _, err := os.Stat(propConfigFile); err == nil {
+		return LoadPropertyConfigFile(defaultConfigurationDirectory + "/" + defaultConfigurationFile)
+	}
+
+	return PropertyConfigurationFile{}, nil
 }
 
 // LoadPropertyConfigFile loads the property config file
 func LoadPropertyConfigFile(configFile string) (PropertyConfigurationFile, error) {
+	log.Debug().Msg("Loading property configuration file " + configFile)
 	var cfg PropertyConfigurationFile
 	cfg.Properties = make(map[string]string)
 
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Debug().Msg("Can't load global properties - file [" + configFile + "] does not exist!")
-		return cfg, nil
-	}
-
-	log.Debug().Msg("Loading property configuration file " + configFile)
 	configor.New(&configor.Config{Debug: false}).Load(&cfg, configFile)
 
 	return cfg, nil
@@ -71,7 +77,7 @@ func SavePropertyConfigFile(configFile string, cfg PropertyConfigurationFile) er
 		return err
 	}
 
-	return ioutil.WriteFile(configFile, fileContent, 0600)
+	return os.WriteFile(configFile, fileContent, 0600)
 }
 
 // SetPropertyConfigEntry sets a property in the property config
@@ -156,8 +162,8 @@ func GetProjectDirectory() (string, error) {
 }
 
 // MergeConfigurations merges two configurations and keep the origin in the scope
-func MergeConfigurations(configProject ProjectConfigrationFile, configGlobal ProjectConfigrationFile) ProjectConfigrationFile {
-	var cfg = ProjectConfigrationFile{}
+func MergeConfigurations(configProject ConfigurationFile, configGlobal ConfigurationFile) ConfigurationFile {
+	var cfg = ConfigurationFile{}
 
 	for _, image := range configProject.Images {
 		image.Scope = "Project"
@@ -197,13 +203,13 @@ func GetCommandConfiguration(commandName string, currentDirectory string, custom
 	configFiles = append(configFiles, globalConfigPath+"/.envcli.yml")
 
 	// load configuration files
-	var finalConfiguration ProjectConfigrationFile
+	var finalConfiguration ConfigurationFile
 	for _, configFile := range configFiles {
 		configContent, _ := LoadProjectConfig(configFile)
 		finalConfiguration = MergeConfigurations(finalConfiguration, configContent)
 	}
 
-	// search for command defintion
+	// search for command definition
 	for _, element := range finalConfiguration.Images {
 		log.Debug().Msg("Checking for a match in image " + element.Name + " [Scope: " + element.Scope + "]")
 		for _, providedCommand := range element.Provides {
