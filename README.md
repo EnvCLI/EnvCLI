@@ -130,12 +130,12 @@ go get -u github.com/EnvCLI/EnvCLI
 
 ## Credits
 
-- [Bintray - Software Distribution](https://bintray.com)
-- [Advanced Installer](https://www.advancedinstaller.com/) - Free License to build the Setup
 - [Jinzhu / YML Configuration File](https://github.com/jinzhu/configor)
 - [Sirupsen / Logging](https://github.com/sirupsen/logrus)
 - [Urfave / CLI](https://github.com/urfave/cli)
-- [mattn / go-isatty](https://github.com/mattn/go-isatty)
+- [Mattn / go-isatty](https://github.com/mattn/go-isatty)
 - [Mattn / Support of colors in Windows CLI](https://github.com/mattn/go-colorable)
-- [Inconshreveable / Go Update](https://github.com/inconshreveable/go-update)
-- [Blang / Semver](https://github.com/blang/semver)
+
+## License
+
+Released under the [MIT license](./LICENSE).
